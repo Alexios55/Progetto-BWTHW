@@ -18,7 +18,6 @@ class RegistrationScreen extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ), 
             )
-            
           ],
         ),
       ),

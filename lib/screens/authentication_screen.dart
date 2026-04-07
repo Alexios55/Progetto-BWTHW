@@ -1,4 +1,4 @@
-import 'package:bwthw_project/widgets/box_text.dart';
+import 'package:bwthw_project/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:bwthw_project/widgets/box_text.dart';
 
@@ -10,22 +10,29 @@ class AuthScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
+        child: SizedBox(
+        width: 300,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            Text(
               'Please, insert your credentials to login',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              ), 
+              ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             BoxText(hintText: 'Email'),
-            const SizedBox(height: 24),
+            SizedBox(height: 12),
             BoxText(hintText: 'Password', obscureText: true),
+            SizedBox(height: 24),
+            CustomButton(text: 'Login', onPressed: () {
+              // Implement login logic here
+            }),
           ],
         ),
+      )
       ),
     );
   }

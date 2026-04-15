@@ -1,26 +1,39 @@
-import 'package:bwthw_project/screens/authentication_screen.dart';
-import 'package:bwthw_project/screens/welcome_screen.dart';
+import 'package:bwthw_project/screens/login_screen.dart';
 import 'package:bwthw_project/screens/registration.dart';
+import 'package:bwthw_project/screens/start_screen.dart';
 import 'package:flutter/material.dart';
+import 'util.dart';
+import 'theme.dart';
 
 void main() {
   runApp(const MyApp());
-   
-}//main
+}
 
-class MyApp extends StatelessWidget{
-  const MyApp({Key? key}) : super(key: key);
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    TextTheme textTheme = createTextTheme(
+      context,
+      "Afacad",
+      "Abhaya Libre",
+    );
+
+    MaterialTheme theme = MaterialTheme(textTheme);
+
     return MaterialApp(
-      initialRoute:'/welcome',
+      debugShowCheckedModeBanner: false,
+      title: 'smartDIET',
+      theme: theme.light(),
+      darkTheme: theme.dark(),
+      themeMode: ThemeMode.system,
+      initialRoute: '/start',
       routes: {
-        '/welcome':(context) => WelcomeScreen(),
-        '/auth':(context) => AuthScreen(),
-        '/registration':(context) => RegistrationScreen(),
+        '/start': (context) => const StartScreen(),
+        '/login': (context) => const LoginScreen(),
+        '/registration': (context) => const RegistrationScreen(),
       },
     );
   }
 }
-

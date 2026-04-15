@@ -8,12 +8,12 @@ class BoxText extends StatelessWidget {
 
 
   const BoxText({
-    Key? key, 
+    super.key, 
     required this.hintText, 
     this.obscureText = false,
     this.width = 600,
     this.height = 50,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

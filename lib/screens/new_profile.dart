@@ -2,7 +2,7 @@ import 'package:bwthw_project/widgets/box_text.dart';
 import 'package:flutter/material.dart';
 
 class NewProfile extends StatelessWidget {
-  const NewProfile({Key? key}) : super(key: key);
+  const NewProfile({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class RegistrationScreen extends StatelessWidget {
-  const RegistrationScreen({Key? key}) : super(key: key);
+  const RegistrationScreen({super.key});
   static const routeName = 'registration';
 
   @override

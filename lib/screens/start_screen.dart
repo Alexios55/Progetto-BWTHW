@@ -5,6 +5,8 @@ class StartScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -13,9 +15,10 @@ class StartScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(),
-              const Icon(
+              Icon(
                 Icons.favorite_outline,
                 size: 90,
+                color: colorScheme.primary,
               ),
               const SizedBox(height: 20),
               const Text(
@@ -26,11 +29,12 @@ class StartScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 'Welcome to smartDIET',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
               const Spacer(),

@@ -1,6 +1,7 @@
 import 'package:bwthw_project/screens/login_screen.dart';
 import 'package:bwthw_project/screens/registration.dart';
 import 'package:bwthw_project/screens/start_screen.dart';
+import 'package:bwthw_project/screens/welcome_screen.dart';
 import 'package:flutter/material.dart';
 import 'util.dart';
 import 'theme.dart';
@@ -33,6 +34,7 @@ class MyApp extends StatelessWidget {
         '/start': (context) => const StartScreen(),
         '/login': (context) => const LoginScreen(),
         '/registration': (context) => const RegistrationScreen(),
+        '/welcome': (context) => const WelcomeScreen(),
       },
     );
   }

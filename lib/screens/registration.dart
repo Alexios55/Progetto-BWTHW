@@ -51,7 +51,9 @@ class RegistrationScreen extends StatelessWidget {
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/welcome');
+                    },
                     child: const Text(
                       'Create Account',
                       style: TextStyle(fontSize: 18),

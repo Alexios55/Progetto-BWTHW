@@ -244,7 +244,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   height: 55,
                   child: ElevatedButton(
                     onPressed: () {
-                      // We will connect this button to the next screen later.
+                      Navigator.pushNamed(context, '/bmi-status');
                     },
                     child: const Text(
                       'Next',

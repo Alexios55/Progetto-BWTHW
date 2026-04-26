@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'util.dart';
 import 'theme.dart';
 import 'package:bwthw_project/screens/personal_info_screen.dart';
-import 'package:bwthw_project/screens/bmi_status.dart';
 
 void main() {
   runApp(const MyApp());

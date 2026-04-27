@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'util.dart';
 import 'theme.dart';
 import 'package:bwthw_project/screens/personal_info_screen.dart';
+import 'package:bwthw_project/screens/home_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
         '/welcome': (context) => const WelcomeScreen(),
         '/personal-info': (context) => const PersonalInfoScreen(),
         '/bmi-status': (context) => const BmiStatusScreen(),
+        '/home': (context) => const HomeScreen(),
       },
     );
   }

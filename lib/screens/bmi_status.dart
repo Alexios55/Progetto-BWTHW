@@ -20,7 +20,6 @@ class BmiStatusScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 20),
-
                 const Text(
                   'Your current physical status is:',
                   style: TextStyle(
@@ -28,9 +27,7 @@ class BmiStatusScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-
                 const SizedBox(height: 24),
-
                 Card(
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -64,8 +61,8 @@ class BmiStatusScreen extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            Column(
-                              children: const [
+                            const Column(
+                              children: [
                                 Icon(
                                   Icons.accessibility_new,
                                   size: 40,
@@ -84,11 +81,9 @@ class BmiStatusScreen extends StatelessWidget {
                             ),
                           ],
                         ),
-
                         const SizedBox(height: 20),
                         Divider(color: colorScheme.outlineVariant),
                         const SizedBox(height: 16),
-
                         const Text(
                           'Your BMI is within the normal weight range. '
                           'Keep up with your current lifestyle to maintain a healthy weight.',
@@ -101,9 +96,7 @@ class BmiStatusScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 28),
-
                 const Text(
                   'What is your ideal weight?',
                   style: TextStyle(
@@ -111,9 +104,7 @@ class BmiStatusScreen extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-
                 const SizedBox(height: 14),
-
                 TextField(
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
@@ -127,9 +118,7 @@ class BmiStatusScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 14),
-
                 const Row(
                   children: [
                     Icon(
@@ -147,9 +136,7 @@ class BmiStatusScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 24),
-
                 Text(
                   'The Body Mass Index (BMI) is a simple way to check if your '
                   'weight is healthy for your height, categorizing it as underweight, '
@@ -160,15 +147,13 @@ class BmiStatusScreen extends StatelessWidget {
                     color: colorScheme.onSurfaceVariant,
                   ),
                 ),
-
                 const SizedBox(height: 40),
-
                 SizedBox(
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
                     onPressed: () {
-                      // We will connect this button to the next screen later.
+                      Navigator.pushNamed(context, '/home');
                     },
                     child: const Text(
                       'Next',

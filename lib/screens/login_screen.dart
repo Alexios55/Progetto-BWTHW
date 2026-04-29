@@ -1,5 +1,5 @@
-import 'package:bwthw_project/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
+import 'package:bwthw_project/services/preference_service.dart';
 
 // This screen allows the user to log into the app by entering
 // an email and a password. If the fields are valid, the user
@@ -7,8 +7,6 @@ import 'package:flutter/material.dart';
 
 // Check that the email has a valid format and that the password
 // contains at least 8 characters before allowing the user to continue.
-import 'package:flutter/material.dart';
-import 'package:bwthw_project/services/preference_service.dart';
 
 // This screen allows the user to log into the app by entering
 // an email and a password. The email must have a valid format
@@ -55,9 +53,12 @@ class _LoginScreenState extends State<LoginScreen> {
     if (canLogin){
       // save the login with shared preferences
       await PreferenceService.saveLogin(true);
-      Navigator.pushNamedAndRemoveUntil(context, 
-      '/bmi-status', 
-      (route) => false);
+      if (!mounted) return;
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/bmi-status',
+        (route) => false,
+      );
     }
 
   }
@@ -226,7 +227,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             hintText: 'Email',
                             prefixIcon: const Icon(Icons.email_outlined),
                             filled: true,
-                            fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.4),
+                            fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(14),
                               borderSide: BorderSide.none,
@@ -247,7 +248,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             hintText: 'Password',
                             prefixIcon: const Icon(Icons.lock_outline),
                             filled: true,
-                            fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.4),
+                            fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(14),
                               borderSide: BorderSide.none,
@@ -280,25 +281,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                   ),
+                ),
                 const SizedBox(height: 40),
-                CustomTextField(
-                  hintText: 'Email',
-                  controller: emailController,
-                ),
-                const SizedBox(height: 20),
-                CustomTextField(
-                  hintText: 'Password',
-                  obscureText: true,
-                  controller: passwordController,
-                ),
-                const SizedBox(height: 28),
-                SizedBox(
-                  width: double.infinity,
-                  height: 55,
-                  child: CustomButton(text: "Sign In", textSize: 18, onPressed: login)
-                ),
-
-                const SizedBox(height: 24),
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,

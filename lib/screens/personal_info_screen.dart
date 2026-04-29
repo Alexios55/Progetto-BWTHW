@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 
-// This screen collects the user's personal information,
-// such as sex, date of birth, age, weight, and height,
-// before moving to the next onboarding step.
+/// This screen collects the user's personal information before
+/// continuing to the next step of the onboarding flow.
+/// The user must select sex, date of birth, age, weight, and height.
+/// The screen also checks that:
+/// - date of birth is 2010 or earlier
+/// - age is numeric and has at least 2 digits
+/// - weight is a valid number
+/// - height is a valid number
 class PersonalInfoScreen extends StatefulWidget {
   const PersonalInfoScreen({super.key});
 
@@ -43,6 +48,100 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     }
   }
 
+  void _goToNextStep() {
+    final String dateOfBirth = dateOfBirthController.text.trim();
+    final String age = ageController.text.trim();
+    final String weight = weightController.text.trim();
+    final String height = heightController.text.trim();
+
+    if (selectedSex == null ||
+        dateOfBirth.isEmpty ||
+        age.isEmpty ||
+        weight.isEmpty ||
+        height.isEmpty) {
+      ScaffoldMessenger.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Please fill in all fields'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      return;
+    }
+
+    // Check that the selected year is not later than 2010.
+    final List<String> parts = dateOfBirth.split('/');
+    if (parts.length != 3) {
+      ScaffoldMessenger.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Please enter a valid date of birth'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      return;
+    }
+
+    final int? year = int.tryParse(parts[2]);
+    if (year == null || year > 2010) {
+      ScaffoldMessenger.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Date of birth must be 2010 or earlier'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      return;
+    }
+
+    // Check that age is numeric and has at least 2 digits.
+    final RegExp ageRegExp = RegExp(r'^\d{2,}$');
+    if (!ageRegExp.hasMatch(age)) {
+      ScaffoldMessenger.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Age must be a number with at least 2 digits'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      return;
+    }
+
+    // Check that weight is a valid number.
+    final double? weightValue = double.tryParse(weight.replaceAll(',', '.'));
+    if (weightValue == null) {
+      ScaffoldMessenger.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Weight must be a valid number'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      return;
+    }
+
+    // Check that height is a valid number.
+    final double? heightValue = double.tryParse(height.replaceAll(',', '.'));
+    if (heightValue == null) {
+      ScaffoldMessenger.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Height must be a valid number'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      return;
+    }
+
+    Navigator.pushNamed(context, '/bmi-status');
+  }
+
   @override
   void dispose() {
     // Dispose controllers to free memory when the screen is removed.
@@ -55,19 +154,27 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 20),
-
-                // Main title of the screen.
+                const SizedBox(height: 10),
                 const Text(
                   'Personal Information',
                   style: TextStyle(
@@ -75,49 +182,37 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-
                 const SizedBox(height: 8),
-
-                // Subtitle that explains what the user has to do.
                 Text(
-                  'Please, enter your personal information to continue',
+                  'Please enter your personal information to continue',
                   style: TextStyle(
                     fontSize: 16,
                     color: colorScheme.onSurfaceVariant,
                   ),
                 ),
-
-                const SizedBox(height: 12),
-
-                // Small helper text to make the screen feel more personalized.
-                Text(
-                  'Your information helps us personalize your journey.',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-
                 const SizedBox(height: 32),
 
-                // Main card that contains all personal information fields.
+                // Main box that contains the personal information form.
                 Card(
-                  elevation: 0,
+                  elevation: 2,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(24),
                     child: Column(
                       children: [
-                        // Dropdown field for sex selection.
                         DropdownButtonFormField<String>(
-                          value: selectedSex,
+                          initialValue: selectedSex,
                           decoration: InputDecoration(
                             hintText: 'Sex',
                             prefixIcon: const Icon(Icons.person_outline),
+                            filled: true,
+                            fillColor: colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.4),
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: BorderSide.none,
                             ),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16,
@@ -144,20 +239,22 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             });
                           },
                         ),
+                        const SizedBox(height: 18),
 
-                        const SizedBox(height: 20),
-
-                        // Read-only field for date of birth.
-                        // When tapped, it opens the calendar picker.
                         TextField(
                           controller: dateOfBirthController,
                           readOnly: true,
                           onTap: () => _selectDate(context),
                           decoration: InputDecoration(
                             hintText: 'Date of birth',
-                            prefixIcon: const Icon(Icons.calendar_today_outlined),
+                            prefixIcon:
+                                const Icon(Icons.calendar_today_outlined),
+                            filled: true,
+                            fillColor: colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.4),
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: BorderSide.none,
                             ),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16,
@@ -165,10 +262,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             ),
                           ),
                         ),
+                        const SizedBox(height: 18),
 
-                        const SizedBox(height: 20),
-
-                        // Age field.
                         TextField(
                           controller: ageController,
                           keyboardType: TextInputType.number,
@@ -176,8 +271,12 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             hintText: 'Age',
                             prefixIcon: const Icon(Icons.badge_outlined),
                             suffixText: 'years',
+                            filled: true,
+                            fillColor: colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.4),
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: BorderSide.none,
                             ),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16,
@@ -185,23 +284,29 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             ),
                           ),
                         ),
+                        const SizedBox(height: 18),
 
-                        const SizedBox(height: 20),
-
-                        // Weight and height are displayed side by side
-                        // to make the layout more compact and modern.
                         Row(
                           children: [
                             Expanded(
                               child: TextField(
                                 controller: weightController,
-                                keyboardType: TextInputType.number,
+                                keyboardType: const TextInputType.numberWithOptions(
+                                  decimal: true,
+                                ),
                                 decoration: InputDecoration(
                                   hintText: 'Weight',
-                                  prefixIcon: const Icon(Icons.monitor_weight_outlined),
+                                  prefixIcon: const Icon(
+                                    Icons.monitor_weight_outlined,
+                                  ),
                                   suffixText: 'kg',
+                                  filled: true,
+                                  fillColor: colorScheme
+                                      .surfaceContainerHighest
+                                      .withValues(alpha: 0.4),
                                   border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                                    borderRadius: BorderRadius.circular(14),
+                                    borderSide: BorderSide.none,
                                   ),
                                   contentPadding: const EdgeInsets.symmetric(
                                     horizontal: 16,
@@ -214,13 +319,20 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             Expanded(
                               child: TextField(
                                 controller: heightController,
-                                keyboardType: TextInputType.number,
+                                keyboardType: const TextInputType.numberWithOptions(
+                                  decimal: true,
+                                ),
                                 decoration: InputDecoration(
                                   hintText: 'Height',
                                   prefixIcon: const Icon(Icons.height),
                                   suffixText: 'cm',
+                                  filled: true,
+                                  fillColor: colorScheme
+                                      .surfaceContainerHighest
+                                      .withValues(alpha: 0.4),
                                   border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                                    borderRadius: BorderRadius.circular(14),
+                                    borderSide: BorderSide.none,
                                   ),
                                   contentPadding: const EdgeInsets.symmetric(
                                     horizontal: 16,
@@ -231,24 +343,25 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             ),
                           ],
                         ),
+                        const SizedBox(height: 24),
+
+                        SizedBox(
+                          width: double.infinity,
+                          height: 55,
+                          child: ElevatedButton(
+                            onPressed: _goToNextStep,
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            child: const Text(
+                              'Next',
+                              style: TextStyle(fontSize: 18),
+                            ),
+                          ),
+                        ),
                       ],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 28),
-
-                // Main button used to continue to the next step.
-                SizedBox(
-                  width: double.infinity,
-                  height: 55,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/bmi-status');
-                    },
-                    child: const Text(
-                      'Next',
-                      style: TextStyle(fontSize: 18),
                     ),
                   ),
                 ),

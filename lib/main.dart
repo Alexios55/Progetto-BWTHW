@@ -9,6 +9,7 @@ import 'theme.dart';
 import 'package:bwthw_project/screens/personal_info_screen.dart';
 import 'package:bwthw_project/screens/splash_screen.dart';
 //import 'package:bwthw_project/screens/bmi_status.dart';
+import 'package:bwthw_project/screens/home_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,6 +43,7 @@ class MyApp extends StatelessWidget {
         '/welcome': (context) => const WelcomeScreen(),
         '/personal-info': (context) => const PersonalInfoScreen(),
         '/bmi-status': (context) => const BmiStatusScreen(),
+        '/home': (context) => const HomeScreen(),
       },
     );
   }

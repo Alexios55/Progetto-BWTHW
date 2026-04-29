@@ -7,13 +7,16 @@ class CustomButton extends StatelessWidget {
   final Color color; 
   final double width;
   final double height;
+  final double textSize;
 
   const CustomButton({super.key, 
   required this.text, 
   required this.onPressed,
   this.color = const Color.fromARGB(255, 241, 171, 80),
   this.width = 200,
-  this.height = 50});
+  this.height = 50,
+  this.textSize = 16});
+  
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +32,7 @@ class CustomButton extends StatelessWidget {
           ),
         ),
         child: Text(text, 
-        style: const TextStyle(fontSize: 16)),
+        style: TextStyle(fontSize: textSize)),
       ),
     );
   }

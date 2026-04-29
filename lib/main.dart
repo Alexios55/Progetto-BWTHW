@@ -7,8 +7,11 @@ import 'package:flutter/material.dart';
 import 'util.dart';
 import 'theme.dart';
 import 'package:bwthw_project/screens/personal_info_screen.dart';
+import 'package:bwthw_project/screens/splash_screen.dart';
+//import 'package:bwthw_project/screens/bmi_status.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -31,7 +34,7 @@ class MyApp extends StatelessWidget {
       theme: theme.light(),
       darkTheme: theme.dark(),
       themeMode: ThemeMode.system,
-      initialRoute: '/start',
+      home: SplashScreen(),
       routes: {
         '/start': (context) => const StartScreen(),
         '/login': (context) => const LoginScreen(),

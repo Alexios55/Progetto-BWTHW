@@ -1,10 +1,56 @@
+import 'package:bwthw_project/widgets/custom_button.dart';
 import 'package:bwthw_project/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:bwthw_project/services/preference_service.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   static const routeName = '/login';
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  bool canLogin = false;
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> login() async {
+    String email = emailController.text.trim();
+    String password = passwordController.text.trim();
+
+    // We have only one user with one credential
+    if (email == 'test@test.com' && password == '1234') {
+      setState(()
+      {
+        canLogin = true;
+      });
+    } else {
+      // Error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Incorrect user or password'),
+        ),
+      );
+    }
+    if (canLogin){
+      // save the login with shared preferences
+      await PreferenceService.saveLogin(true);
+      Navigator.pushNamedAndRemoveUntil(context, 
+      '/bmi-status', 
+      (route) => false);
+    }
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,25 +81,21 @@ class LoginScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 40),
-                const CustomTextField(hintText: 'Email'),
+                CustomTextField(
+                  hintText: 'Email',
+                  controller: emailController,
+                ),
                 const SizedBox(height: 20),
-                const CustomTextField(
+                CustomTextField(
                   hintText: 'Password',
                   obscureText: true,
+                  controller: passwordController,
                 ),
                 const SizedBox(height: 28),
                 SizedBox(
                   width: double.infinity,
                   height: 55,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/welcome');
-                    },
-                    child: const Text(
-                      'Sign In',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  ),
+                  child: CustomButton(text: "Sign In", textSize: 18, onPressed: login)
                 ),
                 const SizedBox(height: 20),
                 Row(

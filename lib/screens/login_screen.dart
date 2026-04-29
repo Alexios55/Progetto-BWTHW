@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 
 // This screen allows the user to log into the app by entering
 // an email and a password. If the fields are valid, the user

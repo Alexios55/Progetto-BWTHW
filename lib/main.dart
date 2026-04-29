@@ -1,13 +1,15 @@
 import 'package:bwthw_project/screens/bmi_status.dart';
+import 'package:bwthw_project/screens/home_screen.dart';
 import 'package:bwthw_project/screens/login_screen.dart';
+import 'package:bwthw_project/screens/personal_info_screen.dart';
 import 'package:bwthw_project/screens/registration.dart';
 import 'package:bwthw_project/screens/start_screen.dart';
 import 'package:bwthw_project/screens/welcome_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:bwthw_project/models/food_diary_db.dart';
 import 'util.dart';
 import 'theme.dart';
-import 'package:bwthw_project/screens/personal_info_screen.dart';
-import 'package:bwthw_project/screens/home_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -26,22 +28,25 @@ class MyApp extends StatelessWidget {
 
     MaterialTheme theme = MaterialTheme(textTheme);
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'smartDIET',
-      theme: theme.light(),
-      darkTheme: theme.dark(),
-      themeMode: ThemeMode.system,
-      initialRoute: '/start',
-      routes: {
-        '/start': (context) => const StartScreen(),
-        '/login': (context) => const LoginScreen(),
-        '/registration': (context) => const RegistrationScreen(),
-        '/welcome': (context) => const WelcomeScreen(),
-        '/personal-info': (context) => const PersonalInfoScreen(),
-        '/bmi-status': (context) => const BmiStatusScreen(),
-        '/home': (context) => const HomeScreen(),
-      },
+    return ChangeNotifierProvider<FoodDiaryDB>(
+      create: (context) => FoodDiaryDB(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'smartDIET',
+        theme: theme.light(),
+        darkTheme: theme.dark(),
+        themeMode: ThemeMode.system,
+        initialRoute: '/start',
+        routes: {
+          '/start': (context) => const StartScreen(),
+          '/login': (context) => const LoginScreen(),
+          '/registration': (context) => const RegistrationScreen(),
+          '/welcome': (context) => const WelcomeScreen(),
+          '/personal-info': (context) => const PersonalInfoScreen(),
+          '/bmi-status': (context) => const BmiStatusScreen(),
+          '/home': (context) => const HomeScreen(),
+        },
+      ),
     );
   }
 }

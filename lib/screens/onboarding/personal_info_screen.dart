@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:bwthw_project/models/user_temp.dart';
+import 'package:bwthw_project/screens/onboarding/bmi_status.dart';
+import 'package:bwthw_project/utils/calculate_age.dart';
 
 /// This screen collects the user's personal information before
 /// continuing to the next step of the onboarding flow.
@@ -9,9 +12,11 @@ import 'package:flutter/material.dart';
 /// - weight is a valid number
 /// - height is a valid number
 class PersonalInfoScreen extends StatefulWidget {
-  const PersonalInfoScreen({super.key});
-
   static const routeName = '/personal-info';
+
+  final UserTemp user;
+
+  const PersonalInfoScreen({super.key, required this.user});
 
   @override
   State<PersonalInfoScreen> createState() => _PersonalInfoScreenState();
@@ -20,16 +25,16 @@ class PersonalInfoScreen extends StatefulWidget {
 class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   // Controllers used to manage the text shown inside the fields.
   final TextEditingController dateOfBirthController = TextEditingController();
-  final TextEditingController ageController = TextEditingController();
   final TextEditingController weightController = TextEditingController();
   final TextEditingController heightController = TextEditingController();
+  final TextEditingController ageController = TextEditingController();
 
   // Variable used to store the selected sex.
   String? selectedSex;
 
   // Opens the date picker and writes the selected date into the text field.
   Future<void> _selectDate(BuildContext context) async {
-    DateTime initialDate = DateTime(2000);
+    DateTime initialDate = DateTime(1900);
 
     final DateTime? pickedDate = await showDatePicker(
       context: context,
@@ -44,21 +49,30 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
             '${pickedDate.day.toString().padLeft(2, '0')}/'
             '${pickedDate.month.toString().padLeft(2, '0')}/'
             '${pickedDate.year}';
+
+            ageController.text = AgeCalculator.calculateAge(pickedDate).toString();
       });
     }
   }
 
   void _goToNextStep() {
-    final String dateOfBirth = dateOfBirthController.text.trim();
-    final String age = ageController.text.trim();
-    final String weight = weightController.text.trim();
-    final String height = heightController.text.trim();
+      widget.user.weight = double.tryParse(weightController.text.trim()) ?? 0;
+      widget.user.height = double.tryParse(heightController.text.trim()) ?? 0;
+      widget.user.dateOfBirth = DateTime.tryParse(dateOfBirthController.text.split('/').reversed.join('-') + 'T00:00:00') ?? DateTime(2000);
+
+
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => BmiStatusScreen(user: widget.user),),
+  );
+
+
 
     if (selectedSex == null ||
-        dateOfBirth.isEmpty ||
-        age.isEmpty ||
-        weight.isEmpty ||
-        height.isEmpty) {
+        dateOfBirthController.text.isEmpty ||
+        ageController.text.isEmpty ||
+        weightController.text.isEmpty ||
+        heightController.text.isEmpty) {
       ScaffoldMessenger.of(context)
         ..removeCurrentSnackBar()
         ..showSnackBar(
@@ -71,7 +85,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     }
 
     // Check that the selected year is not later than 2010.
-    final List<String> parts = dateOfBirth.split('/');
+    final List<String> parts = dateOfBirthController.text.split('/');
     if (parts.length != 3) {
       ScaffoldMessenger.of(context)
         ..removeCurrentSnackBar()
@@ -97,9 +111,13 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       return;
     }
 
+    int age = AgeCalculator.calculateAge(DateTime(year, int.parse(parts[1]), int.parse(parts[0])));
+    ageController.text = age.toString();
+
     // Check that age is numeric and has at least 2 digits.
+    /* Ora non serve, età calcolata in automatico da data selezionata
     final RegExp ageRegExp = RegExp(r'^\d{2,}$');
-    if (!ageRegExp.hasMatch(age)) {
+    if (!ageRegExp.hasMatch(ageController.text)) {
       ScaffoldMessenger.of(context)
         ..removeCurrentSnackBar()
         ..showSnackBar(
@@ -109,10 +127,10 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
           ),
         );
       return;
-    }
+    }*/
 
     // Check that weight is a valid number.
-    final double? weightValue = double.tryParse(weight.replaceAll(',', '.'));
+    final double? weightValue = double.tryParse(weightController.text.replaceAll(',', '.'));
     if (weightValue == null) {
       ScaffoldMessenger.of(context)
         ..removeCurrentSnackBar()
@@ -126,7 +144,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     }
 
     // Check that height is a valid number.
-    final double? heightValue = double.tryParse(height.replaceAll(',', '.'));
+    final double? heightValue = double.tryParse(heightController.text.replaceAll(',', '.'));
     if (heightValue == null) {
       ScaffoldMessenger.of(context)
         ..removeCurrentSnackBar()
@@ -139,7 +157,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       return;
     }
 
-    Navigator.pushNamed(context, '/bmi-status');
+    Navigator.pushNamed(context, '/bmi-status', arguments: widget.user);
   }
 
   @override
@@ -266,7 +284,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
 
                         TextField(
                           controller: ageController,
-                          keyboardType: TextInputType.number,
+                          readOnly: true,
+                          enableInteractiveSelection: false,
                           decoration: InputDecoration(
                             hintText: 'Age',
                             prefixIcon: const Icon(Icons.badge_outlined),
@@ -274,7 +293,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             filled: true,
                             fillColor: colorScheme.surfaceContainerHighest
                                 .withValues(alpha: 0.4),
-                            border: OutlineInputBorder(
+                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(14),
                               borderSide: BorderSide.none,
                             ),

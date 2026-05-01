@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:bwthw_project/models/user_temp.dart';
+import 'package:bwthw_project/screens/onboarding/personal_info_screen.dart';
 
 // This screen collects the user's name and surname
 // before moving to the personal information step.
@@ -25,10 +27,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
 
   void _goToNextStep() {
-    final String name = nameController.text.trim();
-    final String surname = surnameController.text.trim();
-
-    if (name.isEmpty || surname.isEmpty) {
+    UserTemp userTemp = UserTemp(
+      name: nameController.text.trim(),
+      surname: surnameController.text.trim(),
+    );
+    
+    if (userTemp.name!.isEmpty || userTemp.surname!.isEmpty) {
       ScaffoldMessenger.of(context)
         ..removeCurrentSnackBar()
         ..showSnackBar(
@@ -40,7 +44,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       return;
     }
 
-    Navigator.pushNamed(context, '/personal-info');
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => PersonalInfoScreen(user: userTemp)),
+    );
   }
 
   @override

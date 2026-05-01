@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bwthw_project/screens/food_diary_page.dart';
-
+import 'package:bwthw_project/screens/profile_screen.dart';
 // Main page of the app with bottom navigation.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -27,15 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     ),
-    Center(
-      child: Text(
-        'Settings Page',
-        style: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    ),
+    ProfileScreen(),
   ];
 
   @override
@@ -69,9 +61,9 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Dashboard',
           ),
           NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings),
-            label: 'Settings',
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Profile',
           ),
         ],
       ),

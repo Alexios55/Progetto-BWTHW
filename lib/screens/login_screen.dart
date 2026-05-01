@@ -24,6 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool canLogin = false;
+  bool rememberMe = false;
 
   @override
   void dispose() {
@@ -50,13 +51,17 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
     }
-    if (canLogin){
+    if (canLogin) {
       // save the login with shared preferences
-      await PreferenceService.saveLogin(true);
+      if (rememberMe) {
+        await PreferenceService.saveLogin(true);
+      } else {
+        await PreferenceService.saveLogin(false);
+      }
       if (!mounted) return;
       Navigator.pushNamedAndRemoveUntil(
         context,
-        '/bmi-status',
+        '/home',
         (route) => false,
       );
     }
@@ -260,7 +265,21 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
 
-                        const SizedBox(height: 24),
+                        Row(
+                          children: [
+                            Checkbox(
+                              value: rememberMe,
+                              onChanged: (value) {
+                                setState(() {
+                                  rememberMe = value ?? false;
+                                });
+                              },
+                            ),
+                            const Text('Remember me'),
+                          ],
+                        ),
+
+                        const SizedBox(height: 10), // ERA 24
 
                         SizedBox(
                           width: double.infinity,

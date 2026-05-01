@@ -1,15 +1,17 @@
-import 'package:bwthw_project/screens/bmi_status.dart';
+import 'package:bwthw_project/screens/onboarding/bmi_status.dart';
 import 'package:bwthw_project/screens/home_screen.dart';
 import 'package:bwthw_project/screens/login_screen.dart';
-import 'package:bwthw_project/screens/personal_info_screen.dart';
-import 'package:bwthw_project/screens/registration.dart';
+import 'package:bwthw_project/screens/onboarding/personal_info_screen.dart';
+import 'package:bwthw_project/screens/onboarding/registration.dart';
 import 'package:bwthw_project/screens/start_screen.dart';
-import 'package:bwthw_project/screens/welcome_screen.dart';
+import 'package:bwthw_project/screens/onboarding/welcome_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:bwthw_project/models/food_diary_db.dart';
 import 'util.dart';
 import 'theme.dart';
+import 'package:bwthw_project/models/user_temp.dart';
+import 'package:bwthw_project/screens/profile_screen.dart';
 
 import 'package:bwthw_project/screens/splash_screen.dart';
 //import 'package:bwthw_project/screens/bmi_status.dart';
@@ -47,9 +49,14 @@ class MyApp extends StatelessWidget {
           '/login': (context) => const LoginScreen(),
           '/registration': (context) => const RegistrationScreen(),
           '/welcome': (context) => const WelcomeScreen(),
-          '/personal-info': (context) => const PersonalInfoScreen(),
-          '/bmi-status': (context) => const BmiStatusScreen(),
+          '/personal-info': (context) {final user = ModalRoute.of(context)!.settings.arguments as UserTemp;
+            return PersonalInfoScreen(user: user);
+          },
+          '/bmi-status': (context) {final user = ModalRoute.of(context)!.settings.arguments as UserTemp;
+            return BmiStatusScreen(user: user);
+          },
           '/home': (context) => const HomeScreen(),
+          '/profile': (context) => const ProfileScreen(),
         },
       ),
     );

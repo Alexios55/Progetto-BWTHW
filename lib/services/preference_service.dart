@@ -1,6 +1,8 @@
 // This is the file for the preference service, it will be used to save the user's preferences and settings, such as the theme and the language
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bwthw_project/models/user.dart';
+import 'package:bwthw_project/models/blood_test.dart';  
+import 'dart:convert';
 class PreferenceService {
   // This is the method to save if user is logged in
   static Future<void> saveLogin(bool value) async {
@@ -103,6 +105,25 @@ static Future<void> clearAll() async {
   await prefs.clear();
 }
 
+
+static Future<void> saveBloodTests(List<BloodTest> tests) async {
+  final prefs = await SharedPreferences.getInstance();
+
+  List<String> jsonList =
+      tests.map((t) => jsonEncode(t.toMap())).toList();
+
+  await prefs.setStringList('blood_tests', jsonList);
+}
+
+static Future<List<BloodTest>> getBloodTests() async {
+  final prefs = await SharedPreferences.getInstance();
+
+  final list = prefs.getStringList('blood_tests') ?? [];
+
+  return list
+      .map((e) => BloodTest.fromMap(jsonDecode(e)))
+      .toList();
+}
 
   // This is the method to save user preferences, such as theme and language
 

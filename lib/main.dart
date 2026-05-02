@@ -12,7 +12,8 @@ import 'util.dart';
 import 'theme.dart';
 import 'package:bwthw_project/models/user_temp.dart';
 import 'package:bwthw_project/screens/profile_screen.dart';
-
+import 'package:bwthw_project/screens/blood_test_screen.dart';
+import 'package:bwthw_project/screens/add_blood_test_screen.dart';  
 import 'package:bwthw_project/screens/splash_screen.dart';
 //import 'package:bwthw_project/screens/bmi_status.dart';
 
@@ -57,6 +58,8 @@ class MyApp extends StatelessWidget {
           },
           '/home': (context) => const HomeScreen(),
           '/profile': (context) => const ProfileScreen(),
+          '/blood-tests': (context) => const BloodTestScreen(),
+          '/add-blood-test': (context) => const AddBloodTestScreen(),
         },
       ),
     );

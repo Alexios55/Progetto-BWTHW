@@ -1,3 +1,8 @@
+import 'package:bwthw_project/services/user_service.dart';
+import 'package:bwthw_project/models/enums/activity_level.dart';
+import 'package:bwthw_project/models/enums/gender.dart';
+import 'package:bwthw_project/models/enums/goal.dart';
+import 'package:bwthw_project/utils/input_validators.dart';
 import 'package:flutter/material.dart';
 
 // This screen collects the user's personal information,
@@ -13,6 +18,8 @@ class PersonalInfoScreen extends StatefulWidget {
 }
 
 class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   // Controllers used to manage the text shown inside the fields.
   final TextEditingController dateOfBirthController = TextEditingController();
   final TextEditingController ageController = TextEditingController();
@@ -20,7 +27,9 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   final TextEditingController heightController = TextEditingController();
 
   // Variable used to store the selected sex.
-  String? selectedSex;
+  Gender? selectedSex;
+  ActivityLevel selectedActivityLevel = ActivityLevel.moderatelyActive;
+  Goal selectedGoal = Goal.loseWeight;
 
   // Opens the date picker and writes the selected date into the text field.
   Future<void> _selectDate(BuildContext context) async {
@@ -101,137 +110,213 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                 const SizedBox(height: 32),
 
                 // Main card that contains all personal information fields.
-                Card(
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      children: [
-                        // Dropdown field for sex selection.
-                        DropdownButtonFormField<String>(
-                          value: selectedSex,
-                          decoration: InputDecoration(
-                            hintText: 'Sex',
-                            prefixIcon: const Icon(Icons.person_outline),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 18,
-                            ),
-                          ),
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'Male',
-                              child: Text('Male'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'Female',
-                              child: Text('Female'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'Other',
-                              child: Text('Other'),
-                            ),
-                          ],
-                          onChanged: (value) {
-                            setState(() {
-                              selectedSex = value;
-                            });
-                          },
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        // Read-only field for date of birth.
-                        // When tapped, it opens the calendar picker.
-                        TextField(
-                          controller: dateOfBirthController,
-                          readOnly: true,
-                          onTap: () => _selectDate(context),
-                          decoration: InputDecoration(
-                            hintText: 'Date of birth',
-                            prefixIcon: const Icon(Icons.calendar_today_outlined),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 18,
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        // Age field.
-                        TextField(
-                          controller: ageController,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            hintText: 'Age',
-                            prefixIcon: const Icon(Icons.badge_outlined),
-                            suffixText: 'years',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 18,
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        // Weight and height are displayed side by side
-                        // to make the layout more compact and modern.
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: weightController,
-                                keyboardType: TextInputType.number,
-                                decoration: InputDecoration(
-                                  hintText: 'Weight',
-                                  prefixIcon: const Icon(Icons.monitor_weight_outlined),
-                                  suffixText: 'kg',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 18,
-                                  ),
-                                ),
+                Form(
+                  key: _formKey,
+                  child: Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          // Dropdown field for sex selection.
+                          DropdownButtonFormField<Gender>(
+                            value: selectedSex,
+                            decoration: InputDecoration(
+                              hintText: 'Sex',
+                              prefixIcon: const Icon(Icons.person_outline),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 18,
                               ),
                             ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: TextField(
-                                controller: heightController,
-                                keyboardType: TextInputType.number,
-                                decoration: InputDecoration(
-                                  hintText: 'Height',
-                                  prefixIcon: const Icon(Icons.height),
-                                  suffixText: 'cm',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                            items: Gender.values
+                                .map(
+                                  (gender) => DropdownMenuItem<Gender>(
+                                    value: gender,
+                                    child: Text(gender.label),
                                   ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 18,
-                                  ),
-                                ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                selectedSex = value;
+                              });
+                            },
+                            validator: (value) =>
+                                value == null ? 'Select your sex' : null,
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Read-only field for date of birth.
+                          // When tapped, it opens the calendar picker.
+                          TextFormField(
+                            controller: dateOfBirthController,
+                            readOnly: true,
+                            onTap: () => _selectDate(context),
+                            decoration: InputDecoration(
+                              hintText: 'Date of birth',
+                              prefixIcon: const Icon(Icons.calendar_today_outlined),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 18,
                               ),
                             ),
-                          ],
-                        ),
-                      ],
+                            validator:
+                                (value) => InputValidators.validateRequired(
+                                  value,
+                                  fieldName: 'Date of birth',
+                                ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Age field.
+                          TextFormField(
+                            controller: ageController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              hintText: 'Age',
+                              prefixIcon: const Icon(Icons.badge_outlined),
+                              suffixText: 'years',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 18,
+                              ),
+                            ),
+                            validator: InputValidators.validateAge,
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          DropdownButtonFormField<ActivityLevel>(
+                            value: selectedActivityLevel,
+                            decoration: InputDecoration(
+                              hintText: 'Activity level',
+                              prefixIcon:
+                                  const Icon(Icons.directions_walk_outlined),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 18,
+                              ),
+                            ),
+                            items: ActivityLevel.values
+                                .map(
+                                  (level) => DropdownMenuItem<ActivityLevel>(
+                                    value: level,
+                                    child: Text(level.label),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              if (value == null) {
+                                return;
+                              }
+                              setState(() {
+                                selectedActivityLevel = value;
+                              });
+                            },
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          DropdownButtonFormField<Goal>(
+                            value: selectedGoal,
+                            decoration: InputDecoration(
+                              hintText: 'Goal',
+                              prefixIcon: const Icon(Icons.flag_outlined),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 18,
+                              ),
+                            ),
+                            items: Goal.values
+                                .map(
+                                  (goal) => DropdownMenuItem<Goal>(
+                                    value: goal,
+                                    child: Text(goal.label),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              if (value == null) {
+                                return;
+                              }
+                              setState(() {
+                                selectedGoal = value;
+                              });
+                            },
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Weight and height are displayed side by side
+                          // to make the layout more compact and modern.
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextFormField(
+                                  controller: weightController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: InputDecoration(
+                                    hintText: 'Weight',
+                                    prefixIcon: const Icon(
+                                      Icons.monitor_weight_outlined,
+                                    ),
+                                    suffixText: 'kg',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 18,
+                                    ),
+                                  ),
+                                  validator: InputValidators.validateWeight,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: TextFormField(
+                                  controller: heightController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: InputDecoration(
+                                    hintText: 'Height',
+                                    prefixIcon: const Icon(Icons.height),
+                                    suffixText: 'cm',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 18,
+                                    ),
+                                  ),
+                                  validator: InputValidators.validateHeight,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -244,6 +329,25 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   height: 55,
                   child: ElevatedButton(
                     onPressed: () {
+                      if (!_formKey.currentState!.validate()) {
+                        return;
+                      }
+
+                      final double weight =
+                          double.parse(weightController.text.replaceAll(',', '.'));
+                      final double height =
+                          double.parse(heightController.text.replaceAll(',', '.'));
+                      final int age = int.parse(ageController.text);
+
+                      UserService().setUserData(
+                        weight: weight,
+                        height: height,
+                        age: age,
+                        gender: selectedSex ?? Gender.male,
+                        activityLevel: selectedActivityLevel,
+                        goal: selectedGoal,
+                      );
+
                       Navigator.pushNamed(context, '/bmi-status');
                     },
                     child: const Text(
@@ -260,3 +364,4 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     );
   }
 }
+

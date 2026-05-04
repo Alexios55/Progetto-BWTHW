@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:bwthw_project/logic/health_calculator.dart';
+import 'package:bwthw_project/models/enums/goal.dart';
+import 'package:bwthw_project/services/user_service.dart';
 
 // This screen shows the user's current BMI status,
 // an explanation of the result, and a field to enter the ideal weight.
@@ -7,9 +10,42 @@ class BmiStatusScreen extends StatelessWidget {
 
   static const routeName = '/bmi-status';
 
+  String _getBmiStatus(double bmi) {
+    if (bmi < 18.5) {
+      return 'Underweight';
+    } else if (bmi < 25) {
+      return 'Normal weight';
+    } else if (bmi < 30) {
+      return 'Overweight';
+    } else {
+      return 'Obese';
+    }
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'Underweight':
+        return Colors.orange;
+      case 'Normal weight':
+        return Colors.green;
+      case 'Overweight':
+        return Colors.deepOrange;
+      default:
+        return Colors.red;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+
+    final user = UserService();
+
+    final double bmi = user.calculateBMI();
+    final String status = _getBmiStatus(bmi);
+    final Color statusColor = _getStatusColor(status);
+    final patient = user.currentPatient;
+    final healthyRange = HealthCalculator.calculateHealthyWeightRange(user.height);
 
     return Scaffold(
       body: SafeArea(
@@ -20,6 +56,7 @@ class BmiStatusScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 20),
+
                 const Text(
                   'Your current physical status is:',
                   style: TextStyle(
@@ -27,7 +64,9 @@ class BmiStatusScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+
                 const SizedBox(height: 24),
+
                 Card(
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -39,21 +78,21 @@ class BmiStatusScreen extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            const Expanded(
+                            Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
+                                  const Text(
                                     'Your BMI is',
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
-                                  SizedBox(height: 8),
+                                  const SizedBox(height: 8),
                                   Text(
-                                    '23',
-                                    style: TextStyle(
+                                    bmi.toStringAsFixed(1),
+                                    style: const TextStyle(
                                       fontSize: 36,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -61,42 +100,80 @@ class BmiStatusScreen extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            const Column(
+                            Column(
                               children: [
                                 Icon(
                                   Icons.accessibility_new,
                                   size: 40,
-                                  color: Colors.green,
+                                  color: statusColor,
                                 ),
-                                SizedBox(height: 8),
+                                const SizedBox(height: 8),
                                 Text(
-                                  'Normal weight',
+                                  status,
                                   style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.green,
+                                    color: statusColor,
                                   ),
                                 ),
                               ],
                             ),
                           ],
                         ),
+
                         const SizedBox(height: 20),
+
                         Divider(color: colorScheme.outlineVariant),
+
                         const SizedBox(height: 16),
-                        const Text(
-                          'Your BMI is within the normal weight range. '
-                          'Keep up with your current lifestyle to maintain a healthy weight.',
-                          style: TextStyle(
+
+                        Text(
+                          'Your BMI is categorized as "$status". '
+                          'Maintain a balanced lifestyle for optimal health.',
+                          style: const TextStyle(
                             fontSize: 15,
                             height: 1.5,
                           ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        Divider(color: colorScheme.outlineVariant),
+
+                        const SizedBox(height: 16),
+
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _MetricTile(
+                                label: 'BMR',
+                                value: '${user.calculateBmr().toStringAsFixed(0)} kcal',
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _MetricTile(
+                                label: 'TDEE',
+                                value: '${user.calculateTdee().toStringAsFixed(0)} kcal',
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        _MetricTile(
+                          label: 'Daily target',
+                          value:
+                              '${user.dailyCaloriesTarget.toStringAsFixed(0)} kcal (${patient != null ? patient.goal.label : 'Goal not set'})',
                         ),
                       ],
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 28),
+
                 const Text(
                   'What is your ideal weight?',
                   style: TextStyle(
@@ -104,7 +181,9 @@ class BmiStatusScreen extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
+
                 const SizedBox(height: 14),
+
                 TextField(
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
@@ -118,25 +197,29 @@ class BmiStatusScreen extends StatelessWidget {
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 14),
-                const Row(
+
+                Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.lightbulb_outline,
                       size: 18,
                       color: Colors.amber,
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Text(
-                      'Recommended weight 55 - 74 kg.',
-                      style: TextStyle(
+                      'Recommended weight ${healthyRange.minKg.toStringAsFixed(0)} - ${healthyRange.maxKg.toStringAsFixed(0)} kg.',
+                      style: const TextStyle(
                         fontSize: 13,
                         color: Colors.grey,
                       ),
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 24),
+
                 Text(
                   'The Body Mass Index (BMI) is a simple way to check if your '
                   'weight is healthy for your height, categorizing it as underweight, '
@@ -147,7 +230,9 @@ class BmiStatusScreen extends StatelessWidget {
                     color: colorScheme.onSurfaceVariant,
                   ),
                 ),
+
                 const SizedBox(height: 40),
+
                 SizedBox(
                   width: double.infinity,
                   height: 55,
@@ -165,6 +250,49 @@ class BmiStatusScreen extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _MetricTile extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _MetricTile({
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceVariant.withOpacity(0.45),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }

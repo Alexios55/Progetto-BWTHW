@@ -1,16 +1,27 @@
-// This is a class for a general user
+import 'package:bwthw_project/models/enums/gender.dart';
 
-class UserMode {
-  // We need general information about the user, such as name and age and than data for enetry in the app
-  String name;
-  String surname;
-  int age;
-  String gender;
+class UserModel {
+  final String name;
+  final String surname;
+  final int age;
+  final Gender gender;
 
-  UserMode({
+  const UserModel({
     required this.name,
     required this.surname,
     required this.age,
     required this.gender,
+  });
+
+  String get fullName => '$name $surname'.trim();
+}
+
+@Deprecated('Use UserModel instead.')
+class UserMode extends UserModel {
+  const UserMode({
+    required super.name,
+    required super.surname,
+    required super.age,
+    required super.gender,
   });
 }

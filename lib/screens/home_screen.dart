@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:bwthw_project/screens/food_diary_page.dart';
 import 'package:bwthw_project/screens/profile_screen.dart';
+import 'package:bwthw_project/screens/dashboard_page.dart';
+
 // Main page of the app with bottom navigation.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,15 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // Pages shown in the main area of the screen.
   final List<Widget> pages = const [
     FoodDiaryPage(),
-    Center(
-      child: Text(
-        'Dashboard Page',
-        style: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    ),
+    DashboardPage(),
     ProfileScreen(),
   ];
 

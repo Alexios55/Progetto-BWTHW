@@ -22,7 +22,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadUser() async {
-    final loadedUser = await PreferenceService.getUserData(); // ✔ FIX
+    final loadedUser = await PreferenceService.getUserData();
 
     if (!mounted) return;
 
@@ -58,33 +58,79 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget statBox(String label, String value, IconData icon) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(16),
+          color: colorScheme.surfaceContainerHighest.withOpacity(0.45),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: colorScheme.outlineVariant),
         ),
         child: Column(
           children: [
-            Icon(icon, size: 28),
+            Icon(
+              icon,
+              size: 28,
+              color: colorScheme.primary,
+            ),
             const SizedBox(height: 8),
             Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
+                color: colorScheme.onSurface,
               ),
+              textAlign: TextAlign.center,
             ),
-            Text(label, style: const TextStyle(fontSize: 12)),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
       ),
     );
   }
 
+  Widget infoRow(String label, String value) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: colorScheme.onSurface,
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     if (isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -103,78 +149,208 @@ class _ProfileScreenState extends State<ProfileScreen> {
         centerTitle: true,
       ),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              // 👤 AVATAR
-              CircleAvatar(
-                radius: 45,
-                backgroundColor: Colors.blue,
-                child: Text(
-                  user!.name[0],
-                  style: const TextStyle(
-                    fontSize: 32,
-                    color: Colors.white,
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 24,
+                ),
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer.withOpacity(0.65),
+                  borderRadius: BorderRadius.circular(28),
+                ),
+                child: Column(
+                  children: [
+                    CircleAvatar(
+                      radius: 45,
+                      backgroundColor: colorScheme.primary,
+                      child: Text(
+                        user!.name[0],
+                        style: TextStyle(
+                          fontSize: 32,
+                          color: colorScheme.onPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      '${user!.name} ${user!.surname}',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onSurface,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Your personal health profile',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 22),
+
+              Row(
+                children: [
+                  statBox(
+                    'Weight',
+                    '${user!.weight} kg',
+                    Icons.monitor_weight,
+                  ),
+                  const SizedBox(width: 10),
+                  statBox(
+                    'Height',
+                    '${user!.height} cm',
+                    Icons.height,
+                  ),
+                  const SizedBox(width: 10),
+                  statBox(
+                    'BMI',
+                    bmi.toStringAsFixed(1),
+                    Icons.favorite,
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 22),
+
+              Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  side: BorderSide(color: colorScheme.outlineVariant),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.badge_outlined,
+                            color: colorScheme.primary,
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            'Personal Information',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      infoRow('Name', user!.name),
+                      const SizedBox(height: 14),
+                      infoRow('Surname', user!.surname),
+                      const SizedBox(height: 14),
+                      infoRow(
+                        'Birth date',
+                        user!.birthDate.toString().split(' ')[0],
+                      ),
+                      const SizedBox(height: 14),
+                      infoRow('Weight', '${user!.weight} kg'),
+                      const SizedBox(height: 14),
+                      infoRow('Height', '${user!.height} cm'),
+                      const SizedBox(height: 14),
+                      infoRow('Ideal weight', '${user!.idealWeight} kg'),
+                    ],
                   ),
                 ),
               ),
 
-              const SizedBox(height: 10),
+              const SizedBox(height: 22),
 
-              // 👤 NAME
-              Text(
-                '${user!.name} ${user!.surname}',
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
+              Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  side: BorderSide(color: colorScheme.outlineVariant),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.insights_outlined,
+                            color: colorScheme.primary,
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            'BMI Overview',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+                      BmiBar(
+                        bmi: bmi,
+                        statusColor: Colors.green,
+                      ),
+                    ],
+                  ),
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
 
-              // 📊 STATS
-              Row(
-                children: [
-                  statBox('Weight', '${user!.weight} kg', Icons.monitor_weight),
-                  const SizedBox(width: 10),
-                  statBox('Height', '${user!.height} cm', Icons.height),
-                  const SizedBox(width: 10),
-                  statBox('BMI', bmi.toStringAsFixed(1), Icons.favorite),
-                ],
-              ),
-
-              const SizedBox(height: 25),
-
-              // 📈 BMI BAR
-              BmiBar(
-                bmi: bmi,
-                statusColor: Colors.green,
-              ),
-
-              const SizedBox(height: 25),
-
-              // ✏️ EDIT
               SizedBox(
                 width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
+                height: 52,
+                child: ElevatedButton.icon(
                   onPressed: _editProfile,
-                  child: const Text('Edit Profile'),
+                  icon: const Icon(Icons.edit_outlined),
+                  label: const Text('Edit Profile'),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
                 ),
               ),
 
-              const Spacer(),
+              const SizedBox(height: 14),
 
-              // 🚪 LOGOUT
               SizedBox(
                 width: double.infinity,
-                height: 50,
-                child: OutlinedButton(
+                height: 52,
+                child: OutlinedButton.icon(
                   onPressed: _logout,
-                  child: const Text(
+                  icon: const Icon(
+                    Icons.logout,
+                    color: Colors.red,
+                  ),
+                  label: const Text(
                     'Log out',
-                    style: TextStyle(color: Colors.red),
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.red),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
                 ),
               ),

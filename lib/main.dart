@@ -15,7 +15,7 @@ import 'package:bwthw_project/screens/profile_screen.dart';
 import 'package:bwthw_project/screens/blood_test_screen.dart';
 import 'package:bwthw_project/screens/add_blood_test_screen.dart';  
 import 'package:bwthw_project/screens/splash_screen.dart';
-//import 'package:bwthw_project/screens/bmi_status.dart';
+import 'package:bwthw_project/screens/bmi_status.dart';
 
 
 void main() {

@@ -4,7 +4,7 @@ class UserModel {
   final String name;
   final String surname;
   final int age;
-  final Gender gender;
+  final Gender gender;   // abbiamo modificato da final string gender a final gender gender (introducendo un enum) perche cosiabbiamo meno possibilita di errori di battitura
 
   const UserModel({
     required this.name,

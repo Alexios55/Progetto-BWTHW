@@ -1,104 +1,49 @@
 import 'package:flutter/material.dart';
-import 'package:bwthw_project/services/preference_service.dart';
 
-// This screen allows the user to log into the app by entering
-// an email and a password. If the fields are valid, the user
-// can continue to the next screen. Otherwise, an error message is shown.
+// This screen allows the user to create a new account by entering
+// a valid email, a password of at least 8 characters, and a matching
+// confirmation password before continuing to the next step.
+class RegistrationScreen extends StatefulWidget {
+  const RegistrationScreen({super.key});
 
-// Check that the email has a valid format and that the password
-// contains at least 8 characters before allowing the user to continue.
-
-// This screen allows the user to log into the app by entering
-// an email and a password. The email must have a valid format
-// and the password must be at least 8 characters long.
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
-
-  static const routeName = '/login';
+  static const routeName = '/registration';
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegistrationScreen> createState() => _RegistrationScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  bool canLogin = false;
-  bool rememberMe = false;
-
-  @override
-  void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
-    super.dispose();
-  }
-
-  Future<void> login() async {
-    String email = emailController.text.trim();
-    String password = passwordController.text.trim();
-
-    // We have only one user with one credential
-    if (email == 'test@test.com' && password == '1234') {
-      setState(()
-      {
-        canLogin = true;
-      });
-    } else {
-      // Error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Incorrect user or password'),
-        ),
-      );
-    }
-    if (canLogin) {
-      // save the login with shared preferences
-      if (rememberMe) {
-        await PreferenceService.saveLogin(true);
-      } else {
-        await PreferenceService.saveLogin(false);
-      }
-      if (!mounted) return;
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        '/home',
-        (route) => false,
-      );
-    }
-
-  }
-
-  /*@override
-  State<LoginScreen> createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends State<LoginScreen> {
+class _RegistrationScreenState extends State<RegistrationScreen> {
   // Controllers used to read the text entered by the user.
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
   @override
   void dispose() {
     // Dispose the controllers when the screen is removed.
     emailController.dispose();
     passwordController.dispose();
+    confirmPasswordController.dispose();
     super.dispose();
   }
+  
 
-  void _signIn() {
+  void _createAccount() {
     final String email = emailController.text.trim();
     final String password = passwordController.text.trim();
+    final String confirmPassword = confirmPasswordController.text.trim();
 
     final RegExp emailRegExp = RegExp(
       r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
     );
 
-    if (email.isEmpty || password.isEmpty) {
+    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context)
         ..removeCurrentSnackBar()
         ..showSnackBar(
           const SnackBar(
-            content: Text('Please enter both email and password'),
+            content: Text('Please fill in all fields'),
             duration: Duration(seconds: 2),
           ),
         );
@@ -130,8 +75,20 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Passwords do not match'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      return;
+    }
+
     Navigator.pushNamed(context, '/welcome');
-  }*/
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -156,28 +113,24 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 10),
-
                 const Text(
-                  'Login',
+                  'Sign Up',
                   style: TextStyle(
                     fontSize: 34,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-
                 const SizedBox(height: 8),
-
                 Text(
-                  'Please enter your email and password to sign in',
+                  'Please create your account to continue',
                   style: TextStyle(
                     fontSize: 16,
                     color: colorScheme.onSurfaceVariant,
                   ),
                 ),
-
                 const SizedBox(height: 32),
 
-                // Main box that contains the login form.
+                // Main box that contains the registration form.
                 Card(
                   elevation: 2,
                   shape: RoundedRectangleBorder(
@@ -187,42 +140,23 @@ class _LoginScreenState extends State<LoginScreen> {
                     padding: const EdgeInsets.all(24),
                     child: Column(
                       children: [
-                        Container(
-                          width: 70,
-                          height: 70,
-                          decoration: BoxDecoration(
-                            color: colorScheme.primaryContainer,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.person_outline,
-                            size: 36,
-                            color: colorScheme.primary,
-                          ),
-                        ),
-
-                        const SizedBox(height: 20),
-
                         Text(
-                          'Welcome back',
+                          'Create your account',
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
                             color: colorScheme.onSurface,
                           ),
                         ),
-
                         const SizedBox(height: 8),
-
                         Text(
-                          'Sign in to continue your journey with smartDIET',
+                          'Sign up to start your journey with smartDIET',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 14,
                             color: colorScheme.onSurfaceVariant,
                           ),
                         ),
-
                         const SizedBox(height: 28),
 
                         TextField(
@@ -232,7 +166,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             hintText: 'Email',
                             prefixIcon: const Icon(Icons.email_outlined),
                             filled: true,
-                            fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                            fillColor: colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.4),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(14),
                               borderSide: BorderSide.none,
@@ -243,7 +178,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                         ),
-
                         const SizedBox(height: 18),
 
                         TextField(
@@ -253,7 +187,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             hintText: 'Password',
                             prefixIcon: const Icon(Icons.lock_outline),
                             filled: true,
-                            fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                            fillColor: colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.4),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(14),
                               borderSide: BorderSide.none,
@@ -264,35 +199,41 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                         ),
+                        const SizedBox(height: 18),
 
-                        Row(
-                          children: [
-                            Checkbox(
-                              value: rememberMe,
-                              onChanged: (value) {
-                                setState(() {
-                                  rememberMe = value ?? false;
-                                });
-                              },
+                        TextField(
+                          controller: confirmPasswordController,
+                          obscureText: true,
+                          decoration: InputDecoration(
+                            hintText: 'Confirm Password',
+                            prefixIcon: const Icon(Icons.lock_reset_outlined),
+                            filled: true,
+                            fillColor: colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.4),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: BorderSide.none,
                             ),
-                            const Text('Remember me'),
-                          ],
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 18,
+                            ),
+                          ),
                         ),
-
-                        const SizedBox(height: 10), // ERA 24
+                        const SizedBox(height: 24),
 
                         SizedBox(
                           width: double.infinity,
                           height: 55,
                           child: ElevatedButton(
-                            onPressed: login,
+                            onPressed: _createAccount,
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
                               ),
                             ),
                             child: const Text(
-                              'Sign In',
+                              'Create Account',
                               style: TextStyle(fontSize: 18),
                             ),
                           ),
@@ -301,21 +242,22 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 40),
+
+                const SizedBox(height: 24),
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Text(
-                      "Don't have an account?",
+                      'Already have an account?',
                       style: TextStyle(fontSize: 14),
                     ),
                     TextButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/registration');
+                        Navigator.pushNamed(context, '/login');
                       },
                       child: const Text(
-                        'Sign up',
+                        'Login',
                         style: TextStyle(fontSize: 14),
                       ),
                     ),

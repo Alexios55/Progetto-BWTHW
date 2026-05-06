@@ -2,6 +2,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bwthw_project/models/user.dart';
 import 'package:bwthw_project/models/blood_test.dart';  
+import 'package:bwthw_project/models/weight_entry.dart';
 import 'dart:convert';
 class PreferenceService {
   // This is the method to save if user is logged in
@@ -123,6 +124,34 @@ static Future<List<BloodTest>> getBloodTests() async {
   return list
       .map((e) => BloodTest.fromMap(jsonDecode(e)))
       .toList();
+}
+
+static Future<void> saveWeightEntries(List<WeightEntry> entries) async {
+  final prefs = await SharedPreferences.getInstance();
+
+  List<String> jsonList =
+      entries.map((e) => jsonEncode(e.toMap())).toList();
+
+  await prefs.setStringList('weight_entries', jsonList);
+}
+
+static Future<List<WeightEntry>> getWeightEntries() async {
+  final prefs = await SharedPreferences.getInstance();
+
+  final list = prefs.getStringList('weight_entries') ?? [];
+
+  return list
+      .map((e) => WeightEntry.fromMap(jsonDecode(e)))
+      .toList();
+}
+
+static Future<void> addWeightEntry(WeightEntry entry) async {
+  final currentEntries = await getWeightEntries();
+  currentEntries.add(entry);
+
+  currentEntries.sort((a, b) => a.date.compareTo(b.date));
+
+  await saveWeightEntries(currentEntries);
 }
 
   // This is the method to save user preferences, such as theme and language

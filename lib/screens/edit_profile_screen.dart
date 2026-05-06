@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bwthw_project/models/user.dart';
 import 'package:bwthw_project/services/preference_service.dart';
+import 'package:bwthw_project/models/weight_entry.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final User user;
@@ -40,6 +41,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
 
     await PreferenceService.saveUser(updatedUser);
+
+    if (updatedUser.weight != widget.user.weight) {
+      await PreferenceService.addWeightEntry(
+        WeightEntry(
+          date: DateTime.now(),
+          weight: updatedUser.weight,
+        ),
+      );
+    }
 
     Navigator.pop(context, true); // 👈 ritorna "true"
   }

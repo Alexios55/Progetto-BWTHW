@@ -1,4 +1,4 @@
-import 'package:bwthw_project/models/blood_test.dart';  
+import 'package:bwthw_project/models.2/blood_test.dart';  
 
 class BloodAnalysisResult {
   final String status;

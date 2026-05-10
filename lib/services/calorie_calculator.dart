@@ -19,13 +19,13 @@ double activityMultiplier(ActivityLevel activityLevel) {
   switch (activityLevel) {
     case ActivityLevel.sedentary:
       return 1.2;
-    case ActivityLevel.light:
+    case ActivityLevel.lightlyActive:
       return 1.375;
-    case ActivityLevel.moderate:
+    case ActivityLevel.moderatelyActive:
       return 1.55;
-    case ActivityLevel.active:
-      return 1.725;
     case ActivityLevel.veryActive:
+      return 1.725;
+    case ActivityLevel.athlete:
       return 1.9;
   }
 }//activityMultiplier

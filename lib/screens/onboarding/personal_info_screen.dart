@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:bwthw_project/models/user_temp.dart';
+import 'package:provider/provider.dart';
+import 'package:bwthw_project/models.2/enums.dart';
+import 'package:bwthw_project/models.2/patient.dart';
+import 'package:bwthw_project/models.2/patient_state.dart';
+import 'package:bwthw_project/models.2/user_temp.dart';
 import 'package:bwthw_project/screens/onboarding/bmi_status.dart';
+import 'package:bwthw_project/services/user_service.dart';
 import 'package:bwthw_project/utils/calculate_age.dart';
 
 /// This screen collects the user's personal information before
@@ -56,18 +61,6 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   }
 
   void _goToNextStep() {
-      widget.user.weight = double.tryParse(weightController.text.trim()) ?? 0;
-      widget.user.height = double.tryParse(heightController.text.trim()) ?? 0;
-      widget.user.dateOfBirth = DateTime.tryParse(dateOfBirthController.text.split('/').reversed.join('-') + 'T00:00:00') ?? DateTime(2000);
-
-
-  Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => BmiStatusScreen(user: widget.user),),
-  );
-
-
-
     if (selectedSex == null ||
         dateOfBirthController.text.isEmpty ||
         ageController.text.isEmpty ||
@@ -111,7 +104,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       return;
     }
 
-    int age = AgeCalculator.calculateAge(DateTime(year, int.parse(parts[1]), int.parse(parts[0])));
+    final birthDate = DateTime(year, int.parse(parts[1]), int.parse(parts[0]));
+    final age = AgeCalculator.calculateAge(birthDate);
     ageController.text = age.toString();
 
     // Check that age is numeric and has at least 2 digits.
@@ -157,7 +151,55 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       return;
     }
 
-    Navigator.pushNamed(context, '/bmi-status', arguments: widget.user);
+    final gender = _parseGender(selectedSex!);
+    const activityLevel = ActivityLevel.moderatelyActive;
+    const goal = Goal.loseWeight;
+
+    widget.user.weight = weightValue;
+    widget.user.height = heightValue;
+    widget.user.dateOfBirth = birthDate;
+
+    UserService().setUserData(
+      weight: weightValue,
+      height: heightValue,
+      age: age,
+      gender: gender,
+      activityLevel: activityLevel,
+      goal: goal,
+    );
+
+    final patient = Patient(
+      id: 'patient_1',
+      name: widget.user.name ?? 'Patient',
+      surname: widget.user.surname ?? '',
+      email: '',
+      age: age,
+      weightKg: weightValue,
+      heightCm: heightValue,
+      gender: gender,
+      goal: goal,
+      activityLevel: activityLevel,
+    );
+
+    Provider.of<PatientState>(context, listen: false).setPatient(patient);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BmiStatusScreen(user: widget.user),
+      ),
+    );
+  }
+
+  Gender _parseGender(String value) {
+    switch (value) {
+      case 'Male':
+        return Gender.male;
+      case 'Female':
+        return Gender.female;
+      default:
+        return Gender.other;
+    }
   }
 
   @override

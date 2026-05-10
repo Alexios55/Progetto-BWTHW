@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:bwthw_project/models/user_temp.dart';
+import 'package:bwthw_project/models.2/user_temp.dart';
 import 'package:bwthw_project/screens/onboarding/personal_info_screen.dart';
 
 // This screen collects the user's name and surname

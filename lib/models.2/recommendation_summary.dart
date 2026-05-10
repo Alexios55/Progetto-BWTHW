@@ -9,3 +9,4 @@ class RecommendationSummary {
     required this.message,
   });
 }
+

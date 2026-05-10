@@ -1,9 +1,7 @@
-import 'package:bwthw_project/models/daily_health_data.dart';
-import 'package:bwthw_project/models/enums/gender.dart';
-import 'package:bwthw_project/models/enums/activity_level.dart';
-import 'package:bwthw_project/models/enums/goal.dart';
-import 'package:bwthw_project/models/recommendation_summary.dart';
-import 'package:bwthw_project/models/users/patient_user.dart';
+import 'package:bwthw_project/models.2/daily_health_data.dart';
+import 'package:bwthw_project/models.2/enums.dart';
+import 'package:bwthw_project/models.2/patient.dart';
+import 'package:bwthw_project/models.2/recommendation_summary.dart';
 
 class HealthCalculator {
   static double calculateBmi({
@@ -17,7 +15,7 @@ class HealthCalculator {
     return weightKg / (heightMeters * heightMeters);
   }
 
-  static double calculateBmr(PatientUser patient) {
+  static double calculateBmr(Patient patient) {
     final base =
         (10 * patient.weightKg) + (6.25 * patient.heightCm) - (5 * patient.age);
 
@@ -31,11 +29,11 @@ class HealthCalculator {
     }
   }
 
-  static double calculateTdee(PatientUser patient) {
+  static double calculateTdee(Patient patient) {
     return calculateBmr(patient) * patient.activityLevel.multiplier;
   }
 
-  static double calculateDailyCaloriesTarget(PatientUser patient) {
+  static double calculateDailyCaloriesTarget(Patient patient) {
     return calculateTdee(patient) + patient.goal.calorieAdjustment;
   }
 
@@ -49,7 +47,7 @@ class HealthCalculator {
   }
 
   static RecommendationSummary buildDailyRecommendation({
-    required PatientUser patient,
+    required Patient patient,
     required double consumedCalories,
     required DailyHealthData dailyHealthData,
   }) {
@@ -79,3 +77,4 @@ class HealthCalculator {
     );
   }
 }
+

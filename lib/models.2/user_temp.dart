@@ -2,7 +2,7 @@ class UserTemp {
   String? name;
   String? surname;
   double? weight;
-  double? height; 
+  double? height;
   DateTime? dateOfBirth;
   double? idealWeight;
 
@@ -15,3 +15,4 @@ class UserTemp {
     this.idealWeight,
   });
 }
+

@@ -1,7 +1,8 @@
+import 'package:provider/provider.dart';
+import 'package:bwthw_project/models.2/enums.dart';
+import 'package:bwthw_project/models.2/patient.dart';
+import 'package:bwthw_project/models.2/patient_state.dart';
 import 'package:bwthw_project/services/user_service.dart';
-import 'package:bwthw_project/models/enums/activity_level.dart';
-import 'package:bwthw_project/models/enums/gender.dart';
-import 'package:bwthw_project/models/enums/goal.dart';
 import 'package:bwthw_project/utils/input_validators.dart';
 import 'package:flutter/material.dart';
 
@@ -348,6 +349,21 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                         goal: selectedGoal,
                       );
 
+                      Patient patient = Patient(
+                        id: 'patient_1',
+                        name: 'Patient',
+                        email: '',
+                        age: age,
+                        weightKg: weight,
+                        heightCm: height,
+                        gender: selectedSex ?? Gender.male,
+                        goal: selectedGoal,
+                        activityLevel: selectedActivityLevel,
+                      );
+
+                      Provider.of<PatientState>(context, listen: false).setPatient(patient);
+
+
                       Navigator.pushNamed(context, '/bmi-status');
                     },
                     child: const Text(
@@ -364,4 +380,5 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     );
   }
 }
+
 

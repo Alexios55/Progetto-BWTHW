@@ -1,9 +1,7 @@
 import 'package:bwthw_project/logic/health_calculator.dart';
-import 'package:bwthw_project/models/daily_health_data.dart';
-import 'package:bwthw_project/models/enums/activity_level.dart';
-import 'package:bwthw_project/models/enums/gender.dart';
-import 'package:bwthw_project/models/enums/goal.dart';
-import 'package:bwthw_project/models/users/patient_user.dart';
+import 'package:bwthw_project/models.2/daily_health_data.dart';
+import 'package:bwthw_project/models.2/enums.dart';
+import 'package:bwthw_project/models.2/patient.dart';
 import 'package:flutter/foundation.dart';
 
 class UserService extends ChangeNotifier {
@@ -15,7 +13,7 @@ class UserService extends ChangeNotifier {
 
   UserService._internal();
 
-  PatientUser? _currentPatient;
+  Patient? _currentPatient;
   DailyHealthData _dailyHealthData = const DailyHealthData(
     steps: 8200,
     activeCaloriesBurned: 320,
@@ -31,7 +29,7 @@ class UserService extends ChangeNotifier {
     'Dinner': 0,
   };
 
-  PatientUser? get currentPatient => _currentPatient;
+  Patient? get currentPatient => _currentPatient;
   DailyHealthData get dailyHealthData => _dailyHealthData;
   double get weight => _currentPatient?.weightKg ?? 0;
   double get height => _currentPatient?.heightCm ?? 0;
@@ -51,9 +49,11 @@ class UserService extends ChangeNotifier {
     ActivityLevel activityLevel = ActivityLevel.moderatelyActive,
     Goal goal = Goal.loseWeight,
   }) {
-    _currentPatient = PatientUser(
+    _currentPatient = Patient(
+      id: 'current_patient',
       name: '',
       surname: '',
+      email: '',
       age: age,
       gender: gender,
       heightCm: height,
@@ -110,3 +110,4 @@ class UserService extends ChangeNotifier {
     return summary.message;
   }
 }
+

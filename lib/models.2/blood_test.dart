@@ -29,11 +29,12 @@ class BloodTest {
   factory BloodTest.fromMap(Map<String, dynamic> map) {
     return BloodTest(
       date: DateTime.parse(map['date']),
-      iron: map['iron'],
-      calcium: map['calcium'],
-      glucose: map['glucose'],
-      cholesterol: map['cholesterol'],
-      vitaminD: map['vitaminD'],
+      iron: (map['iron'] ?? 0).toDouble(),
+      calcium: (map['calcium'] ?? 0).toDouble(),
+      glucose: (map['glucose'] ?? 0).toDouble(),
+      cholesterol: (map['cholesterol'] ?? 0).toDouble(),
+      vitaminD: (map['vitaminD'] ?? 0).toDouble(),
     );
   }
 }
+

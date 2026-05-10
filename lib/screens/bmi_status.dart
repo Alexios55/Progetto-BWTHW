@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bwthw_project/logic/health_calculator.dart';
-import 'package:bwthw_project/models/enums/goal.dart';
+import 'package:bwthw_project/models.2/enums.dart';
 import 'package:bwthw_project/services/user_service.dart';
 
 // This screen shows the user's current BMI status,
@@ -297,3 +297,4 @@ class _MetricTile extends StatelessWidget {
     );
   }
 }
+

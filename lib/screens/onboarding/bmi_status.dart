@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:bwthw_project/models/user_temp.dart';
+import 'package:bwthw_project/models.2/user_temp.dart';
 import 'package:bwthw_project/widgets/bmi_bar.dart';
 import 'package:bwthw_project/services/preference_service.dart';
-import 'package:bwthw_project/models/user.dart';
+import 'package:bwthw_project/models.2/user.dart';
 
 /// This screen shows the user's BMI result, the current physical status,
 /// a short explanation, and a field where the user can enter an ideal weight.

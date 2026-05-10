@@ -20,3 +20,4 @@ class DailyHealthData {
         systolicPressure = 0,
         diastolicPressure = 0;
 }
+

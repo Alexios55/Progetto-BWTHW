@@ -16,7 +16,8 @@ import 'package:bwthw_project/screens/blood_test_screen.dart';
 import 'package:bwthw_project/screens/add_blood_test_screen.dart';  
 import 'package:bwthw_project/screens/splash_screen.dart';
 import 'package:bwthw_project/models.2/patient_state.dart';
-
+import 'package:bwthw_project/screens/body_measurements_screen.dart';
+import 'package:bwthw_project/screens/add_body_measurement_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -69,6 +70,8 @@ class MyApp extends StatelessWidget {
       '/profile': (context) => const ProfileScreen(),
       '/blood-tests': (context) => const BloodTestScreen(),
       '/add-blood-test': (context) => const AddBloodTestScreen(),
+      '/body-measurements': (context) => const BodyMeasurementsScreen(),
+      '/add-body-measurement': (context) => const AddBodyMeasurementScreen(),
       },
     ),
   );

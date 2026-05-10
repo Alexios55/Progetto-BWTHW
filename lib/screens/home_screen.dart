@@ -61,12 +61,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/blood-tests');
-        },
-        child: const Icon(Icons.bloodtype),
-      ),
     );
   }
 }

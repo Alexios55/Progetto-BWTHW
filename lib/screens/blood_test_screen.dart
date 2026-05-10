@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:bwthw_project/models.2/blood_test.dart';
 import 'package:bwthw_project/services/preference_service.dart';
-import 'package:bwthw_project/utils/blood_analysis.dart';
+import 'package:bwthw_project/screens/blood_test_detail_screen.dart';
 
 class BloodTestScreen extends StatefulWidget {
   const BloodTestScreen({super.key});
@@ -13,7 +12,6 @@ class BloodTestScreen extends StatefulWidget {
 
 class _BloodTestScreenState extends State<BloodTestScreen> {
   List<BloodTest> tests = [];
-  String selectedParameter = 'iron';
 
   @override
   void initState() {
@@ -23,200 +21,233 @@ class _BloodTestScreenState extends State<BloodTestScreen> {
 
   Future<void> loadTests() async {
     final loaded = await PreferenceService.getBloodTests();
-    setState(() => tests = loaded);
+    loaded.sort((a, b) => b.date.compareTo(a.date));
+
+    setState(() {
+      tests = loaded;
+    });
   }
 
-  // Taking the value of the selected parameter from the blood test
-  double getValue(BloodTest t) {
-    switch (selectedParameter) {
-      case 'iron':
-        return t.iron;
-      case 'calcium':
-        return t.calcium;
-      case 'glucose':
-        return t.glucose;
-      case 'cholesterol':
-        return t.cholesterol;
-      case 'vitaminD':
-        return t.vitaminD;
-      default:
-        return 0;
+  Future<void> _addBloodTest() async {
+    final result = await Navigator.pushNamed(context, '/add-blood-test');
+
+    if (result != null) {
+      tests.add(result as BloodTest);
+      tests.sort((a, b) => b.date.compareTo(a.date));
+
+      await PreferenceService.saveBloodTests(tests);
+
+      setState(() {});
     }
   }
 
-  // Normal range for each parameter
-  Map<String, double> getRange() {
-    switch (selectedParameter) {
-      case 'iron':
-        return {'min': 60, 'max': 170};
-      case 'calcium':
-        return {'min': 8.5, 'max': 10.5};
-      case 'glucose':
-        return {'min': 70, 'max': 100};
-      case 'cholesterol':
-        return {'min': 0, 'max': 200};
-      case 'vitaminD':
-        return {'min': 20, 'max': 50};
-      default:
-        return {'min': 0, 'max': 100};
-    }
+  Future<void> _deleteBloodTest(BloodTest test) async {
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Delete analysis'),
+          content: const Text(
+            'Do you want to delete this saved blood analysis?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext, false);
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext, true);
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm != true) return;
+
+    tests.remove(test);
+    await PreferenceService.saveBloodTests(tests);
+
+    setState(() {});
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Blood Tests')),
-      body: tests.isEmpty
-          ? const Center(child: Text('No data'))
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
+      appBar: AppBar(
+        title: const Text('Blood Tests'),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: tests.isEmpty
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Parameter selection chips
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
+                  Text(
+                    'Saved Analyses',
+                    style: textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'No blood analysis saved yet.',
+                    style: textTheme.titleMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: colorScheme.outlineVariant),
+                    ),
+                    child: Column(
                       children: [
-                        _chip('Iron', 'iron'),
-                        _chip('Calcium', 'calcium'),
-                        _chip('Glucose', 'glucose'),
-                        _chip('Chol', 'cholesterol'),
-                        _chip('Vit D', 'vitaminD'),
+                        Icon(
+                          Icons.bloodtype_outlined,
+                          size: 46,
+                          color: colorScheme.primary,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'No analyses yet',
+                          style: textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Your saved blood analyses will appear here as a list.',
+                          textAlign: TextAlign.center,
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
                       ],
                     ),
                   ),
-
-                  const SizedBox(height: 20),
-
-                  // Chart with colored range
-                  Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      side: BorderSide(color: colorScheme.outlineVariant),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          _buildChart(),
-
-                          const SizedBox(height: 12),
-
-                          // RANGE LABEL
-                          Text(
-                            'Normal range: ${getRange()['min']} - ${getRange()['max']}',
-                            style: TextStyle(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
+                  const SizedBox(height: 16),
+                  _buildAddAnalysisButton(context),
+                ],
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Saved Analyses',
+                    style: textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-
-                  const SizedBox(height: 20),
-
-                  // Analysis of the latest test
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Text(
-                      BloodAnalysis.fullAnalysis(tests.last),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Tap an analysis to open and review all values.',
+                    style: textTheme.titleMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
-
-                  const SizedBox(height: 20),
-
-                  // List of all tests in a card format
+                  const SizedBox(height: 16),
                   Column(
-                    children: tests
-                        .map((t) => _historyCard(context, t))
-                        .toList(),
+                    children: [
+                      ...tests.map<Widget>((test) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _buildAnalysisTile(context, test),
+                        );
+                      }).toList(),
+                      _buildAddAnalysisButton(context),
+                    ],
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+
+  Widget _buildAnalysisTile(BuildContext context, BloodTest test) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(20),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BloodTestDetailScreen(test: test),
+          ),
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: colorScheme.outlineVariant),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: colorScheme.primaryContainer.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(
+                Icons.description_outlined,
+                color: colorScheme.primary,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Blood Analysis',
+                    style: textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Date: ${_formatDate(test.date)}',
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
             ),
-
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final result =
-              await Navigator.pushNamed(context, '/add-blood-test');
-
-          if (result != null) {
-            tests.add(result as BloodTest);
-            tests.sort((a, b) => b.date.compareTo(a.date));
-
-            await PreferenceService.saveBloodTests(tests);
-
-            setState(() {});
-          }
-        },
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
-
-  // chips for selecting the parameter to display in the chart
-  Widget _chip(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: ChoiceChip(
-        label: Text(label),
-        selected: selectedParameter == value,
-        onSelected: (_) {
-          setState(() => selectedParameter = value);
-        },
-      ),
-    );
-  }
-
-  // Chart with colored range for the selected parameter
-  Widget _buildChart() {
-    final range = getRange();
-
-    final spots = tests.asMap().entries.map((e) {
-      return FlSpot(e.key.toDouble(), getValue(e.value));
-    }).toList();
-
-    return SizedBox(
-      height: 220,
-      child: LineChart(
-        LineChartData(
-          minY: range['min']! - 20,
-          maxY: range['max']! + 20,
-
-          gridData: FlGridData(show: true),
-          titlesData: FlTitlesData(show: false),
-          borderData: FlBorderData(show: false),
-
-          // 🎨 RANGE COLORATO
-          extraLinesData: ExtraLinesData(
-            horizontalLines: [
-              HorizontalLine(
-                y: range['min']!,
-                color: Colors.orange,
-                strokeWidth: 2,
-              ),
-              HorizontalLine(
-                y: range['max']!,
+            Icon(
+              Icons.chevron_right,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            IconButton(
+              onPressed: () async {
+                await _deleteBloodTest(test);
+              },
+              icon: const Icon(
+                Icons.delete_outline,
                 color: Colors.red,
-                strokeWidth: 2,
               ),
-            ],
-          ),
-
-          lineBarsData: [
-            LineChartBarData(
-              isCurved: true,
-              spots: spots,
-              barWidth: 3,
-              dotData: FlDotData(show: true),
             ),
           ],
         ),
@@ -224,61 +255,50 @@ class _BloodTestScreenState extends State<BloodTestScreen> {
     );
   }
 
-  // Card for each blood test in the history list
-  Widget _historyCard(BuildContext context, BloodTest t) {
+  Widget _buildAddAnalysisButton(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Card(
-        shape: RoundedRectangleBorder(
+    return InkWell(
+      borderRadius: BorderRadius.circular(20),
+      onTap: () async {
+        await _addBloodTest();
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: colorScheme.outlineVariant),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Text(t.date.toString().split(' ')[0]),
-
-              const SizedBox(height: 10),
-
-              Row(
-                children: [
-                  Expanded(child: _box('Iron', '${t.iron} µg/dL')),
-                  const SizedBox(width: 8),
-                  Expanded(child: _box('Calcium', '${t.calcium} mg/dL')),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(child: _box('Glucose', '${t.glucose} mg/dL')),
-                  const SizedBox(width: 8),
-                  Expanded(child: _box('Chol', '${t.cholesterol} mg/dL')),
-                ],
-              ),
-              const SizedBox(height: 8),
-              _box('Vitamin D', '${t.vitaminD} ng/mL'),
-            ],
+          border: Border.all(
+            color: colorScheme.primary,
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _box(String label, String value) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Expanded(child: Text(label)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
-        ],
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: colorScheme.primaryContainer.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(
+                Icons.add,
+                color: colorScheme.primary,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                'Add Analysis',
+                style: textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.primary,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

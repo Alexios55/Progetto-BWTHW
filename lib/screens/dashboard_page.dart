@@ -2,9 +2,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:bwthw_project/models/food_diary_db.dart';
-import 'package:bwthw_project/models/user.dart';
-import 'package:bwthw_project/models/weight_entry.dart';
+import 'package:bwthw_project/models.2/food_diary_db.dart';
+import 'package:bwthw_project/models.2/user.dart';
+import 'package:bwthw_project/models.2/weight_entry.dart';
 import 'package:bwthw_project/services/preference_service.dart';
 
 class DashboardPage extends StatefulWidget {

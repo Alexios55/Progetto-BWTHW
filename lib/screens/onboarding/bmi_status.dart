@@ -2,12 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:bwthw_project/models.2/user_temp.dart';
 import 'package:bwthw_project/widgets/bmi_bar.dart';
 import 'package:bwthw_project/services/preference_service.dart';
-<<<<<<< HEAD
-import 'package:bwthw_project/models/user.dart';
-import 'package:bwthw_project/models/weight_entry.dart';
-=======
 import 'package:bwthw_project/models.2/user.dart';
->>>>>>> main
+import 'package:bwthw_project/models.2/weight_entry.dart';
 
 /// This screen shows the user's BMI result, the current physical status,
 /// a short explanation, and a field where the user can enter an ideal weight.
@@ -31,10 +27,10 @@ class _BmiStatusScreenState extends State<BmiStatusScreen> {
 
   // Calculating BMI using the user's weight and height.
   double get bmi {
-  double weight = widget.user.weight!;
-  double height = widget.user.height! / 100;
+    double weight = widget.user.weight!;
+    double height = widget.user.height! / 100;
 
-  return weight / (height * height);
+    return weight / (height * height);
   }
 
   // Determining the physical status based on the BMI value.
@@ -99,65 +95,65 @@ class _BmiStatusScreenState extends State<BmiStatusScreen> {
     super.dispose();
   }
 
-void _goToHome() async {
-  final String idealWeight = idealWeightController.text.trim();
+  void _goToHome() async {
+    final String idealWeight = idealWeightController.text.trim();
 
-  if (idealWeight.isEmpty) {
-    ScaffoldMessenger.of(context)
-      ..removeCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(
-          content: Text('Please enter your ideal weight'),
-        ),
-      );
-    return;
+    if (idealWeight.isEmpty) {
+      ScaffoldMessenger.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Please enter your ideal weight'),
+          ),
+        );
+      return;
+    }
+
+    final double? idealWeightValue =
+        double.tryParse(idealWeight.replaceAll(',', '.'));
+
+    if (idealWeightValue == null) {
+      ScaffoldMessenger.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Ideal weight must be a valid number'),
+          ),
+        );
+      return;
+    }
+
+    widget.user.idealWeight = idealWeightValue;
+
+    await finishOnboarding();
   }
 
-  final double? idealWeightValue =
-      double.tryParse(idealWeight.replaceAll(',', '.'));
+  Future<void> finishOnboarding() async {
+    User user = User(
+      name: widget.user.name!,
+      surname: widget.user.surname!,
+      birthDate: widget.user.dateOfBirth!,
+      weight: widget.user.weight!,
+      height: widget.user.height!,
+      idealWeight: widget.user.idealWeight ?? 0,
+    );
 
-  if (idealWeightValue == null) {
-    ScaffoldMessenger.of(context)
-      ..removeCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(
-          content: Text('Ideal weight must be a valid number'),
-        ),
-      );
-    return;
+    await PreferenceService.saveUser(user);
+    await PreferenceService.addWeightEntry(
+      WeightEntry(
+        date: DateTime.now(),
+        weight: user.weight,
+      ),
+    );
+    await PreferenceService.saveOnboardingCompleted(true);
+
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      '/home',
+      (route) => false,
+      arguments: user,
+    );
   }
-
-  widget.user.idealWeight = idealWeightValue;
-
-  await finishOnboarding();
-}
-
-Future<void> finishOnboarding() async {
-  User user = User(
-    name: widget.user.name!,
-    surname: widget.user.surname!,
-    birthDate: widget.user.dateOfBirth!, 
-    weight: widget.user.weight!,
-    height: widget.user.height!,
-    idealWeight: widget.user.idealWeight ?? 0,
-  );
-
-  await PreferenceService.saveUser(user);
-  await PreferenceService.addWeightEntry(
-    WeightEntry(
-      date: DateTime.now(),
-      weight: user.weight,
-    ),
-  );
-  await PreferenceService.saveOnboardingCompleted(true);
-
-  Navigator.pushNamedAndRemoveUntil(
-    context,
-    '/home',
-    (route) => false,
-    arguments: user,
-  );
-}
 
   @override
   Widget build(BuildContext context) {

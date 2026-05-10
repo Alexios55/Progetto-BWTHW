@@ -1,8 +1,9 @@
+import 'package:bwthw_project/models.2/food_diary_db.dart';
+import 'package:bwthw_project/models.2/food_entry.dart';
+import 'package:bwthw_project/screens/food_search_page.dart';
+import 'package:bwthw_project/services/user_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:bwthw_project/models/food_diary_db.dart';
-import 'package:bwthw_project/models/food_entry.dart';
-import 'package:bwthw_project/screens/food_search_page.dart';
 
 // Homepage screen. It shows the food diary divided by meal type.
 class FoodDiaryPage extends StatelessWidget {
@@ -10,12 +11,17 @@ class FoodDiaryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final TextTheme textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final userService = UserService();
 
     return SafeArea(
       child: Consumer<FoodDiaryDB>(
         builder: (context, foodDiaryDB, child) {
+          final consumedCalories = _totalCalories(foodDiaryDB.entries);
+          final targetCalories = userService.dailyCaloriesTarget;
+          final smartwatchData = userService.dailyHealthData;
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -27,6 +33,22 @@ class FoodDiaryPage extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     color: colorScheme.primary,
                   ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  userService.getDailyFeedback(),
+                  style: textTheme.titleMedium?.copyWith(
+                    color: colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _buildOverviewCard(
+                  context,
+                  consumedCalories: consumedCalories,
+                  targetCalories: targetCalories,
+                  steps: smartwatchData.steps,
+                  activeCaloriesBurned: smartwatchData.activeCaloriesBurned,
                 ),
                 const SizedBox(height: 24),
                 _buildMealSection(context, foodDiaryDB, 'Breakfast'),
@@ -44,15 +66,50 @@ class FoodDiaryPage extends StatelessWidget {
     );
   }
 
+  Widget _buildOverviewCard(
+    BuildContext context, {
+    required double consumedCalories,
+    required double targetCalories,
+    required int steps,
+    required double activeCaloriesBurned,
+  }) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return Card(
+      elevation: 0,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Today overview',
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text('Consumed: ${consumedCalories.toStringAsFixed(0)} kcal'),
+            Text('Target: ${targetCalories.toStringAsFixed(0)} kcal'),
+            Text('Steps: $steps'),
+            Text(
+              'Watch calories burned: ${activeCaloriesBurned.toStringAsFixed(0)} kcal',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildMealSection(
     BuildContext context,
     FoodDiaryDB foodDiaryDB,
     String mealTitle,
   ) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final TextTheme textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
-    final List<FoodEntry> mealEntries = foodDiaryDB.entries
+    final mealEntries = foodDiaryDB.entries
         .where((entry) => entry.mealType == mealTitle)
         .toList();
 
@@ -69,31 +126,7 @@ class FoodDiaryPage extends StatelessWidget {
                 height: 180,
                 child: Column(
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            mealTitle,
-                            style: textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        FilledButton.icon(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    FoodSearchPage(mealType: mealTitle),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.add),
-                          label: const Text('Add'),
-                        ),
-                      ],
-                    ),
+                    _buildMealHeader(context, mealTitle),
                     const Spacer(),
                     Center(
                       child: Text(
@@ -109,36 +142,12 @@ class FoodDiaryPage extends StatelessWidget {
               )
             : Column(
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          mealTitle,
-                          style: textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      FilledButton.icon(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  FoodSearchPage(mealType: mealTitle),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.add),
-                        label: const Text('Add'),
-                      ),
-                    ],
-                  ),
+                  _buildMealHeader(context, mealTitle),
                   const SizedBox(height: 16),
                   Column(
                     children: mealEntries.asMap().entries.map((entry) {
-                      final int index = entry.key;
-                      final FoodEntry foodEntry = entry.value;
+                      final index = entry.key;
+                      final foodEntry = entry.value;
 
                       return Padding(
                         padding: EdgeInsets.only(
@@ -158,13 +167,42 @@ class FoodDiaryPage extends StatelessWidget {
     );
   }
 
+  Widget _buildMealHeader(BuildContext context, String mealTitle) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            mealTitle,
+            style: textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        FilledButton.icon(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => FoodSearchPage(mealType: mealTitle),
+              ),
+            );
+          },
+          icon: const Icon(Icons.add),
+          label: const Text('Add'),
+        ),
+      ],
+    );
+  }
+
   Widget _buildFoodEntryCard(
     BuildContext context,
     FoodDiaryDB foodDiaryDB,
     FoodEntry foodEntry,
   ) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final TextTheme textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Container(
       width: double.infinity,
@@ -188,7 +226,7 @@ class FoodDiaryPage extends StatelessWidget {
               ),
               IconButton(
                 onPressed: () {
-                  final int index = foodDiaryDB.entries.indexOf(foodEntry);
+                  final index = foodDiaryDB.entries.indexOf(foodEntry);
                   if (index != -1) {
                     foodDiaryDB.deleteEntry(index);
                   }
@@ -293,7 +331,7 @@ class FoodDiaryPage extends StatelessWidget {
     String value,
     Color backgroundColor,
   ) {
-    final TextTheme textTheme = Theme.of(context).textTheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -321,6 +359,10 @@ class FoodDiaryPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  double _totalCalories(List<FoodEntry> entries) {
+    return entries.fold(0, (total, entry) => total + entry.calories);
   }
 
   String _formatNumber(double value) {

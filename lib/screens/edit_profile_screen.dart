@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:bwthw_project/models/user.dart';
+import 'package:bwthw_project/models.2/user.dart';
 import 'package:bwthw_project/services/preference_service.dart';
 import 'package:bwthw_project/models/weight_entry.dart';
 

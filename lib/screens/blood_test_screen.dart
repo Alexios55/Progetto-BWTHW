@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:bwthw_project/models/blood_test.dart';
+import 'package:bwthw_project/models.2/blood_test.dart';
 import 'package:bwthw_project/services/preference_service.dart';
 import 'package:bwthw_project/utils/blood_analysis.dart';
 

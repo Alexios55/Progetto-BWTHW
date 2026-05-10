@@ -1,8 +1,13 @@
 // This is the file for the preference service, it will be used to save the user's preferences and settings, such as the theme and the language
 import 'package:shared_preferences/shared_preferences.dart';
+<<<<<<< HEAD
 import 'package:bwthw_project/models/user.dart';
 import 'package:bwthw_project/models/blood_test.dart';  
 import 'package:bwthw_project/models/weight_entry.dart';
+=======
+import 'package:bwthw_project/models.2/user.dart';
+import 'package:bwthw_project/models.2/blood_test.dart';  
+>>>>>>> main
 import 'dart:convert';
 class PreferenceService {
   // This is the method to save if user is logged in

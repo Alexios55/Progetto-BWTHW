@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bwthw_project/models.2/blood_test.dart';
 import 'package:bwthw_project/services/preference_service.dart';
-import 'package:bwthw_project/screens/blood_test_detail_screen.dart';
+import 'package:bwthw_project/screens/blood_test_screens/blood_test_detail_screen.dart';
 
 class BloodTestScreen extends StatefulWidget {
   const BloodTestScreen({super.key});
@@ -20,11 +20,16 @@ class _BloodTestScreenState extends State<BloodTestScreen> {
   }
 
   Future<void> loadTests() async {
-    final loaded = await PreferenceService.getBloodTests();
-    loaded.sort((a, b) => b.date.compareTo(a.date));
+    final loaded = await PreferenceService.getBloodTests() ?? [];
+    final loadedTests = loaded.whereType<BloodTest>().toList();
+    loadedTests.sort((a, b) {
+      final aDate = a.date ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final bDate = b.date ?? DateTime.fromMillisecondsSinceEpoch(0);
+      return bDate.compareTo(aDate);
+    });
 
     setState(() {
-      tests = loaded;
+      tests = loadedTests;
     });
   }
 
@@ -33,7 +38,11 @@ class _BloodTestScreenState extends State<BloodTestScreen> {
 
     if (result != null) {
       tests.add(result as BloodTest);
-      tests.sort((a, b) => b.date.compareTo(a.date));
+      tests.sort((a, b) {
+        final aDate = a.date ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final bDate = b.date ?? DateTime.fromMillisecondsSinceEpoch(0);
+        return bDate.compareTo(aDate);
+      });
 
       await PreferenceService.saveBloodTests(tests);
 
@@ -76,7 +85,10 @@ class _BloodTestScreenState extends State<BloodTestScreen> {
     setState(() {});
   }
 
-  String _formatDate(DateTime date) {
+  String _formatDate(DateTime? date) {
+    if (date == null) {
+      return 'Unknown';
+    }
     return '${date.day}/${date.month}/${date.year}';
   }
 

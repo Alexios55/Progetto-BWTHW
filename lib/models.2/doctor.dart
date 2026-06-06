@@ -8,20 +8,14 @@ class Doctor extends User {
   final String licenseNumber;
 
   Doctor({
-    required String id,
-    required String name,
-    String surname = '',
-    required String email,
-    String password = '',
+    required super.id,
+    required super.name,
+    super.surname,
+    required super.email,
+    super.password,
     required this.gender,
     required this.specialization,
     required this.licenseNumber,
-  }) : super(
-          id: id,
-          name: name,
-          surname: surname,
-          email: email,
-          password: password,
-        );
+  });
 }
 

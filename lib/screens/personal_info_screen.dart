@@ -79,7 +79,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
 
                 // Main title of the screen.
                 const Text(
-                  'Personal Information',
+                  'Personal Informaition',
                   style: TextStyle(
                     fontSize: 34,
                     fontWeight: FontWeight.bold,

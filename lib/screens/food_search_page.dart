@@ -96,7 +96,7 @@ class _FoodSearchPageState extends State<FoodSearchPage> {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
 
-    final List<FoodItem> filteredFoods = foodCatalog.foods.where((food) {
+    final List<FoodItem> filteredFoods = FoodCatalog.foods.where((food) {
       return food.name.toLowerCase().contains(searchText.toLowerCase());
     }).toList();
 

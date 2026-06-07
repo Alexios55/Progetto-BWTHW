@@ -91,7 +91,7 @@ class DailyTargets {
     };
 
     // Goal adjustment
-    final double goalAdjustment = switch (patient.goal) {
+    final double goalAdjustment = switch (patient.goal ?? Goal.maintainWeight) {
       Goal.loseWeight      => -300,
       Goal.gainWeight      => 300,
       Goal.maintainWeight  => 0,

@@ -7,6 +7,7 @@ import 'package:bwthw_project/models.2/user_temp.dart';
 import 'package:bwthw_project/screens/onboarding/bmi_status.dart';
 import 'package:bwthw_project/services/user_service.dart';
 import 'package:bwthw_project/utils/calculate_age.dart';
+import 'package:bwthw_project/widgets/date_input_field.dart';
 
 /// This screen collects the user's personal information before
 /// continuing to the next step of the onboarding flow.
@@ -33,31 +34,33 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   final TextEditingController weightController = TextEditingController();
   final TextEditingController heightController = TextEditingController();
   final TextEditingController ageController = TextEditingController();
-
+  late int age;
+  late DateTime birthDate;
+  
   // Variable used to store the selected sex.
   String? selectedSex;
+  // Variable used to store the selected activity level.
+  String? activityLevel;
 
-  // Opens the date picker and writes the selected date into the text field.
-  Future<void> _selectDate(BuildContext context) async {
-    DateTime initialDate = DateTime(1900);
-
-    final DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: initialDate,
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
-    );
-
-    if (pickedDate != null) {
-      setState(() {
-        dateOfBirthController.text =
-            '${pickedDate.day.toString().padLeft(2, '0')}/'
-            '${pickedDate.month.toString().padLeft(2, '0')}/'
-            '${pickedDate.year}';
-
-            ageController.text = AgeCalculator.calculateAge(pickedDate).toString();
-      });
+  void _onDateParsed(DateTime? date) {
+    if (date == null) {
+      setState(() => ageController.clear());
+      return;
     }
+    if (date.isAfter(DateTime.now())) {
+      ScaffoldMessenger.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(const SnackBar(
+          content: Text('Please enter a date of birth that is not in the future'),
+          duration: Duration(seconds: 2),
+        ));
+      return;
+    }
+    setState(() {
+      age = AgeCalculator.calculateAge(date);
+      birthDate = date;
+      ageController.text = age.toString();
+    });
   }
 
   void _goToNextStep() {
@@ -65,7 +68,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
         dateOfBirthController.text.isEmpty ||
         ageController.text.isEmpty ||
         weightController.text.isEmpty ||
-        heightController.text.isEmpty) {
+        heightController.text.isEmpty ||
+        activityLevel == null) {
       ScaffoldMessenger.of(context)
         ..removeCurrentSnackBar()
         ..showSnackBar(
@@ -77,51 +81,22 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       return;
     }
 
-    // Check that the selected year is not later than 2010.
-    final List<String> parts = dateOfBirthController.text.split('/');
-    if (parts.length != 3) {
+    // Control if the user has more than 16 years (for legal issue) and write it into the age field
+    if (age < 16) {
       ScaffoldMessenger.of(context)
         ..removeCurrentSnackBar()
         ..showSnackBar(
           const SnackBar(
-            content: Text('Please enter a valid date of birth'),
+            content: Text('You must be at least 16 years old to use this app'),
             duration: Duration(seconds: 2),
           ),
         );
       return;
     }
-
-    final int? year = int.tryParse(parts[2]);
-    if (year == null || year > 2010) {
-      ScaffoldMessenger.of(context)
-        ..removeCurrentSnackBar()
-        ..showSnackBar(
-          const SnackBar(
-            content: Text('Date of birth must be 2010 or earlier'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      return;
+    else {
+      // If age is valid, write it into the age field.
+      ageController.text = age.toString();
     }
-
-    final birthDate = DateTime(year, int.parse(parts[1]), int.parse(parts[0]));
-    final age = AgeCalculator.calculateAge(birthDate);
-    ageController.text = age.toString();
-
-    // Check that age is numeric and has at least 2 digits.
-    /* Ora non serve, età calcolata in automatico da data selezionata
-    final RegExp ageRegExp = RegExp(r'^\d{2,}$');
-    if (!ageRegExp.hasMatch(ageController.text)) {
-      ScaffoldMessenger.of(context)
-        ..removeCurrentSnackBar()
-        ..showSnackBar(
-          const SnackBar(
-            content: Text('Age must be a number with at least 2 digits'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      return;
-    }*/
 
     // Check that weight is a valid number.
     final double? weightValue = double.tryParse(weightController.text.replaceAll(',', '.'));
@@ -152,8 +127,9 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     }
 
     final gender = _parseGender(selectedSex!);
-    const activityLevel = ActivityLevel.moderatelyActive;
-    const goal = Goal.loseWeight;
+    final parsedActivityLevel = _parseActivityLevel(activityLevel!);
+    // Goal is intentionally not set here: it will be derived on the next
+    // screen by comparing current weight with the user's target weight.
 
     widget.user.weight = weightValue;
     widget.user.height = heightValue;
@@ -164,8 +140,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       height: heightValue,
       age: age,
       gender: gender,
-      activityLevel: activityLevel,
-      goal: goal,
+      activityLevel: parsedActivityLevel,
     );
 
     final patient = Patient(
@@ -177,8 +152,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       weightKg: weightValue,
       heightCm: heightValue,
       gender: gender,
-      goal: goal,
-      activityLevel: activityLevel,
+      activityLevel: parsedActivityLevel,
     );
 
     Provider.of<PatientState>(context, listen: false).setPatient(patient);
@@ -189,6 +163,21 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
         builder: (context) => BmiStatusScreen(user: widget.user),
       ),
     );
+  }
+
+  ActivityLevel _parseActivityLevel(String value) {
+    switch (value) {
+      case 'Sedentary':
+        return ActivityLevel.sedentary;
+      case 'Lightly Active':
+        return ActivityLevel.lightlyActive;
+      case 'Moderately Active':
+        return ActivityLevel.moderatelyActive;
+      case 'Athlete':
+        return ActivityLevel.athlete;
+      default:
+        return ActivityLevel.moderatelyActive;
+    }
   }
 
   Gender _parseGender(String value) {
@@ -301,26 +290,12 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                         ),
                         const SizedBox(height: 18),
 
-                        TextField(
+                        DateInputField(
                           controller: dateOfBirthController,
-                          readOnly: true,
-                          onTap: () => _selectDate(context),
-                          decoration: InputDecoration(
-                            hintText: 'Date of birth',
-                            prefixIcon:
-                                const Icon(Icons.calendar_today_outlined),
-                            filled: true,
-                            fillColor: colorScheme.surfaceContainerHighest
-                                .withValues(alpha: 0.4),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: BorderSide.none,
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 18,
-                            ),
-                          ),
+                          label: 'Date of Birth',
+                          firstDate: DateTime(1900),
+                          lastDate: DateTime.now(),
+                          onDateParsed: _onDateParsed,
                         ),
                         const SizedBox(height: 18),
 
@@ -405,6 +380,49 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                           ],
                         ),
                         const SizedBox(height: 24),
+
+                        DropdownButtonFormField<String>(
+                          initialValue: null,
+                          decoration: InputDecoration(
+                            hintText: 'Activity Level',
+                            prefixIcon: const Icon(Icons.fitness_center),
+                            filled: true,
+                            fillColor: colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.4),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 18,
+                            ),
+                          ),
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'Sedentary',
+                              child: Text('Sedentary'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Lightly Active',
+                              child: Text('Lightly Active'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Moderately Active',
+                              child: Text('Moderately Active'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Athlete',
+                              child: Text('Athlete'),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              activityLevel = value;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 18),
 
                         SizedBox(
                           width: double.infinity,

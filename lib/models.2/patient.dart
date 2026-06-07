@@ -4,13 +4,13 @@ import 'user.dart';
 // This class represents a patient of the application.
 class Patient extends User {
   @override
-  final int age;
-  final double weightKg;
-  final double heightCm;
+  int age;
+  double weightKg;
+  double heightCm;
   final Gender gender;
-  final Goal goal;
-  final ActivityLevel activityLevel;
-  final double? targetWeightKg;
+  Goal? goal;
+  ActivityLevel activityLevel;
+  double? targetWeightKg;
 
   Patient({
     required String id,
@@ -22,7 +22,7 @@ class Patient extends User {
     required this.weightKg,
     required this.heightCm,
     required this.gender,
-    required this.goal,
+    this.goal,
     required this.activityLevel,
     this.targetWeightKg,
   }) : super(

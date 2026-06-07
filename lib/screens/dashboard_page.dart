@@ -6,6 +6,7 @@ import 'package:bwthw_project/models.2/food_diary_db.dart';
 import 'package:bwthw_project/models.2/user.dart';
 import 'package:bwthw_project/models.2/weight_entry.dart';
 import 'package:bwthw_project/services/preference_service.dart';
+import 'package:bwthw_project/widgets/date_input_field.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -42,32 +43,58 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Future<void> _logWeight() async {
     final TextEditingController weightController = TextEditingController();
+    final TextEditingController dateController = TextEditingController();
 
-    final double? newWeight = await showDialog<double>(
+    // Pre-fill with today's date.
+    final now = DateTime.now();
+    dateController.text =
+        '${now.day.toString().padLeft(2, '0')}/'
+        '${now.month.toString().padLeft(2, '0')}/'
+        '${now.year}';
+
+    // Holds the date parsed by DateInputField via its callback.
+    DateTime? parsedDate = now;
+
+    final result = await showDialog<({double weight, DateTime date})>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Add Weight'),
-          content: TextField(
-            controller: weightController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(
-              hintText: 'Enter your current weight',
-            ),
+          title: const Text('Log Weight'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: weightController,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: const InputDecoration(
+                  labelText: 'Weight',
+                  hintText: 'e.g. 72.5',
+                  suffixText: 'kg',
+                  prefixIcon: Icon(Icons.monitor_weight_outlined),
+                ),
+              ),
+              const SizedBox(height: 16),
+              DateInputField(
+                controller: dateController,
+                label: 'Date',
+                lastDate: DateTime.now(),
+                onDateParsed: (date) => parsedDate = date,
+              ),
+            ],
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-              },
+              onPressed: () => Navigator.pop(dialogContext),
               child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
-                final double? parsedValue =
-                    double.tryParse(weightController.text.replaceAll(',', '.'));
-
-                if (parsedValue == null || parsedValue <= 0) {
+                final double? parsedWeight = double.tryParse(
+                  weightController.text.replaceAll(',', '.')
+                );
+                if (parsedWeight == null || parsedWeight <= 0) {
                   ScaffoldMessenger.of(context)
                     ..removeCurrentSnackBar()
                     ..showSnackBar(
@@ -77,8 +104,18 @@ class _DashboardPageState extends State<DashboardPage> {
                     );
                   return;
                 }
-
-                Navigator.pop(dialogContext, parsedValue);
+                if (parsedDate == null) {
+                  ScaffoldMessenger.of(context)
+                    ..removeCurrentSnackBar()
+                    ..showSnackBar(const SnackBar(
+                      content: Text('Please enter a valid date'),
+                    ));
+                  return;
+                }
+                Navigator.pop(
+                  dialogContext,
+                  (weight: parsedWeight, date: parsedDate!),
+                );
               },
               child: const Text('Save'),
             ),
@@ -88,13 +125,14 @@ class _DashboardPageState extends State<DashboardPage> {
     );
 
     weightController.dispose();
+    dateController.dispose();
 
-    if (newWeight == null) return;
+    if (result == null) return;
 
     await PreferenceService.addWeightEntry(
       WeightEntry(
-        date: DateTime.now(),
-        weight: newWeight,
+        date: result.date,
+        weight: result.weight,
       ),
     );
 
@@ -103,7 +141,7 @@ class _DashboardPageState extends State<DashboardPage> {
         name: user!.name,
         surname: user!.surname,
         birthDate: user!.birthDate,
-        weight: newWeight,
+        weight: result.weight,
         height: user!.height,
         idealWeight: user!.idealWeight,
       );

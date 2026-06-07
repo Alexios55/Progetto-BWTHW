@@ -34,7 +34,7 @@ class HealthCalculator {
   }
 
   static double calculateDailyCaloriesTarget(Patient patient) {
-    return calculateTdee(patient) + patient.goal.calorieAdjustment;
+    return calculateTdee(patient) + (patient.goal?.calorieAdjustment ?? 0);
   }
 
   static ({double minKg, double maxKg}) calculateHealthyWeightRange(

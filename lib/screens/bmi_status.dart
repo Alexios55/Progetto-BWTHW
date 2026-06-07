@@ -165,7 +165,7 @@ class BmiStatusScreen extends StatelessWidget {
                         _MetricTile(
                           label: 'Daily target',
                           value:
-                              '${user.dailyCaloriesTarget.toStringAsFixed(0)} kcal (${patient != null ? patient.goal.label : 'Goal not set'})',
+                              '${user.dailyCaloriesTarget.toStringAsFixed(0)} kcal (${patient != null ? patient.goal?.label : 'Goal not set'})',
                         ),
                       ],
                     ),

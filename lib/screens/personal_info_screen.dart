@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:bwthw_project/models.2/enums.dart';
 import 'package:bwthw_project/models.2/patient.dart';
@@ -5,6 +6,7 @@ import 'package:bwthw_project/models.2/patient_state.dart';
 import 'package:bwthw_project/services/user_service.dart';
 import 'package:bwthw_project/utils/input_validators.dart';
 import 'package:flutter/material.dart';
+import 'package:bwthw_project/widgets/date_input_field.dart';
 
 // This screen collects the user's personal information,
 // such as sex, date of birth, age, weight, and height,

@@ -39,7 +39,7 @@ double calculateTdee(Patient patient) {
 double calculateDailyCalorieGoal(Patient patient) {
   double tdee = calculateTdee(patient);
 
-  switch (patient.goal) {
+  switch (patient.goal ?? Goal.maintainWeight) {
     case Goal.loseWeight:
       return tdee - 500;
     case Goal.maintainWeight:

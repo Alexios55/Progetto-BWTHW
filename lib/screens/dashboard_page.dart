@@ -4,9 +4,13 @@ import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:bwthw_project/models.2/food_diary_db.dart';
 import 'package:bwthw_project/models.2/user.dart';
+import 'package:bwthw_project/models.2/patient.dart';
 import 'package:bwthw_project/models.2/weight_entry.dart';
 import 'package:bwthw_project/services/preference_service.dart';
 import 'package:bwthw_project/widgets/date_input_field.dart';
+import 'package:bwthw_project/services/calorie_calculator.dart';
+import 'package:provider/provider.dart';
+import 'package:bwthw_project/models.2/patient_state.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -39,6 +43,14 @@ class _DashboardPageState extends State<DashboardPage> {
       user = loadedUser;
       isLoading = false;
     });
+
+    // update the weigth in patient for the calculation of calories
+    final patientState = context.read<PatientState>();
+    if (patientState.patient != null && loadedUser != null) {
+      patientState.setPatient(
+        patientState.patient!.copyWith(weightKg: loadedUser.weight),
+      );
+    }
   }
 
   Future<void> _logWeight() async {
@@ -136,20 +148,13 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
     );
 
-    if (user != null) {
-      final updatedUser = User(
-        name: user!.name,
-        surname: user!.surname,
-        birthDate: user!.birthDate,
-        weight: result.weight,
-        height: user!.height,
-        idealWeight: user!.idealWeight,
-      );
-
-      await PreferenceService.saveUser(updatedUser);
-    }
-
     await _loadDashboardData();
+
+    final target = user?.idealWeight;
+    if (target != null &&
+        ((result.weight - target).abs() <= 0.5)) {
+      _showCongratulationsBanner();
+    }
   }
 
   Future<void> _deleteLastWeight() async {
@@ -210,6 +215,31 @@ class _DashboardPageState extends State<DashboardPage> {
     await _loadDashboardData();
   }
 
+  // A banner to show up when the user reaches the goal
+  void _showCongratulationsBanner() {
+  showDialog(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Row(
+        children: [
+          Icon(Icons.emoji_events, color: Colors.amber),
+          SizedBox(width: 8),
+          Text('Congratulations!'),
+        ],
+      ),
+      content: const Text(
+        'You have reached your ideal weight! Your goal is now set to maintain your weight. If you want to set a new weight goal, you can do so at any time in your profile page. Keep up the great work maintaining a healthy lifestyle.',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('Thanks!'),
+        ),
+      ],
+    ),
+  );
+}
+
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
@@ -224,7 +254,14 @@ class _DashboardPageState extends State<DashboardPage> {
     return SafeArea(
       child: Consumer<FoodDiaryDB>(
         builder: (context, foodDiaryDB, child) {
-          const double baseGoal = 1550;
+          final patient = context.watch<PatientState>().patient;
+          if (patient == null) {
+            return const Center(
+              child: Text('No user data found. Please complete your profile.'),
+            );
+          }
+
+          double baseGoal = calculateDailyCalorieGoal(patient);
           const double exerciseCalories = 0;
 
           double foodCalories = 0;
@@ -321,7 +358,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
                                           Text(
-                                            _formatNumber(remainingCalories),
+                                            '${_formatNumber(remainingCalories)} kcal',
                                             style: textTheme.displaySmall?.copyWith(
                                               fontWeight: FontWeight.bold,
                                             ),
@@ -350,7 +387,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                     context,
                                     Icons.flag_outlined,
                                     'Base Goal',
-                                    _formatNumber(baseGoal),
+                                    '${_formatNumber(baseGoal)} kcal',
                                     Colors.grey.shade700,
                                   ),
                                   const SizedBox(height: 16),
@@ -358,7 +395,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                     context,
                                     Icons.restaurant,
                                     'Food',
-                                    _formatNumber(foodCalories),
+                                    '${_formatNumber(foodCalories)} kcal',
                                     colorScheme.primary,
                                   ),
                                   const SizedBox(height: 16),
@@ -366,7 +403,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                     context,
                                     Icons.local_fire_department_outlined,
                                     'Exercise',
-                                    _formatNumber(exerciseCalories),
+                                    '${_formatNumber(exerciseCalories)} kcal',
                                     Colors.orange,
                                   ),
                                 ],
@@ -850,9 +887,6 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   static String _formatNumber(double value) {
-    if (value == value.roundToDouble()) {
-      return value.toStringAsFixed(0);
-    }
-    return value.toStringAsFixed(1);
+    return value.toStringAsFixed(0);
   }
 }

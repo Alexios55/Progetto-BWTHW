@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// A reusable date input field that supports both keyboard entry (DD/MM/YYYY) and a calendar picker, with a toggle icon to switch between the two modes.
+/// A reusable date input field that supports keyboard entry (DD/MM/YYYY)
+/// with auto-formatting, plus a calendar icon to optionally pick a date
+/// from a date picker. After picking from the calendar the field remains
+/// editable via keyboard — the two modes coexist without a toggle.
 ///
 /// Example usage:
 /// ```dart
@@ -49,12 +52,10 @@ class DateInputField extends StatefulWidget {
 }
 
 class _DateInputFieldState extends State<DateInputField> {
-  bool _useDatePicker = false;
-
   DateTime get _firstDate => widget.firstDate ?? DateTime(1900);
   DateTime get _lastDate => widget.lastDate ?? DateTime.now();
 
-  // Keyboard path
+  // ── Keyboard path ──────────────────────────────────────────────────────────
 
   void _onChanged(String value) {
     final digits = value.replaceAll('/', '');
@@ -81,7 +82,7 @@ class _DateInputFieldState extends State<DateInputField> {
     }
   }
 
-  // Calendar path 
+  // ── Calendar path ──────────────────────────────────────────────────────────
 
   Future<void> _openCalendar() async {
     // Use whatever is already in the field as the calendar's starting point.
@@ -118,7 +119,7 @@ class _DateInputFieldState extends State<DateInputField> {
     }
   }
 
-  // Parsing & validation 
+  // ── Parsing & validation ───────────────────────────────────────────────────
 
   void _notifyParsed(String dateStr) {
     try {
@@ -147,22 +148,7 @@ class _DateInputFieldState extends State<DateInputField> {
     }
   }
 
-  // Toggle 
-
-  void _toggleMode() {
-    setState(() {
-      _useDatePicker = !_useDatePicker;
-      // Reset incomplete dates when switching modes to avoid inconsistent state.
-      if (widget.controller.text.length < 10) {
-        widget.controller.clear();
-        widget.onDateParsed?.call(null);
-      }
-    });
-
-    if (_useDatePicker) _openCalendar();
-  }
-
-  // Build 
+  // ── Build ──────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -170,13 +156,9 @@ class _DateInputFieldState extends State<DateInputField> {
 
     return TextField(
       controller: widget.controller,
-      keyboardType:
-          _useDatePicker ? TextInputType.none : TextInputType.number,
-      readOnly: _useDatePicker,
-      inputFormatters:
-          _useDatePicker ? [] : [FilteringTextInputFormatter.digitsOnly],
-      onChanged: _useDatePicker ? null : _onChanged,
-      onTap: _useDatePicker ? _openCalendar : null,
+      keyboardType: TextInputType.number,
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      onChanged: _onChanged,
       decoration: InputDecoration(
         labelText: widget.label,
         hintText: widget.hint,
@@ -188,12 +170,9 @@ class _DateInputFieldState extends State<DateInputField> {
           borderSide: BorderSide.none,
         ),
         suffixIcon: IconButton(
-          icon: Icon(
-            _useDatePicker ? Icons.keyboard : Icons.calendar_today,
-            size: 20,
-          ),
-          tooltip: _useDatePicker ? 'Use keyboard' : 'Use calendar',
-          onPressed: _toggleMode,
+          icon: const Icon(Icons.calendar_today, size: 20),
+          tooltip: 'Pick from calendar',
+          onPressed: _openCalendar,
         ),
       ),
     );

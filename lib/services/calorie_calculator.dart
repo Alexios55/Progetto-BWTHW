@@ -30,7 +30,7 @@ double activityMultiplier(ActivityLevel activityLevel) {
   }
 }//activityMultiplier
 
-//This function calculates the TDEE of a patient.
+//This function calculates the TDEE (Total Daily Energy Expenditure) of a patient.
 double calculateTdee(Patient patient) {
   return calculateBmr(patient) * activityMultiplier(patient.activityLevel);
 }//calculateTdee
@@ -48,3 +48,5 @@ double calculateDailyCalorieGoal(Patient patient) {
       return tdee + 300;
   }
 }//calculateDailyCalorieGoal
+
+

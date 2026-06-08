@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:bwthw_project/models.2/user.dart';
+import 'package:provider/provider.dart';
+import 'package:bwthw_project/models.2/patient.dart';
+import 'package:bwthw_project/models.2/patient_state.dart';
+import 'package:bwthw_project/models.2/enums.dart';
 import 'package:bwthw_project/services/preference_service.dart';
 import 'package:bwthw_project/widgets/bmi_bar.dart';
 import 'edit_profile_screen.dart';
@@ -12,31 +15,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  User? user;
-  bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadUser();
-  }
-
-  Future<void> _loadUser() async {
-    final loadedUser = await PreferenceService.getUserData();
-
-    if (!mounted) return;
-
-    setState(() {
-      user = loadedUser;
-      isLoading = false;
-    });
-  }
-
-  double get bmi {
-    if (user == null) return 0;
-    double h = user!.height / 100;
-    return user!.weight / (h * h);
-  }
 
   void _logout() async {
     await PreferenceService.clearAll();
@@ -44,16 +22,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     await PreferenceService.saveLogin(false);
   }
 
-  void _editProfile() async {
+  void _editProfile(Patient patient) async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => EditProfileScreen(user: user!),
+        builder: (_) => EditProfileScreen(patient: patient),
       ),
     );
 
     if (result == true) {
-      _loadUser();
+      // No reload, automatic notify PatientState
     }
   }
 
@@ -131,17 +109,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    if (isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    if (user == null) {
+    final patient = context.watch<PatientState>().patient;
+    if (patient == null) {
       return const Scaffold(
         body: Center(child: Text('No user data')),
       );
     }
+
+    final h = patient.heightCm / 100;
+    final bmi = patient.weightKg / (h * h);
 
     return Scaffold(
       appBar: AppBar(
@@ -169,7 +145,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       radius: 45,
                       backgroundColor: colorScheme.primary,
                       child: Text(
-                        user!.name[0],
+                        patient.name[0],
                         style: TextStyle(
                           fontSize: 32,
                           color: colorScheme.onPrimary,
@@ -179,7 +155,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: 14),
                     Text(
-                      '${user!.name} ${user!.surname}',
+                      '${patient.name} ${patient.surname}',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -199,80 +175,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
 
-              const SizedBox(height: 22),
+              const SizedBox(height: 15),
 
               Row(
                 children: [
                   statBox(
                     'Weight',
-                    '${user!.weight} kg',
+                    '${patient.weightKg} kg',
                     Icons.monitor_weight,
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 5),
                   statBox(
                     'Height',
-                    '${user!.height} cm',
+                    '${patient.heightCm} cm',
                     Icons.height,
-                  ),
-                  const SizedBox(width: 10),
-                  statBox(
-                    'BMI',
-                    bmi.toStringAsFixed(1),
-                    Icons.favorite,
                   ),
                 ],
               ),
-
-              const SizedBox(height: 22),
-
-              Card(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  side: BorderSide(color: colorScheme.outlineVariant),
+              const SizedBox(height: 5),
+              Row(
+                children: [
+                statBox(
+                  'Goal',
+                  '${patient.targetWeightKg} kg',
+                  Icons.flag,
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.badge_outlined,
-                            color: colorScheme.primary,
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            'Personal Information',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: colorScheme.onSurface,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      infoRow('Name', user!.name),
-                      const SizedBox(height: 14),
-                      infoRow('Surname', user!.surname),
-                      const SizedBox(height: 14),
-                      infoRow(
-                        'Birth date',
-                        user!.birthDate.toString().split(' ')[0],
-                      ),
-                      const SizedBox(height: 14),
-                      infoRow('Weight', '${user!.weight} kg'),
-                      const SizedBox(height: 14),
-                      infoRow('Height', '${user!.height} cm'),
-                      const SizedBox(height: 14),
-                      infoRow('Ideal weight', '${user!.idealWeight} kg'),
-                    ],
-                  ),
+                const SizedBox(width: 5),
+                statBox(
+                  'Activity level',
+                  '${patient.activityLevel.label}',
+                  Icons.fitness_center,
                 ),
-              ),
+              ],
+            ),
 
-              const SizedBox(height: 22),
+              const SizedBox(height: 10),
 
               Card(
                 elevation: 0,
@@ -311,13 +248,61 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 8),
+
+              Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  side: BorderSide(color: colorScheme.outlineVariant),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.badge_outlined,
+                            color: colorScheme.primary,
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            'Personal Information',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      infoRow('Name', patient.name),
+                      const SizedBox(height: 12),
+                      infoRow('Surname', patient.surname),
+                      const SizedBox(height: 12),
+                      infoRow(
+                        'Birth date',
+                        '${patient.birthDate.day.toString().padLeft(2, '0')}/'
+                        '${patient.birthDate.month.toString().padLeft(2, '0')}/'
+                        '${patient.birthDate.year}',
+                      ),
+                      const SizedBox(height: 12),
+                      infoRow('Gender', patient.gender.label),
+                      const SizedBox(height: 12),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 10),
 
               SizedBox(
                 width: double.infinity,
                 height: 52,
                 child: ElevatedButton.icon(
-                  onPressed: _editProfile,
+                  onPressed: () => _editProfile(patient),
                   icon: const Icon(Icons.edit_outlined),
                   label: const Text('Edit Profile'),
                   style: ElevatedButton.styleFrom(
@@ -328,7 +313,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
 
-              const SizedBox(height: 14),
+              const SizedBox(height: 10),
 
               SizedBox(
                 width: double.infinity,

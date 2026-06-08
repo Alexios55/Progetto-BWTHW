@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'patient.dart';
+import 'package:bwthw_project/services/preference_service.dart';
+import 'package:bwthw_project/models.2/enums.dart';
 
 class PatientState extends ChangeNotifier {
   Patient? patient;
@@ -12,6 +14,26 @@ class PatientState extends ChangeNotifier {
 
   void setPatient(Patient newPatient) {
     patient = newPatient;
+    notifyListeners();
+  }
+
+  Future<void> loadFromPreferences() async {
+    final loaded = await PreferenceService.getPatient();
+    if (loaded != null) {
+      patient = loaded;
+      notifyListeners();
+    }
+  }
+
+  void updateWeight(double newWeight) {
+    if (patient == null) return;
+    patient = patient!.copyWith(weightKg: newWeight);
+    notifyListeners();
+  }
+
+  void updateGoal(Goal newGoal) {
+    if (patient == null) return;
+    patient = patient!.copyWith(goal: newGoal);
     notifyListeners();
   }
 

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bwthw_project/services/preference_service.dart';
+import 'package:provider/provider.dart';
+import 'package:bwthw_project/models.2/patient_state.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -18,14 +20,17 @@ class _SplashScreenState extends State<SplashScreen> {
   });
   }
 
-
   Future<void> _checkLoginStatus() async {
     bool isLoggedIn = await PreferenceService.getLogin();
+
+    if (isLoggedIn) {
+    await context.read<PatientState>().loadFromPreferences();
+    }
 
     await Future.delayed(const Duration(seconds: 2));
 
     if (isLoggedIn) {
-      Navigator.pushReplacementNamed(context, '/bmi-status');
+      Navigator.pushReplacementNamed(context, '/home');
     } else {
       Navigator.pushReplacementNamed(context, '/start');
     }

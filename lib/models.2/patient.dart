@@ -29,6 +29,8 @@ class Patient extends User {
     this.goal,
     required this.activityLevel,
     this.targetWeightKg,
+    DateTime? birthDate,
+
   }) : super(
           id: id,
           name: name,
@@ -38,6 +40,7 @@ class Patient extends User {
           weight: weightKg,
           height: heightCm,
           idealWeight: targetWeightKg ?? 0,
+          birthDate: birthDate,
         );
 
   Patient copyWith({
@@ -53,6 +56,7 @@ class Patient extends User {
     Goal? goal,
     ActivityLevel? activityLevel,
     double? targetWeightKg,
+    DateTime? birthDate,
   }) {
     return Patient(
       id: id ?? this.id,
@@ -67,7 +71,46 @@ class Patient extends User {
       goal: goal ?? this.goal,
       activityLevel: activityLevel ?? this.activityLevel,
       targetWeightKg: targetWeightKg ?? this.targetWeightKg,
+      birthDate: birthDate ?? this.birthDate,
     );
   }
+
+  Map<String, dynamic> toMap() {
+  return {
+    'id': id,
+    'name': name,
+    'surname': surname,
+    'email': email,
+    'password': password,
+    'age': age,
+    'weightKg': weightKg,
+    'heightCm': heightCm,
+    'gender': gender.name,
+    'goal': goal?.name,
+    'activityLevel': activityLevel.name,
+    'targetWeightKg': targetWeightKg,
+    'birthDate': birthDate.toIso8601String(),
+  };
+}
+
+factory Patient.fromMap(Map<String, dynamic> map) {
+  return Patient(
+    id: map['id'] ?? '',
+    name: map['name'] ?? '',
+    surname: map['surname'] ?? '',
+    email: map['email'] ?? '',
+    password: map['password'] ?? '',
+    age: map['age'] ?? 0,
+    weightKg: (map['weightKg'] ?? 0).toDouble(),
+    heightCm: (map['heightCm'] ?? 0).toDouble(),
+    gender: Gender.values.byName(map['gender'] ?? 'male'),
+    goal: map['goal'] != null ? Goal.values.byName(map['goal']) : null,
+    activityLevel: ActivityLevel.values.byName(
+      map['activityLevel'] ?? 'moderatelyActive',
+    ),
+    targetWeightKg: (map['targetWeightKg'] as num?)?.toDouble(),
+    birthDate: DateTime.tryParse(map['birthDate'] ?? ''),
+  );
+}
 }
 

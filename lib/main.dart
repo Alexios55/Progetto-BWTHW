@@ -18,6 +18,7 @@ import 'package:bwthw_project/screens/splash_screen.dart';
 import 'package:bwthw_project/models.2/patient_state.dart';
 import 'package:bwthw_project/screens/body_measurements_screen.dart';
 import 'package:bwthw_project/screens/add_body_measurement_screen.dart';
+import 'package:bwthw_project/models.2/patient.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -61,10 +62,6 @@ class MyApp extends StatelessWidget {
       '/personal-info': (context) {
         final user = ModalRoute.of(context)!.settings.arguments as UserTemp;
         return PersonalInfoScreen(user: user);
-      },
-      '/bmi-status': (context) {
-        final user = ModalRoute.of(context)!.settings.arguments as UserTemp;
-        return BmiStatusScreen(user: user);
       },
       '/home': (context) => const HomeScreen(),
       '/profile': (context) => const ProfileScreen(),

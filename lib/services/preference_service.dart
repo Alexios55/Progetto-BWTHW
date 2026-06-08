@@ -4,6 +4,7 @@ import 'package:bwthw_project/models.2/user.dart';
 import 'package:bwthw_project/models.2/blood_test.dart';  
 import 'package:bwthw_project/models.2/weight_entry.dart';
 import 'package:bwthw_project/models.2/body_measurement_entry.dart';
+import 'package:bwthw_project/models.2/patient.dart';
 import 'dart:convert';
 class PreferenceService {
   // keys
@@ -118,6 +119,25 @@ class PreferenceService {
     if (mostRecent.date == entry.date && mostRecent.weight == entry.weight) {
       final prefs = await _prefs();
       await prefs.setDouble(_weightKey, entry.weight);
+    }
+  }
+
+  // Patient data ----------------------------------------------------------------------
+  // Method to save patient data
+  static Future<void> savePatient(Patient patient) async {
+    final prefs = await _prefs();
+    await prefs.setString('patient', jsonEncode(patient.toMap()));
+  }
+
+  // Method to get patient data
+  static Future<Patient?> getPatient() async {
+    final prefs = await _prefs();
+    final json = prefs.getString('patient');
+    if (json == null) return null;
+    try {
+      return Patient.fromMap(jsonDecode(json));
+    } catch (_) {
+      return null;
     }
   }
 

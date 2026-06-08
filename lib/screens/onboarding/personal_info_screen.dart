@@ -153,6 +153,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       heightCm: heightValue,
       gender: gender,
       activityLevel: parsedActivityLevel,
+      birthDate: birthDate,
     );
 
     Provider.of<PatientState>(context, listen: false).setPatient(patient);
@@ -160,7 +161,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => BmiStatusScreen(user: widget.user),
+        builder: (context) => BmiStatusScreen(user: widget.user, 
+        patient: patient),
       ),
     );
   }

@@ -11,6 +11,7 @@ import 'package:bwthw_project/widgets/date_input_field.dart';
 import 'package:bwthw_project/services/calorie_calculator.dart';
 import 'package:provider/provider.dart';
 import 'package:bwthw_project/models.2/patient_state.dart';
+import 'package:bwthw_project/models.2/enums.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -45,12 +46,10 @@ class _DashboardPageState extends State<DashboardPage> {
     });
 
     // update the weigth in patient for the calculation of calories
-    final patientState = context.read<PatientState>();
-    if (patientState.patient != null && loadedUser != null) {
-      patientState.setPatient(
-        patientState.patient!.copyWith(weightKg: loadedUser.weight),
-      );
-    }
+    context.read<PatientState>().updateWeight(loadedUser!.weight);
+    await PreferenceService.savePatient(
+      context.read<PatientState>().patient!,
+    );
   }
 
   Future<void> _logWeight() async {
@@ -154,6 +153,10 @@ class _DashboardPageState extends State<DashboardPage> {
     if (target != null &&
         ((result.weight - target).abs() <= 0.5)) {
       _showCongratulationsBanner();
+      context.read<PatientState>().updateGoal(Goal.maintainWeight);
+      await PreferenceService.savePatient(
+        context.read<PatientState>().patient!,
+      );
     }
   }
 

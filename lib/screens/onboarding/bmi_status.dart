@@ -4,6 +4,10 @@ import 'package:bwthw_project/widgets/bmi_bar.dart';
 import 'package:bwthw_project/services/preference_service.dart';
 import 'package:bwthw_project/models.2/user.dart';
 import 'package:bwthw_project/models.2/weight_entry.dart';
+import 'package:provider/provider.dart';
+import 'package:bwthw_project/models.2/patient.dart';
+import 'package:bwthw_project/models.2/patient_state.dart';
+import 'package:bwthw_project/models.2/enums.dart';
 
 /// This screen shows the user's BMI result, the current physical status,
 /// a short explanation, and a field where the user can enter an ideal weight.
@@ -11,9 +15,11 @@ import 'package:bwthw_project/models.2/weight_entry.dart';
 /// prepared to receive dynamic values later.
 class BmiStatusScreen extends StatefulWidget {
   final UserTemp user;
+  final Patient patient;
   const BmiStatusScreen({
     super.key,
     required this.user,
+    required this.patient,
   });
 
   static const routeName = '/bmi-status';
@@ -139,6 +145,17 @@ class _BmiStatusScreenState extends State<BmiStatusScreen> {
     );
 
     await PreferenceService.saveUser(user);
+    final completePatient = widget.patient.copyWith(
+      targetWeightKg: widget.user.idealWeight,
+      goal: _deriveGoal(widget.user.weight!, widget.user.idealWeight!),
+    );
+    await PreferenceService.savePatient(completePatient);
+
+    // Update the PatientState
+    if (mounted) {
+      context.read<PatientState>().setPatient(completePatient);
+    }
+
     await PreferenceService.addWeightEntry(
       WeightEntry(
         date: DateTime.now(),
@@ -154,6 +171,13 @@ class _BmiStatusScreenState extends State<BmiStatusScreen> {
       arguments: user,
     );
   }
+
+  Goal _deriveGoal(double currentWeight, double targetWeight) {
+  const threshold = 1.0;
+  if (targetWeight < currentWeight - threshold) return Goal.loseWeight;
+  if (targetWeight > currentWeight + threshold) return Goal.gainWeight;
+  return Goal.maintainWeight;
+}
 
   @override
   Widget build(BuildContext context) {

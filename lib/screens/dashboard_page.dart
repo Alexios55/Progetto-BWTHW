@@ -1,18 +1,11 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:bwthw_project/models.2/food_diary_db.dart';
-import 'package:bwthw_project/models.2/user.dart';
-import 'package:bwthw_project/models.2/patient.dart';
-import 'package:bwthw_project/models.2/weight_entry.dart';
 import 'package:bwthw_project/services/preference_service.dart';
-import 'package:bwthw_project/widgets/date_input_field.dart';
 import 'package:bwthw_project/services/calorie_calculator.dart';
-import 'package:provider/provider.dart';
 import 'package:bwthw_project/models.2/patient_state.dart';
-import 'package:bwthw_project/models.2/enums.dart';
-
+import 'package:bwthw_project/widgets/navigation_card.dart';
+import 'package:bwthw_project/screens/inside_dashboard/weight_health_screens/health_screen.dart';
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
 
@@ -21,8 +14,8 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  List<WeightEntry> weightEntries = [];
-  User? user;
+  // List<WeightEntry> weightEntries = [];
+  // User? user;
   bool isLoading = true;
 
   @override
@@ -32,16 +25,16 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Future<void> _loadDashboardData() async {
-    final loadedEntries = await PreferenceService.getWeightEntries();
+    // final loadedEntries = await PreferenceService.getWeightEntries();
     final loadedUser = await PreferenceService.getUserData();
 
-    loadedEntries.sort((a, b) => a.date.compareTo(b.date));
+    // loadedEntries.sort((a, b) => a.date.compareTo(b.date));
 
     if (!mounted) return;
 
     setState(() {
-      weightEntries = loadedEntries;
-      user = loadedUser;
+      //weightEntries = loadedEntries;
+      // user = loadedUser;
       isLoading = false;
     });
 
@@ -52,7 +45,7 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Future<void> _logWeight() async {
+  /*Future<void> _logWeight() async {
     final TextEditingController weightController = TextEditingController();
     final TextEditingController dateController = TextEditingController();
 
@@ -64,13 +57,13 @@ class _DashboardPageState extends State<DashboardPage> {
         '${now.year}';
 
     // Holds the date parsed by DateInputField via its callback.
-    DateTime? parsedDate = now;
+    DateTime? parsedDate = now; */
 
-    final result = await showDialog<({double weight, DateTime date})>(
+    /*final result = await showDialog<({double weight, DateTime date})>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Log Weight'),
+          title: const Text('Register Weight'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -133,9 +126,9 @@ class _DashboardPageState extends State<DashboardPage> {
           ],
         );
       },
-    );
+    );*/
 
-    weightController.dispose();
+    /*weightController.dispose();
     dateController.dispose();
 
     if (result == null) return;
@@ -147,9 +140,9 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
     );
 
-    await _loadDashboardData();
+    await _loadDashboardData();*/
 
-    final target = user?.idealWeight;
+    /*final target = user?.idealWeight;
     if (target != null &&
         ((result.weight - target).abs() <= 0.5)) {
       _showCongratulationsBanner();
@@ -158,9 +151,9 @@ class _DashboardPageState extends State<DashboardPage> {
         context.read<PatientState>().patient!,
       );
     }
-  }
+  }*/
 
-  Future<void> _deleteLastWeight() async {
+  /*Future<void> _deleteLastWeight() async {
     if (weightEntries.length <= 1 || user == null) return;
 
     final bool? confirm = await showDialog<bool>(
@@ -216,10 +209,10 @@ class _DashboardPageState extends State<DashboardPage> {
     await PreferenceService.saveUser(updatedUser);
 
     await _loadDashboardData();
-  }
+  }*/
 
   // A banner to show up when the user reaches the goal
-  void _showCongratulationsBanner() {
+  /*void _showCongratulationsBanner() {
   showDialog(
     context: context,
     builder: (ctx) => AlertDialog(
@@ -241,7 +234,7 @@ class _DashboardPageState extends State<DashboardPage> {
       ],
     ),
   );
-}
+}*/
 
   @override
   Widget build(BuildContext context) {
@@ -417,22 +410,45 @@ class _DashboardPageState extends State<DashboardPage> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  _buildWeightCard(context),
-                  const SizedBox(height: 24),
-                  _buildBloodTestsCard(context),
-                  const SizedBox(height: 24),
-                  _buildBodyMeasurementsCard(context),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
 
-  Widget _buildWeightCard(BuildContext context) {
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    NavCard(
+                      label: 'Weight\n& Health',
+                      icon: Icons.monitor_weight_outlined,
+                      onTap: () async {
+                        await Navigator.push(context, MaterialPageRoute(
+                          builder: (_) => const HealthScreen(),
+                        ));
+                        // ricarica i dati del paziente al ritorno
+                        if (mounted) setState(() {});
+                      },
+                    ),
+                    const SizedBox(width: 10),
+                    NavCard(
+                      label: 'Blood\nTests',
+                      icon: Icons.bloodtype_outlined,
+                      onTap: () => Navigator.pushNamed(context, '/blood-tests'),
+                    ),
+                    const SizedBox(width: 10),
+                    NavCard(
+                      label: 'Body\nMeasures',
+                      icon: Icons.straighten_outlined,
+                      onTap: () => Navigator.pushNamed(context, '/body-measurements'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    ),
+  );
+}
+
+  /*Widget _buildWeightCard(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
 
@@ -668,7 +684,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 context,
                 'Start',
                 '${_formatNumber(startingWeight)} kg',
-                Icons.flag_outlined,
+                Icons.start,
               ),
               const SizedBox(width: 10),
               _weightInfoBox(
@@ -682,16 +698,16 @@ class _DashboardPageState extends State<DashboardPage> {
                 context,
                 'Goal',
                 goalWeight,
-                Icons.track_changes_outlined,
+                Icons.flag,
               ),
             ],
           ),
         ],
       ),
     );
-  }
+  }*/
 
-  Widget _buildBloodTestsCard(BuildContext context) {
+  /*Widget _buildBloodTestsCard(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
 
@@ -855,7 +871,7 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
       ),
     );
-  }
+  }*/
 
   Widget _infoRow(
     BuildContext context,

@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:bwthw_project/models.2/enums.dart';
 import 'package:bwthw_project/models.2/patient.dart';
@@ -6,7 +5,6 @@ import 'package:bwthw_project/models.2/patient_state.dart';
 import 'package:bwthw_project/services/user_service.dart';
 import 'package:bwthw_project/utils/input_validators.dart';
 import 'package:flutter/material.dart';
-import 'package:bwthw_project/widgets/date_input_field.dart';
 
 // This screen collects the user's personal information,
 // such as sex, date of birth, age, weight, and height,
@@ -126,7 +124,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                         children: [
                           // Dropdown field for sex selection.
                           DropdownButtonFormField<Gender>(
-                            value: selectedSex,
+                            initialValue: selectedSex,
                             decoration: InputDecoration(
                               hintText: 'Sex',
                               prefixIcon: const Icon(Icons.person_outline),
@@ -205,7 +203,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                           const SizedBox(height: 20),
 
                           DropdownButtonFormField<ActivityLevel>(
-                            value: selectedActivityLevel,
+                            initialValue: selectedActivityLevel,
                             decoration: InputDecoration(
                               hintText: 'Activity level',
                               prefixIcon:
@@ -239,7 +237,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                           const SizedBox(height: 20),
 
                           DropdownButtonFormField<Goal>(
-                            value: selectedGoal,
+                            initialValue: selectedGoal,
                             decoration: InputDecoration(
                               hintText: 'Goal',
                               prefixIcon: const Icon(Icons.flag_outlined),

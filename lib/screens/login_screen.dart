@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bwthw_project/services/preference_service.dart';
+import 'package:provider/provider.dart';
+import 'package:bwthw_project/models.2/patient_state.dart';
 
 // This screen allows the user to log into the app by entering
 // an email and a password. If the fields are valid, the user
@@ -58,6 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         await PreferenceService.saveLogin(false);
       }
+      await context.read<PatientState>().loadFromPreferences();
       if (!mounted) return;
       Navigator.pushNamedAndRemoveUntil(
         context,

@@ -36,6 +36,19 @@ class BmiBar extends StatelessWidget {
           ),
         ),
 
+        Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Row(
+            children: [
+              // "Underweight" occupa 18.5/40 = ~46% della larghezza
+              Expanded(flex: 185, child: Text('Under-\nweight', style: TextStyle(fontSize: 9, color: Colors.blue), textAlign: TextAlign.center)),
+              Expanded(flex: 65, child: Text('Normal', style: TextStyle(fontSize: 9, color: Colors.green), textAlign: TextAlign.center)),
+              Expanded(flex: 50, child: Text('Over-\nweight', style: TextStyle(fontSize: 9, color: Colors.orange), textAlign: TextAlign.center)),
+              Expanded(flex: 100, child: Text('Obese', style: TextStyle(fontSize: 9, color: Colors.red), textAlign: TextAlign.center)),
+            ],
+          ),
+        ),
+
         const SizedBox(height: 8),
 
         // indicatore animato

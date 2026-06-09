@@ -6,6 +6,7 @@ import 'package:bwthw_project/models.2/enums.dart';
 import 'package:bwthw_project/services/preference_service.dart';
 import 'package:bwthw_project/models.2/weight_entry.dart';
 import 'package:bwthw_project/models.2/user.dart';
+import 'package:bwthw_project/widgets/date_input_field.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final Patient patient;
@@ -19,10 +20,9 @@ class EditProfileScreen extends StatefulWidget {
 class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController nameController;
   late TextEditingController surnameController;
-  late TextEditingController weightController;
-  late TextEditingController heightController;
   late Gender selectedGender;
-  late ActivityLevel selectedActivity;
+  late TextEditingController birthDateController;
+  late DateTime birthDate;
 
   @override
   void initState() {
@@ -30,25 +30,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     nameController = TextEditingController(text: widget.patient.name);
     surnameController = TextEditingController(text: widget.patient.surname);
-    weightController =
-        TextEditingController(text: widget.patient.weight.toString());
-    heightController =
-        TextEditingController(text: widget.patient.height.toString());
     selectedGender = widget.patient.gender;
-    selectedActivity = widget.patient.activityLevel;
+    birthDate = widget.patient.birthDate;
+    birthDateController = TextEditingController(
+      text: widget.patient.birthDate.toIso8601String().split('T').first,
+    );
   }
 
   void _saveChanges() async {
-    final newWeight = double.tryParse(weightController.text) ?? widget.patient.weightKg;
-    final newHeight = double.tryParse(heightController.text) ?? widget.patient.heightCm;
 
     final updatedPatient = widget.patient.copyWith(
       name: nameController.text.trim(),
       surname: surnameController.text.trim(),
-      weightKg: newWeight,
-      heightCm: newHeight,
       gender: selectedGender,
-      activityLevel: selectedActivity,
+      birthDate: birthDate,
     );
 
     await PreferenceService.savePatient(updatedPatient);
@@ -56,19 +51,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       name: updatedPatient.name,
       surname: updatedPatient.surname,
       birthDate: updatedPatient.birthDate,
-      weight: updatedPatient.weightKg,
-      height: updatedPatient.heightCm,
-      idealWeight: updatedPatient.targetWeightKg ?? 0,
     ));
-
-    if (newWeight != widget.patient.weightKg) {
-      await PreferenceService.addWeightEntry(
-        WeightEntry(
-          date: DateTime.now(),
-          weight: newWeight,
-        ),
-      );
-    }
 
     if (mounted) {
       context.read<PatientState>().setPatient(updatedPatient);
@@ -87,8 +70,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           children: [
             TextField(controller: nameController, decoration: const InputDecoration(labelText: 'Name')),
             TextField(controller: surnameController, decoration: const InputDecoration(labelText: 'Surname')),
-            TextField(controller: weightController, decoration: const InputDecoration(labelText: 'Weight')),
-            TextField(controller: heightController, decoration: const InputDecoration(labelText: 'Height')),
 
             const SizedBox(height: 16),
             DropdownButtonFormField<Gender>(
@@ -100,15 +81,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               )).toList(),
               onChanged: (v) => setState(() => selectedGender = v!),
             ),
+
             const SizedBox(height: 16),
-            DropdownButtonFormField<ActivityLevel>(
-              value: selectedActivity,
-              decoration: const InputDecoration(labelText: 'Activity Level'),
-              items: ActivityLevel.values.map((a) => DropdownMenuItem(
-                value: a,
-                child: Text(a.name),
-              )).toList(),
-              onChanged: (v) => setState(() => selectedActivity = v!),
+            DateInputField(
+              controller: birthDateController,
+              label: 'Date of Birth',
+              firstDate: DateTime(1900),
+              lastDate: DateTime.now(),
+              onDateParsed: (date) {
+                if (date != null) birthDateController = birthDateController;
+              },
             ),
 
             const SizedBox(height: 20),

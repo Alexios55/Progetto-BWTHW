@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bwthw_project/models.2/blood_test.dart';
 import 'package:bwthw_project/services/preference_service.dart';
-import 'package:bwthw_project/screens/blood_test_screens/blood_test_detail_screen.dart';
+import 'package:bwthw_project/screens/inside_dashboard/blood_test_screens/blood_test_detail_screen.dart';
 
 class BloodTestScreen extends StatefulWidget {
   const BloodTestScreen({super.key});
@@ -100,6 +100,7 @@ class _BloodTestScreenState extends State<BloodTestScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Blood Tests'),
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),

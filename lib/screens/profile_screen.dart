@@ -4,7 +4,6 @@ import 'package:bwthw_project/models.2/patient.dart';
 import 'package:bwthw_project/models.2/patient_state.dart';
 import 'package:bwthw_project/models.2/enums.dart';
 import 'package:bwthw_project/services/preference_service.dart';
-import 'package:bwthw_project/widgets/bmi_bar.dart';
 import 'edit_profile_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -116,9 +115,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     }
 
-    final h = patient.heightCm / 100;
-    final bmi = patient.weightKg / (h * h);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("Profile"),
@@ -177,7 +173,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               const SizedBox(height: 15),
 
-              Row(
+              /*Row(
                 children: [
                   statBox(
                     'Weight',
@@ -207,10 +203,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Icons.fitness_center,
                 ),
               ],
-            ),
+            ),*/
 
               const SizedBox(height: 10),
-
+/*
               Card(
                 elevation: 0,
                 shape: RoundedRectangleBorder(
@@ -246,7 +242,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
                 ),
-              ),
+              ),*/
 
               const SizedBox(height: 8),
 

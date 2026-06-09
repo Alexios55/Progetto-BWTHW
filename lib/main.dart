@@ -12,13 +12,12 @@ import 'util.dart';
 import 'theme.dart';
 import 'package:bwthw_project/models.2/user_temp.dart';
 import 'package:bwthw_project/screens/profile_screen.dart';
-import 'package:bwthw_project/screens/blood_test_screens/blood_test_screen.dart';
-import 'package:bwthw_project/screens/blood_test_screens/add_blood_test_screen.dart';  
+import 'package:bwthw_project/screens/inside_dashboard/blood_test_screens/blood_test_screen.dart';
+import 'package:bwthw_project/screens/inside_dashboard/blood_test_screens/add_blood_test_screen.dart';  
 import 'package:bwthw_project/screens/splash_screen.dart';
 import 'package:bwthw_project/models.2/patient_state.dart';
-import 'package:bwthw_project/screens/body_measurements_screen.dart';
-import 'package:bwthw_project/screens/add_body_measurement_screen.dart';
-import 'package:bwthw_project/models.2/patient.dart';
+import 'package:bwthw_project/screens/inside_dashboard/body_mesearument_screens/body_measurements_screen.dart';
+import 'package:bwthw_project/screens/inside_dashboard/body_mesearument_screens/add_body_measurement_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

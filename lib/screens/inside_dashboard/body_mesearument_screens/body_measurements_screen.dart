@@ -285,6 +285,7 @@ class _BodyMeasurementsScreenState extends State<BodyMeasurementsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Body Measurements'),
+        centerTitle: true,
         actions: [
           IconButton(
             onPressed: _showHowToMeasureDialog,

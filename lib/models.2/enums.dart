@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 enum Goal {
   loseWeight,
   maintainWeight,
@@ -87,3 +89,49 @@ extension GenderX on Gender {
   }
 }
 
+enum MealType {
+  breakfast,       
+  morningSnack,   
+  lunch,          
+  afternoonSnack,  
+  dinner, 
+}
+
+extension MealTypeExtension on MealType {
+  String get label {
+    switch (this) {
+      case MealType.breakfast:      return 'Breakfast';
+      case MealType.morningSnack:   return 'Morning snack';
+      case MealType.lunch:          return 'lunch';
+      case MealType.afternoonSnack: return 'Afternoon snack';
+      case MealType.dinner:         return 'Dinner';
+    }
+  }
+ 
+  // Returns the MealType matching the current time of day.
+  static MealType current() {
+    final hour = DateTime.now().hour;
+    if (hour >= 6  && hour < 10) return MealType.breakfast;
+    if (hour >= 10 && hour < 12) return MealType.morningSnack;
+    if (hour >= 12 && hour < 15) return MealType.lunch;
+    if (hour >= 15 && hour < 19) return MealType.afternoonSnack;
+    return MealType.dinner; // 19:00 – 05:59
+  }
+}
+ 
+enum FoodCategory {
+  dairy,
+  juicesAndSweeteners,
+  bakeryAndCereals,
+  meat,
+  fish,
+  eggs,
+  curedMeats,
+  cheese,
+  fruit,
+  vegetables,
+  legumes,
+  fatsAndSpreads,
+  nuts,
+  preparedFoods,
+}

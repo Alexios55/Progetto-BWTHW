@@ -4,7 +4,7 @@ import 'package:bwthw_project/models.2/patient.dart';
 import 'package:bwthw_project/models.2/patient_state.dart';
 import 'package:bwthw_project/models.2/enums.dart';
 import 'package:bwthw_project/services/preference_service.dart';
-import 'package:bwthw_project/models.2/weight_entry.dart';
+import 'package:bwthw_project/models.2/input_mesearument_models/weight_entry.dart';
 import 'package:bwthw_project/models.2/user.dart';
 
 class EditHealthScreen extends StatefulWidget {

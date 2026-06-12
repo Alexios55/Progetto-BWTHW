@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:bwthw_project/models.2/food_catalog.dart';
-import 'package:bwthw_project/models.2/food_diary_db.dart';
-import 'package:bwthw_project/models.2/food_entry.dart';
-import 'package:bwthw_project/models.2/food_item.dart';
+import 'package:bwthw_project/models.2/food_models/food_catalog.dart';
+import 'package:bwthw_project/models.2/food_models/food_diary_db.dart';
+import 'package:bwthw_project/models.2/food_models/food_entry.dart';
+import 'package:bwthw_project/models.2/food_models/food_item.dart';
 
 // This page allows the user to search a food and add it to the diary.
 class FoodSearchPage extends StatefulWidget {

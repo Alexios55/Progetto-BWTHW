@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:bwthw_project/logic/blood_test_analyzer.dart';
-import 'package:bwthw_project/models.2/blood_test.dart';
-import 'package:bwthw_project/models.2/food_item.dart';
+import 'package:bwthw_project/models.2/input_mesearument_models/blood_test.dart';
+import 'package:bwthw_project/models.2/food_models/food_item.dart';
 import 'package:bwthw_project/models.2/patient.dart';
 import 'package:bwthw_project/models.2/enums.dart';
 import 'package:bwthw_project/logic/nutrient_interaction_graph.dart';

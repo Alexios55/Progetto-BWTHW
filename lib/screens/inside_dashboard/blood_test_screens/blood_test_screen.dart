@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:bwthw_project/models.2/blood_test.dart';
+import 'package:bwthw_project/models.2/input_mesearument_models/blood_test.dart';
 import 'package:bwthw_project/services/preference_service.dart';
 import 'package:bwthw_project/screens/inside_dashboard/blood_test_screens/blood_test_detail_screen.dart';
 

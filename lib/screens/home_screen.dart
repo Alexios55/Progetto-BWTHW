@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bwthw_project/screens/food_diary_screens/food_diary_page.dart';
-import 'package:bwthw_project/screens/profile_screen.dart';
+import 'package:bwthw_project/screens/profile/profile_screen.dart';
 import 'package:bwthw_project/screens/dashboard_page.dart';
 
 // Main page of the app with bottom navigation.

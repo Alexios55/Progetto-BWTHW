@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:bwthw_project/models.2/body_measurement_entry.dart';
+import 'package:bwthw_project/models.2/input_mesearument_models/body_measurement_entry.dart';
 
 class AddBodyMeasurementScreen extends StatefulWidget {
   const AddBodyMeasurementScreen({super.key});

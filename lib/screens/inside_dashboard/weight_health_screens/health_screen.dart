@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:bwthw_project/models.2/weight_entry.dart';
+import 'package:bwthw_project/models.2/input_mesearument_models/weight_entry.dart';
 import 'package:bwthw_project/services/preference_service.dart';
 import 'package:bwthw_project/widgets/stat_box.dart';
 import 'package:bwthw_project/widgets/bmi_bar.dart';

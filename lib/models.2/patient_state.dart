@@ -11,6 +11,7 @@ class PatientState extends ChangeNotifier {
   int steps = 0;
   int sleepMinutes = 0;
   int heartRate = 0;
+  double distanceKm = 0;
 
   void setPatient(Patient newPatient) {
     patient = newPatient;
@@ -62,12 +63,18 @@ class PatientState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateDistance(double km) {
+    distanceKm = km;
+    notifyListeners();
+  }
+
   void resetDailyData() {
     consumedCalories = 0;
     burnedCalories = 0;
     steps = 0;
     sleepMinutes = 0;
     heartRate = 0;
+    distanceKm = 0;
     notifyListeners();
   }
 }

@@ -1,9 +1,11 @@
 import 'package:bwthw_project/screens/dashboard_page.dart';
 import 'package:bwthw_project/screens/onboarding/registration.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:bwthw_project/services/preference_service.dart';
 import 'package:bwthw_project/services/impact.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:bwthw_project/models.2/patient_state.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,15 +17,56 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController userController = TextEditingController();
+  final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final Impact impact = Impact();
+  bool _isLoading = false;
+  bool rememberMe = false;
 
   @override
   void dispose() {
-    userController.dispose();
+    usernameController.dispose();
     passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> login() async {
+    final username = usernameController.text;
+    final password = passwordController.text;
+
+    if (username.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(const SnackBar(content: Text('Please enter your username and password.'),
+        ));
+        return;
+    }
+
+    setState(() => _isLoading = true);
+
+    final result = await impact.getAndStoreTokens(username, password);
+
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+   if (result == 200) {
+      await PreferenceService.saveLogin(rememberMe);
+      await context.read<PatientState>().loadFromPreferences();
+      if (!mounted) return;
+      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+    } else {
+      ScaffoldMessenger.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(SnackBar(
+          backgroundColor: Theme.of(context).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(8),
+          duration: const Duration(seconds: 3),
+          content: Text(result == 401
+              ? 'Incorrect username or password'
+              : 'Connection error (code $result). Please try again.'),
+        ));
+    }
   }
 
   @override
@@ -119,7 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 28),
 
                         TextField(
-                          controller: userController,
+                          controller: usernameController,
                           keyboardType: TextInputType.emailAddress,
                           decoration: InputDecoration(
                             hintText: 'Email',
@@ -164,40 +207,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           width: double.infinity,
                           height: 55,
                           child: ElevatedButton(
-                            onPressed: () async {
-                              // Check if credentials are correct
-                              final result = await impact.getAndStoreTokens(userController.text, passwordController.text);
-                              // If credentials are correct, store user and the password in SharedPreferences
-                              // plus navigation to the dashboard screen
-                              if (result == 200) {
-                                final sp = await SharedPreferences.getInstance();
-                                await sp.setString('username', userController.text);
-                                await sp.setString('password', passwordController.text);
-                                final onboarding_completed = await sp.getBool('onboarding_completed');
-                                if (onboarding_completed == null || onboarding_completed == false) {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => RegistrationScreen(),
-                                    ),
-                                  );
-                                }
-                                else {
-                                  Navigator.pushReplacement(
-                                    context, 
-                                    MaterialPageRoute(
-                                      builder: (context) => const DashboardPage(),
-                                    ),
-                                  );
-                                }
-                              } else { // If credential are incorrect, show a SnackBar with an error message for the user
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                          content: Text('Incorrect user or password'),
-                                        ),
-                                  );
-                                }
-                            },
+                            onPressed: _isLoading ? null : login,
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),

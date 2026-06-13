@@ -47,8 +47,8 @@ class CalorieBalanceBar extends StatelessWidget {
   // Checkpoints
   static const List<_Checkpoint> _checkPoints = [
     _Checkpoint(0, 0, 0.0),    // midnight 
-    _Checkpoint(8, 0, 0.25),   // breakfast
-    _Checkpoint(13, 0, 0.60),  // lunch    
+    _Checkpoint(9, 0, 0.15),   // breakfast
+    _Checkpoint(14, 0, 0.45),  // lunch    
     _Checkpoint(19, 0, 0.90),  // dinner  
     _Checkpoint(23, 59, 1.0),  // end of day
   ];
@@ -63,7 +63,7 @@ class CalorieBalanceBar extends StatelessWidget {
       final aMin = a.hour * 60 + a.minute;
       final bMin = b.hour * 60 + b.minute;
 
-      if (nowMinutes >= aMin && nowMinutes > bMin) {
+      if (nowMinutes >= aMin && nowMinutes < bMin) {
         final t = (nowMinutes - aMin)/(bMin - aMin);
         return a.fraction + t * (b.fraction - a.fraction);
       }
@@ -74,8 +74,8 @@ class CalorieBalanceBar extends StatelessWidget {
 
   static String _mealPhaseName(DateTime now) {
     final h = now.hour;
-    if (h < 8) return 'before breakfast';
-    if (h < 13) return 'after breakfast';
+    if (h < 9) return 'before breakfast';
+    if (h < 14) return 'after breakfast';
     if (h < 19) return 'after lunch';
     if (h < 23) return 'after dinner';
     return 'end of day';
@@ -90,16 +90,16 @@ class CalorieBalanceBar extends StatelessWidget {
 
   Color get _indicatorColor {
     final norm = (_balance / maxRange).clamp(-1.0, 1.0);
-    if (norm < -0.2) return Colors.red;
-    if (norm > 0.2) return Colors.blue;
+    if (norm < -0.25) return Colors.red;
+    if (norm > 0.25) return Colors.blue;
     return Colors.green;
   }
 
   String get _label {
     final b = _balance;
     final phase = _mealPhaseName(DateTime.now());
-    if (b > 50) return '+${b.toStringAsFixed(0)} kcal surplus ($phase)';
-    if (b < -50) return '${b.toStringAsFixed(0)} kcal deficit ($phase)';
+    if (b > 200) return '+${b.toStringAsFixed(0)} kcal surplus ($phase)';
+    if (b < -200) return '${b.toStringAsFixed(0)} kcal deficit ($phase)';
     return 'On track $phase';
   }
 

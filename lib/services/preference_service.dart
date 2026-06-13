@@ -210,6 +210,15 @@ class PreferenceService {
     await saveBodyMeasurementEntries(currentEntries);
   }
 
+  // User distance goal -------------------------------------------------------------------
+  static const String _burnedCaloriesGoalKey = 'burned_calories_goal';
+
+  static Future<void> saveBurnedCaloriesGoal(double goal) async =>
+      (await _prefs()).setDouble(_burnedCaloriesGoalKey, goal);
+ 
+  static Future<double> getBurnedCaloriesGoal() async =>
+      (await _prefs()).getDouble(_burnedCaloriesGoalKey) ?? 500.0;
+
   // User preferences ----------------------------------------------------------------------
   // This is the method to save user preferences, such as theme and language
   Future<void> saveThemeMode(String themeMode) async => 

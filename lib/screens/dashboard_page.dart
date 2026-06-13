@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+import 'package:bwthw_project/screens/inside_dashboard/suggested_food_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:bwthw_project/models.2/food_models/food_diary_db.dart';
@@ -6,11 +6,8 @@ import 'package:bwthw_project/services/preference_service.dart';
 import 'package:bwthw_project/services/calorie_calculator.dart';
 import 'package:bwthw_project/models.2/patient_state.dart';
 import 'package:bwthw_project/widgets/navigation_card.dart';
-import 'package:bwthw_project/widgets/stat_box.dart';
 import 'package:bwthw_project/screens/inside_dashboard/weight_health_screens/health_screen.dart';
 import 'package:bwthw_project/widgets/calorie_balance_bar.dart';
-import 'package:bwthw_project/models.2/patient.dart';
-import 'package:bwthw_project/models.2/werable_data_models/calories.dart';
 import 'package:bwthw_project/models.2/enums.dart';
 import 'package:bwthw_project/models.2/food_models/food_item.dart';
 import 'package:bwthw_project/logic/nutrition_engine.dart';
@@ -174,43 +171,70 @@ class _DashboardPageState extends State<DashboardPage> {
     List<FoodScore> suggestions,
     MealType currentMeal,
   ) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color:colorScheme.outlineVariant),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(children: [
-            Icon(Icons.auto_awesome_outlined,
-            size: 18, 
-            color: colorScheme.primary),
-            const SizedBox(width: 8),
-            Expanded(child: Text(
-              'Food suggested for ${currentMeal.label.toLowerCase()} meal',
-              style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold,),),),
+        onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => SuggestedFoodsScreen(),
+            ),
+          );
+        },
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: colorScheme.outlineVariant),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.auto_awesome_outlined,
+                    size: 18,
+                    color: colorScheme.primary,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Food suggested for ${currentMeal.label.toLowerCase()} meal',
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right,
+                    size: 20,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+          ...suggestions.asMap().entries.map((entry) {
+            final index = entry.key;
+            final score = entry.value;
+            return Column(
+              children: [
+                _buildSuggestionTile(context, colorScheme, textTheme, score),
+                if (index < suggestions.length - 1)
+                Divider(height: 16, color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                  ),
+                ],
+              );
+            }),
           ],
         ),
-        const SizedBox(height: 12),
-
-        ...suggestions.asMap().entries.map((entry) {
-          final index = entry.key;
-          final score = entry.value;
-          return Column(
-            children: [
-              _buildSuggestionTile(context, colorScheme, textTheme, score),
-              if (index < suggestions.length - 1)
-              Divider(height: 16, color: colorScheme.outlineVariant.withValues(alpha: 0.5),
-                ),
-              ],
-            );
-          }),
-        ],
       ),
+    ),
     );
   }
 
@@ -301,13 +325,13 @@ class _DashboardPageState extends State<DashboardPage> {
     // Macro-based labels
     if (score.macroScore > 0.55) {
       if (food.proteins > 15) {
-        labels.add(_ReasonLabel('Alto in proteine', Icons.fitness_center, Colors.blue));
+        labels.add(_ReasonLabel('High in protein', Icons.fitness_center, Colors.blue));
       }
       if (food.carbs > 30 && food.carbs < 70) {
-        labels.add(_ReasonLabel('Carboidrati bilanciati', Icons.bolt, Colors.amber.shade700));
+        labels.add(_ReasonLabel('Balanced carbohydrates', Icons.bolt, Colors.amber.shade700));
       }
       if (food.fats < 5 && food.calories < 200) {
-        labels.add(_ReasonLabel('Leggero', Icons.air, Colors.teal));
+        labels.add(_ReasonLabel('Light', Icons.air, Colors.teal));
       }
     }
  
@@ -504,9 +528,7 @@ class _DashboardPageState extends State<DashboardPage> {
               // Burned card
               Expanded(
                 child: GestureDetector(
-                  onTap: () {
-                    // TODO: navigate to exercise page
-                  },
+                  onTap: () => Navigator.pushNamed(context, '/burned-calories'),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 14, vertical: 12),

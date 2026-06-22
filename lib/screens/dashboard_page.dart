@@ -1,3 +1,4 @@
+
 import 'package:bwthw_project/screens/inside_dashboard/suggested_food_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -115,7 +116,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
                   // Suggested food Widget
                   if (topSuggestions.isNotEmpty) ...[
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 20),
                     _buildSuggestedFoodCard(
                       context,
                       colorScheme,
@@ -422,7 +423,7 @@ class _DashboardPageState extends State<DashboardPage> {
         width: double.infinity,
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: colorScheme.surface,
+          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: colorScheme.outlineVariant),
         ),   
@@ -629,3 +630,4 @@ class _ReasonLabel {
   final Color color;
   const _ReasonLabel(this.text, this.icon, this.color);
 }
+

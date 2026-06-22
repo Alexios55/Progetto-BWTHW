@@ -1,3 +1,4 @@
+
 import 'package:bwthw_project/models.2/food_models/food_diary_db.dart';
 import 'package:bwthw_project/models.2/food_models/food_entry.dart';
 import 'package:bwthw_project/screens/food_diary_screens/food_search_page.dart';
@@ -27,19 +28,30 @@ class FoodDiaryPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Food Diary',
-                  style: textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.primary,
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 20,
                   ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  userService.getDailyFeedback(),
-                  style: textTheme.titleMedium?.copyWith(
-                    color: colorScheme.primary,
-                    fontWeight: FontWeight.w600,
+                  decoration: BoxDecoration(
+                    color: colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: colorScheme.outlineVariant),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    'Food Diary',
+                    style: textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -372,3 +384,4 @@ class FoodDiaryPage extends StatelessWidget {
     return value.toStringAsFixed(1);
   }
 }
+

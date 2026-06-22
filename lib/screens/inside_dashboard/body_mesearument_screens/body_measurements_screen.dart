@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:bwthw_project/models.2/input_mesearument_models/body_measurement_entry.dart';
 import 'package:bwthw_project/services/preference_service.dart';
@@ -72,40 +73,27 @@ class _BodyMeasurementsScreenState extends State<BodyMeasurementsScreen> {
   }
 
   void _showHowToMeasureDialog() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     showDialog(
       context: context,
       builder: (dialogContext) {
         return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: Column(
               children: [
-                const Text(
+                Text(
                   'How to take measurements',
-                  style: TextStyle(
-                    fontSize: 24,
+                  style: textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Colors.purple,
+                    color: colorScheme.onSurface,
                   ),
                   textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                Image.asset(
-                  'assets/images/body_measurements_guide.png',
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) {
-                    return Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: const Text(
-                        'Add the guide image in assets/images/body_measurements_guide.png',
-                        textAlign: TextAlign.center,
-                      ),
-                    );
-                  },
                 ),
                 const SizedBox(height: 20),
                 const _GuideText(
@@ -138,7 +126,7 @@ class _BodyMeasurementsScreenState extends State<BodyMeasurementsScreen> {
                   description:
                       'Measure the upper part of the thigh at its widest point, about 3/4 of the way up from the knee.',
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 TextButton(
                   onPressed: () {
                     Navigator.pop(dialogContext);
@@ -184,7 +172,7 @@ class _BodyMeasurementsScreenState extends State<BodyMeasurementsScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: colorScheme.primaryContainer.withOpacity(0.7),
+                color: colorScheme.primaryContainer.withValues(alpha: 0.7),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(Icons.add, color: colorScheme.primary),
@@ -231,6 +219,7 @@ class _BodyMeasurementsScreenState extends State<BodyMeasurementsScreen> {
                   'Measurement - ${_formatDate(entry.date)}',
                   style: textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -244,33 +233,45 @@ class _BodyMeasurementsScreenState extends State<BodyMeasurementsScreen> {
             ],
           ),
           const SizedBox(height: 14),
-          _valueRow('Chest', '${_formatNumber(entry.chest)} cm'),
+          _valueRow(context, 'Chest', '${_formatNumber(entry.chest)} cm'),
           const SizedBox(height: 8),
-          _valueRow('Arm', '${_formatNumber(entry.arm)} cm'),
+          _valueRow(context, 'Arm', '${_formatNumber(entry.arm)} cm'),
           const SizedBox(height: 8),
-          _valueRow('Waist', '${_formatNumber(entry.waist)} cm'),
+          _valueRow(context, 'Waist', '${_formatNumber(entry.waist)} cm'),
           const SizedBox(height: 8),
-          _valueRow('Hips', '${_formatNumber(entry.hips)} cm'),
+          _valueRow(context, 'Hips', '${_formatNumber(entry.hips)} cm'),
           const SizedBox(height: 8),
-          _valueRow('Thigh', '${_formatNumber(entry.thigh)} cm'),
+          _valueRow(context, 'Thigh', '${_formatNumber(entry.thigh)} cm'),
         ],
       ),
     );
   }
 
-  Widget _valueRow(String label, String value) {
+  Widget _valueRow(BuildContext context, String label, String value) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          Expanded(child: Text(label)),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                color: colorScheme.onSurface,
+              ),
+            ),
+          ),
           Text(
             value,
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onSurface,
+            ),
           ),
         ],
       ),
@@ -286,12 +287,6 @@ class _BodyMeasurementsScreenState extends State<BodyMeasurementsScreen> {
       appBar: AppBar(
         title: const Text('Body Measurements'),
         centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: _showHowToMeasureDialog,
-            icon: const Icon(Icons.info_outline),
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -302,6 +297,7 @@ class _BodyMeasurementsScreenState extends State<BodyMeasurementsScreen> {
               'Saved Measurements',
               style: textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
@@ -312,41 +308,28 @@ class _BodyMeasurementsScreenState extends State<BodyMeasurementsScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            InkWell(
-              borderRadius: BorderRadius.circular(20),
-              onTap: _showHowToMeasureDialog,
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: colorScheme.outlineVariant),
+            SizedBox(
+              width: double.infinity,
+              height: 55,
+              child: OutlinedButton.icon(
+                onPressed: _showHowToMeasureDialog,
+                icon: Icon(
+                  Icons.accessibility_new,
+                  color: colorScheme.primary,
                 ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: colorScheme.primaryContainer.withOpacity(0.7),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Icon(
-                        Icons.accessibility_new,
-                        color: colorScheme.primary,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    const Expanded(
-                      child: Text(
-                        'How to measure your body',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const Icon(Icons.chevron_right),
-                  ],
+                label: Text(
+                  'How to measure your body',
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.primary,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: colorScheme.outlineVariant),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  backgroundColor: colorScheme.surface,
                 ),
               ),
             ),
@@ -372,6 +355,7 @@ class _BodyMeasurementsScreenState extends State<BodyMeasurementsScreen> {
                       'No measurements yet',
                       style: textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
+                        color: colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -415,22 +399,24 @@ class _GuideText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CircleAvatar(
-            backgroundColor: Colors.purple,
-            foregroundColor: Colors.white,
+            backgroundColor: colorScheme.primary,
+            foregroundColor: colorScheme.onPrimary,
             child: Text(number),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: RichText(
               text: TextSpan(
-                style: const TextStyle(
-                  color: Colors.black,
+                style: TextStyle(
+                  color: colorScheme.onSurface,
                   fontSize: 16,
                   height: 1.4,
                 ),
@@ -449,3 +435,4 @@ class _GuideText extends StatelessWidget {
     );
   }
 }
+

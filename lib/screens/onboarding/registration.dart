@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 
 // This screen allows the user to create a new account by entering
@@ -13,7 +14,6 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
-  // Controllers used to read the text entered by the user.
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
@@ -21,13 +21,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   @override
   void dispose() {
-    // Dispose the controllers when the screen is removed.
     emailController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
     super.dispose();
   }
-  
 
   void _createAccount() {
     final String email = emailController.text.trim();
@@ -50,7 +48,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       return;
     }
 
-    // Validate the email format and make sure the password is at least 8 characters long.
     if (!emailRegExp.hasMatch(email)) {
       ScaffoldMessenger.of(context)
         ..removeCurrentSnackBar()
@@ -120,28 +117,40 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Please create your account to continue',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
                 const SizedBox(height: 32),
-
-                // Main box that contains the registration form.
-                Card(
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
+                Container(
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface,
                     borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.10),
+                        blurRadius: 18,
+                        spreadRadius: 1,
+                        offset: const Offset(0, 0),
+                      ),
+                    ],
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(24),
                     child: Column(
                       children: [
+                        Container(
+                          width: 70,
+                          height: 70,
+                          decoration: BoxDecoration(
+                            color: colorScheme.primaryContainer,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.person_add_alt_1_outlined,
+                            size: 36,
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
                         Text(
-                          'Create your account',
+                          'Create account',
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -158,7 +167,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           ),
                         ),
                         const SizedBox(height: 28),
-
                         TextField(
                           controller: emailController,
                           keyboardType: TextInputType.emailAddress,
@@ -179,7 +187,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           ),
                         ),
                         const SizedBox(height: 18),
-
                         TextField(
                           controller: passwordController,
                           obscureText: true,
@@ -200,7 +207,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           ),
                         ),
                         const SizedBox(height: 18),
-
                         TextField(
                           controller: confirmPasswordController,
                           obscureText: true,
@@ -221,7 +227,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           ),
                         ),
                         const SizedBox(height: 24),
-
                         SizedBox(
                           width: double.infinity,
                           height: 55,
@@ -242,9 +247,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 24),
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -271,3 +274,4 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     );
   }
 }
+

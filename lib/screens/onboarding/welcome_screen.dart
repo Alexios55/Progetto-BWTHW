@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:bwthw_project/models.2/user_temp.dart';
 import 'package:bwthw_project/screens/onboarding/personal_info_screen.dart';
@@ -14,13 +15,11 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
-  // Controllers used to read the text entered by the user.
   final TextEditingController nameController = TextEditingController();
   final TextEditingController surnameController = TextEditingController();
 
   @override
   void dispose() {
-    // Dispose the controllers when the screen is removed.
     nameController.dispose();
     surnameController.dispose();
     super.dispose();
@@ -31,7 +30,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       name: nameController.text.trim(),
       surname: surnameController.text.trim(),
     );
-    
+
     if (userTemp.name!.isEmpty || userTemp.surname!.isEmpty) {
       ScaffoldMessenger.of(context)
         ..removeCurrentSnackBar()
@@ -46,7 +45,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => PersonalInfoScreen(user: userTemp)),
+      MaterialPageRoute(
+        builder: (context) => PersonalInfoScreen(user: userTemp),
+      ),
     );
   }
 
@@ -80,26 +81,56 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Please enter your name and surname to continue',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
                 const SizedBox(height: 32),
-
-                // Main box that contains the welcome form.
-                Card(
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
+                Container(
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface,
                     borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.10),
+                        blurRadius: 18,
+                        spreadRadius: 1,
+                        offset: const Offset(0, 0),
+                      ),
+                    ],
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(24),
                     child: Column(
                       children: [
+                        Container(
+                          width: 70,
+                          height: 70,
+                          decoration: BoxDecoration(
+                            color: colorScheme.primaryContainer,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.person_outline,
+                            size: 36,
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          'Tell us who you are',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Please enter your name and surname to continue',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 28),
                         TextField(
                           controller: nameController,
                           decoration: InputDecoration(
@@ -166,3 +197,4 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     );
   }
 }
+

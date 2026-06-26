@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:bwthw_project/models.2/food_models/food_catalog.dart';
@@ -107,11 +108,12 @@ class _FoodSearchPageState extends State<FoodSearchPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Food Diary',
-                style: textTheme.headlineMedium?.copyWith(
+                style: TextStyle(
+                  fontSize: 34,
                   fontWeight: FontWeight.bold,
-                  color: colorScheme.primary,
+                  color: Colors.black,
                 ),
               ),
               const SizedBox(height: 24),
@@ -227,3 +229,4 @@ class _FoodSearchPageState extends State<FoodSearchPage> {
     return value.toStringAsFixed(1);
   }
 }
+

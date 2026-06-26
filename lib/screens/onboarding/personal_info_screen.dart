@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:bwthw_project/models.2/enums.dart';
@@ -9,14 +10,6 @@ import 'package:bwthw_project/services/user_service.dart';
 import 'package:bwthw_project/utils/calculate_age.dart';
 import 'package:bwthw_project/widgets/date_input_field.dart';
 
-/// This screen collects the user's personal information before
-/// continuing to the next step of the onboarding flow.
-/// The user must select sex, date of birth, age, weight, and height.
-/// The screen also checks that:
-/// - date of birth is 2010 or earlier
-/// - age is numeric and has at least 2 digits
-/// - weight is a valid number
-/// - height is a valid number
 class PersonalInfoScreen extends StatefulWidget {
   static const routeName = '/personal-info';
 
@@ -29,17 +22,14 @@ class PersonalInfoScreen extends StatefulWidget {
 }
 
 class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
-  // Controllers used to manage the text shown inside the fields.
   final TextEditingController dateOfBirthController = TextEditingController();
   final TextEditingController weightController = TextEditingController();
   final TextEditingController heightController = TextEditingController();
   final TextEditingController ageController = TextEditingController();
   late int age;
   late DateTime birthDate;
-  
-  // Variable used to store the selected sex.
+
   String? selectedSex;
-  // Variable used to store the selected activity level.
   String? activityLevel;
 
   void _onDateParsed(DateTime? date) {
@@ -81,7 +71,6 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       return;
     }
 
-    // Control if the user has more than 16 years (for legal issue) and write it into the age field
     if (age < 16) {
       ScaffoldMessenger.of(context)
         ..removeCurrentSnackBar()
@@ -92,14 +81,12 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
           ),
         );
       return;
-    }
-    else {
-      // If age is valid, write it into the age field.
+    } else {
       ageController.text = age.toString();
     }
 
-    // Check that weight is a valid number.
-    final double? weightValue = double.tryParse(weightController.text.replaceAll(',', '.'));
+    final double? weightValue =
+        double.tryParse(weightController.text.replaceAll(',', '.'));
     if (weightValue == null) {
       ScaffoldMessenger.of(context)
         ..removeCurrentSnackBar()
@@ -112,8 +99,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       return;
     }
 
-    // Check that height is a valid number.
-    final double? heightValue = double.tryParse(heightController.text.replaceAll(',', '.'));
+    final double? heightValue =
+        double.tryParse(heightController.text.replaceAll(',', '.'));
     if (heightValue == null) {
       ScaffoldMessenger.of(context)
         ..removeCurrentSnackBar()
@@ -128,8 +115,6 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
 
     final gender = _parseGender(selectedSex!);
     final parsedActivityLevel = _parseActivityLevel(activityLevel!);
-    // Goal is intentionally not set here: it will be derived on the next
-    // screen by comparing current weight with the user's target weight.
 
     widget.user.weight = weightValue;
     widget.user.height = heightValue;
@@ -161,8 +146,10 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => BmiStatusScreen(user: widget.user, 
-        patient: patient),
+        builder: (context) => BmiStatusScreen(
+          user: widget.user,
+          patient: patient,
+        ),
       ),
     );
   }
@@ -195,7 +182,6 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
 
   @override
   void dispose() {
-    // Dispose controllers to free memory when the screen is removed.
     dateOfBirthController.dispose();
     ageController.dispose();
     weightController.dispose();
@@ -233,26 +219,56 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Please enter your personal information to continue',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
                 const SizedBox(height: 32),
-
-                // Main box that contains the personal information form.
-                Card(
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
+                Container(
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface,
                     borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.10),
+                        blurRadius: 18,
+                        spreadRadius: 1,
+                        offset: const Offset(0, 0),
+                      ),
+                    ],
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(24),
                     child: Column(
                       children: [
+                        Container(
+                          width: 70,
+                          height: 70,
+                          decoration: BoxDecoration(
+                            color: colorScheme.primaryContainer,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.badge_outlined,
+                            size: 36,
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          'Tell us about you',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Please enter your personal information to continue',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 28),
                         DropdownButtonFormField<String>(
                           initialValue: selectedSex,
                           decoration: InputDecoration(
@@ -291,7 +307,6 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                           },
                         ),
                         const SizedBox(height: 18),
-
                         DateInputField(
                           controller: dateOfBirthController,
                           label: 'Date of Birth',
@@ -300,7 +315,6 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                           onDateParsed: _onDateParsed,
                         ),
                         const SizedBox(height: 18),
-
                         TextField(
                           controller: ageController,
                           readOnly: true,
@@ -312,7 +326,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             filled: true,
                             fillColor: colorScheme.surfaceContainerHighest
                                 .withValues(alpha: 0.4),
-                             border: OutlineInputBorder(
+                            border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(14),
                               borderSide: BorderSide.none,
                             ),
@@ -323,13 +337,13 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                           ),
                         ),
                         const SizedBox(height: 18),
-
                         Row(
                           children: [
                             Expanded(
                               child: TextField(
                                 controller: weightController,
-                                keyboardType: const TextInputType.numberWithOptions(
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
                                   decimal: true,
                                 ),
                                 decoration: InputDecoration(
@@ -339,8 +353,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                   ),
                                   suffixText: 'kg',
                                   filled: true,
-                                  fillColor: colorScheme
-                                      .surfaceContainerHighest
+                                  fillColor: colorScheme.surfaceContainerHighest
                                       .withValues(alpha: 0.4),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(14),
@@ -357,7 +370,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             Expanded(
                               child: TextField(
                                 controller: heightController,
-                                keyboardType: const TextInputType.numberWithOptions(
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
                                   decimal: true,
                                 ),
                                 decoration: InputDecoration(
@@ -365,8 +379,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                   prefixIcon: const Icon(Icons.height),
                                   suffixText: 'cm',
                                   filled: true,
-                                  fillColor: colorScheme
-                                      .surfaceContainerHighest
+                                  fillColor: colorScheme.surfaceContainerHighest
                                       .withValues(alpha: 0.4),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(14),
@@ -382,7 +395,6 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                           ],
                         ),
                         const SizedBox(height: 24),
-
                         DropdownButtonFormField<String>(
                           initialValue: null,
                           decoration: InputDecoration(
@@ -425,7 +437,6 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                           },
                         ),
                         const SizedBox(height: 18),
-
                         SizedBox(
                           width: double.infinity,
                           height: 55,
@@ -454,3 +465,4 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     );
   }
 }
+

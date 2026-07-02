@@ -5,10 +5,8 @@ import 'package:bwthw_project/models.2/food_models/food_diary_db.dart';
 import 'package:bwthw_project/models.2/food_models/food_item.dart';
 import 'package:bwthw_project/models.2/enums.dart';
 import 'package:bwthw_project/logic/nutrition_engine.dart';
-import 'package:bwthw_project/logic/blood_test_analyzer.dart';
 import 'package:bwthw_project/models.2/input_mesearument_models/blood_test.dart';
 import 'package:bwthw_project/services/preference_service.dart';
-import 'package:bwthw_project/services/calorie_calculator.dart';
 import 'package:bwthw_project/models.2/food_models/food_catalog.dart';
 
 class SuggestedFoodsScreen extends StatefulWidget {
@@ -37,6 +35,34 @@ class _SuggestedFoodsScreenState extends State<SuggestedFoodsScreen> {
     });
   }
 
+  Widget bulletPoint(TextTheme textTheme, ColorScheme colorScheme, String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            margin: const EdgeInsets.only(top: 6, right: 8),
+            decoration: BoxDecoration(
+              color: colorScheme.primary,
+              shape: BoxShape.circle,
+            ),
+          ),
+          Expanded(
+            child: Text(
+              text,
+              style: textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -59,7 +85,7 @@ class _SuggestedFoodsScreenState extends State<SuggestedFoodsScreen> {
               builder: (context, foodDiaryDB, _) {
                 final patient = context.watch<PatientState>().patient;
                 if (patient == null) {
-                  return const Center(child: Text('Profilo utente non trovato.'));
+                  return const Center(child: Text('User profile not found.'));
                 }
 
                 final exerciseCalories =
@@ -77,43 +103,6 @@ class _SuggestedFoodsScreenState extends State<SuggestedFoodsScreen> {
                     consumedMap[item] = (consumedMap[item] ?? 0) + entry.grams;
                   }
                 }
-
-                // Totals consumed today
-                final double totalCalories = foodDiaryDB.entries
-                    .fold(0, (s, e) => s + e.calories);
-                final double totalProteins = foodDiaryDB.entries
-                    .fold(0, (s, e) => s + e.proteins);
-                final double totalCarbs = foodDiaryDB.entries
-                    .fold(0, (s, e) => s + e.carbs);
-                final double totalFats = foodDiaryDB.entries
-                    .fold(0, (s, e) => s + e.fats);
-
-                // Fiber from catalog items
-                double totalFiber = 0;
-                consumedMap.forEach((food, grams) {
-                  totalFiber += food.fiber * (grams / 100);
-                });
-
-                // Macro targets
-                final targets = DailyTargets.fromPatient(patient);
-
-                // Blood micronutrients consumed
-                double totalIron = 0, totalCalcium = 0,
-                    totalVitaminD = 0, totalOmega3 = 0;
-                consumedMap.forEach((food, grams) {
-                  final scale = grams / 100;
-                  totalIron     += food.iron     * scale;
-                  totalCalcium  += food.calcium  * scale;
-                  totalVitaminD += food.vitaminD * scale;
-                  totalOmega3   += food.omega3   * scale;
-                });
-
-                // Blood parameter targets (reference optimal values)
-                const double ironTarget     = 18.0;   // mg/day RDA
-                const double calciumTarget  = 1000.0; // mg/day RDA
-                const double vitaminDTarget = 15.0;   // µg/day RDA
-                const double omega3Target   = 1600.0; // mg/day RDA (ALA)
-                const double fiberTarget    = 25.0;   // g/day RDA
 
                 // Ranked suggestions for current meal
                 final currentMeal = MealTypeExtension.current();
@@ -165,132 +154,6 @@ class _SuggestedFoodsScreenState extends State<SuggestedFoodsScreen> {
 
                             const SizedBox(height: 20),
 
-                            // ── ROW 1: Macros ────────────────────
-                            Text(
-                              "Today's macronutrients",
-                              style: textTheme.titleSmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.3,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                _NutrientRing(
-                                  label: 'Calories',
-                                  value: totalCalories,
-                                  target: targets.calories,
-                                  unit: 'kcal',
-                                  color: colorScheme.primary,
-                                ),
-                                _NutrientRing(
-                                  label: 'Proteins',
-                                  value: totalProteins,
-                                  target: targets.proteins,
-                                  unit: 'g',
-                                  color: Colors.blue.shade500,
-                                ),
-                                _NutrientRing(
-                                  label: 'Carbohydrates',
-                                  value: totalCarbs,
-                                  target: targets.carbs,
-                                  unit: 'g',
-                                  color: Colors.amber.shade600,
-                                ),
-                                _NutrientRing(
-                                  label: 'Fats',
-                                  value: totalFats,
-                                  target: targets.fats,
-                                  unit: 'g',
-                                  color: Colors.orange.shade500,
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            // ── ROW 2: Micronutrienti ─────────────
-                            Row(
-                              children: [
-                                Text(
-                                  "Today's micronutrients",
-                                  style: textTheme.titleSmall?.copyWith(
-                                    color: colorScheme.onSurfaceVariant,
-                                    fontWeight: FontWeight.w600,
-                                    letterSpacing: 0.3,
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                if (_latestBloodTest == null)
-                                  Tooltip(
-                                    message: 'No blood tests recorded.\nTargets are based on standard RDA values.',
-                                    child: Icon(Icons.info_outline,
-                                        size: 14,
-                                        color: colorScheme.onSurfaceVariant),
-                                  ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                _NutrientRing(
-                                  label: 'Iron',
-                                  value: totalIron,
-                                  target: ironTarget,
-                                  unit: 'mg',
-                                  color: Colors.red.shade400,
-                                  deficit: _latestBloodTest != null
-                                      ? BloodTestAnalyzer.computeDeficits(
-                                              _latestBloodTest!)['iron']
-                                          ?.deficit
-                                      : null,
-                                ),
-                                _NutrientRing(
-                                  label: 'Calcium',
-                                  value: totalCalcium,
-                                  target: calciumTarget,
-                                  unit: 'mg',
-                                  color: Colors.indigo.shade400,
-                                  deficit: _latestBloodTest != null
-                                      ? BloodTestAnalyzer.computeDeficits(
-                                              _latestBloodTest!)['calcium']
-                                          ?.deficit
-                                      : null,
-                                ),
-                                _NutrientRing(
-                                  label: 'Vit. D',
-                                  value: totalVitaminD,
-                                  target: vitaminDTarget,
-                                  unit: 'µg',
-                                  color: Colors.orange.shade400,
-                                  deficit: _latestBloodTest != null
-                                      ? BloodTestAnalyzer.computeDeficits(
-                                              _latestBloodTest!)['vitaminD']
-                                          ?.deficit
-                                      : null,
-                                ),
-                                _NutrientRing(
-                                  label: 'Omega-3',
-                                  value: totalOmega3,
-                                  target: omega3Target,
-                                  unit: 'mg',
-                                  color: Colors.cyan.shade500,
-                                ),
-                                _NutrientRing(
-                                  label: 'Fibers',
-                                  value: totalFiber,
-                                  target: fiberTarget,
-                                  unit: 'g',
-                                  color: Colors.green.shade500,
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 28),
-
                             // ── Suggested list header ─────────────
                             Text(
                               'Suggested for you right now',
@@ -300,11 +163,17 @@ class _SuggestedFoodsScreenState extends State<SuggestedFoodsScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Sorted by personalized nutritional score',
+                              'Suggested fooods are sorted by personalized nutritional score. \n'
+                              'The Food Score estimate how appropriate a food is for your current meal by comining different nutritional factors into a single value.\n'
+                              'The algorithm calculate the score considering many parameters, including:',
                               style: textTheme.bodySmall?.copyWith(
                                 color: colorScheme.onSurfaceVariant,
                               ),
                             ),
+                            bulletPoint(textTheme, colorScheme, 'Your current caloric intake and calories still needed to reach your daily target'),
+                            bulletPoint(textTheme, colorScheme, 'Your current macronutrient and micronutrient intake and needs'),
+                            bulletPoint(textTheme, colorScheme, 'The nutritional composition of the food itself (macros, micros, fibers, etc.)'),
+                            bulletPoint(textTheme, colorScheme, 'The nutritional priority assigned to each nutrient based on latest blood test results (if available)'),
                             const SizedBox(height: 12),
                           ],
                         ),
@@ -337,117 +206,6 @@ class _SuggestedFoodsScreenState extends State<SuggestedFoodsScreen> {
               },
             ),
     );
-  }
-}
-
-// ── NUTRIENT RING ────────────────────────────────────────────────
-
-class _NutrientRing extends StatelessWidget {
-  final String label;
-  final double value;
-  final double target;
-  final String unit;
-  final Color color;
-  // If non-null, shows a small deficit indicator dot
-  final double? deficit;
-
-  const _NutrientRing({
-    required this.label,
-    required this.value,
-    required this.target,
-    required this.unit,
-    required this.color,
-    this.deficit,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
-    final progress = (value / target).clamp(0.0, 1.0);
-    final isOver = value > target;
-    final ringColor = isOver ? Colors.red.shade400 : color;
-
-    return Column(
-      children: [
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            SizedBox(
-              width: 58,
-              height: 58,
-              child: CircularProgressIndicator(
-                value: progress,
-                strokeWidth: 5.5,
-                backgroundColor:
-                    colorScheme.outlineVariant.withOpacity(0.25),
-                valueColor: AlwaysStoppedAnimation<Color>(ringColor),
-                strokeCap: StrokeCap.round,
-              ),
-            ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  _format(value),
-                  style: textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 11,
-                  ),
-                ),
-                Text(
-                  unit,
-                  style: textTheme.labelSmall?.copyWith(
-                    fontSize: 9,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-            // Deficit dot — top-right of ring
-            if (deficit != null && deficit! > 0.2)
-              Positioned(
-                top: 2,
-                right: 2,
-                child: Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: deficit! > 0.6
-                        ? Colors.red.shade400
-                        : Colors.orange.shade400,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                        color: colorScheme.surface, width: 1.5),
-                  ),
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        Text(
-          label,
-          style: textTheme.labelSmall?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-            fontSize: 10,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        Text(
-          '/ ${_format(target)} $unit',
-          style: textTheme.labelSmall?.copyWith(
-            fontSize: 9,
-            color: colorScheme.onSurfaceVariant.withOpacity(0.6),
-          ),
-        ),
-      ],
-    );
-  }
-
-  String _format(double v) {
-    if (v >= 1000) return '${(v / 1000).toStringAsFixed(1)}k';
-    if (v >= 10)   return v.toStringAsFixed(0);
-    return v.toStringAsFixed(1);
   }
 }
 
@@ -541,7 +299,7 @@ class _FoodSuggestionCard extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          '${(score.totalScore * 100).toStringAsFixed(0)}',
+                          (score.totalScore * 100).toStringAsFixed(0),
                           style: textTheme.labelSmall?.copyWith(
                             color: _scoreColor(score.totalScore),
                             fontWeight: FontWeight.bold,
@@ -719,7 +477,7 @@ class _FoodSuggestionCard extends StatelessWidget {
                                             .withOpacity(0.35)),
                                   ),
                                   child: Text(
-                                    '${(alt.totalScore * 100).toStringAsFixed(0)}',
+                                    (alt.totalScore * 100).toStringAsFixed(0),
                                     style: textTheme.labelSmall?.copyWith(
                                       color: _scoreColor(alt.totalScore),
                                       fontWeight: FontWeight.bold,
@@ -745,22 +503,30 @@ class _FoodSuggestionCard extends StatelessWidget {
     final chips = <_Chip>[];
     final food = score.food;
 
-    if (food.proteins > 15)
+    if (food.proteins > 15) {
       chips.add(_Chip('Protein', Icons.fitness_center, Colors.blue));
-    if (food.iron > 2)
+    }
+    if (food.iron > 2) {
       chips.add(_Chip('Rich in iron', Icons.bloodtype_outlined, Colors.red));
-    if (food.calcium > 150)
+    }
+    if (food.calcium > 150) {
       chips.add(_Chip('Calcium', Icons.science_outlined, Colors.indigo));
-    if (food.vitaminD > 3)
+    }
+    if (food.vitaminD > 3) {
       chips.add(_Chip('Vit. D', Icons.wb_sunny_outlined, Colors.orange));
-    if (food.omega3 > 500)
+    }
+    if (food.omega3 > 500) {
       chips.add(_Chip('Omega-3', Icons.water_drop_outlined, Colors.cyan));
-    if (food.fiber > 3)
+    }
+    if (food.fiber > 3) {
       chips.add(_Chip('Fibers', Icons.grass_outlined, Colors.green));
-    if (food.fats < 5 && food.calories < 150)
+    }
+    if (food.fats < 5 && food.calories < 150) {
       chips.add(_Chip('Light', Icons.air, Colors.teal));
-    if (score.activityScore > 0.4)
+    }
+    if (score.activityScore > 0.4) {
       chips.add(_Chip('Post-workout', Icons.directions_run, Colors.deepOrange));
+    }
 
     return chips.take(2).map((c) => Padding(
       padding: const EdgeInsets.only(right: 5),

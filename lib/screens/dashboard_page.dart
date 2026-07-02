@@ -414,7 +414,7 @@ class _DashboardPageState extends State<DashboardPage> {
     double exerciseCalories,
   ) {
     // balance: positive = surplus, negative = deficit
-    final double balance = foodCalories - exerciseCalories - baseGoal;
+    // final double balance = foodCalories - exerciseCalories - baseGoal;
     final patient = context.watch<PatientState>().patient;
 
     return InkWell(
@@ -423,7 +423,7 @@ class _DashboardPageState extends State<DashboardPage> {
         width: double.infinity,
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
+          color: colorScheme.surfaceContainerHighest.withOpacity(0),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: colorScheme.outlineVariant),
         ),   
@@ -471,9 +471,7 @@ class _DashboardPageState extends State<DashboardPage> {
               // Consumed card
               Expanded(
                 child: GestureDetector(
-                  onTap: () {
-                    // TODO: navigate to food diary
-                  },
+                  onTap: () => Navigator.pushNamed(context, '/consumed-calories'),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 14, vertical: 12),

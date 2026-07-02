@@ -2,7 +2,6 @@
 import 'package:bwthw_project/models.2/food_models/food_diary_db.dart';
 import 'package:bwthw_project/models.2/food_models/food_entry.dart';
 import 'package:bwthw_project/screens/food_diary_screens/food_search_page.dart';
-import 'package:bwthw_project/services/user_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -12,93 +11,77 @@ class FoodDiaryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final userService = UserService();
 
     return SafeArea(
       child: Consumer<FoodDiaryDB>(
         builder: (context, foodDiaryDB, child) {
-          final consumedCalories = _totalCalories(foodDiaryDB.entries);
-          final targetCalories = userService.dailyCaloriesTarget;
-          final smartwatchData = userService.dailyHealthData;
+          const meals = ['Breakfast', 'Snack', 'Lunch', 'Dinner'];
+          const headerHeight = 34.0 + 16.0 + 16.0; // title + spacing
+          const gapHeight = 5.0 * 3;               // 3 gaps between 4 tiles
+          const padding = 16.0 * 2;                // vertical padding
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Food Diary',
-                  style: TextStyle(
-                    fontSize: 34,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final availableHeight = constraints.maxHeight;
+              // Height available for the 4 tiles combined
+              final tilesHeight =
+                  availableHeight - headerHeight - gapHeight - padding;
+              // Each tile gets an equal share as its minimum collapsed height
+              final tileMinHeight = (tilesHeight / meals.length).clamp(64.0, 200.0);
+
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Food Diary',
+                      style: TextStyle(
+                        fontSize: 34,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ...meals.expand((meal) => [
+                      _buildMealSection(
+                        context,
+                        foodDiaryDB,
+                        meal,
+                        minCollapsedHeight: tileMinHeight,
+                      ),
+                      if (meal != meals.last) const SizedBox(height: 5),
+                    ]),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                _buildOverviewCard(
-                  context,
-                  consumedCalories: consumedCalories,
-                  targetCalories: targetCalories,
-                  steps: smartwatchData.steps,
-                  activeCaloriesBurned: smartwatchData.activeCaloriesBurned,
-                ),
-                const SizedBox(height: 24),
-                _buildMealSection(context, foodDiaryDB, 'Breakfast'),
-                const SizedBox(height: 20),
-                _buildMealSection(context, foodDiaryDB, 'Snack'),
-                const SizedBox(height: 20),
-                _buildMealSection(context, foodDiaryDB, 'Lunch'),
-                const SizedBox(height: 20),
-                _buildMealSection(context, foodDiaryDB, 'Dinner'),
-              ],
-            ),
+              );
+            },
           );
         },
       ),
     );
   }
 
-  Widget _buildOverviewCard(
-    BuildContext context, {
-    required double consumedCalories,
-    required double targetCalories,
-    required int steps,
-    required double activeCaloriesBurned,
-  }) {
-    final textTheme = Theme.of(context).textTheme;
-
-    return Card(
-      elevation: 0,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Today overview',
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text('Consumed: ${consumedCalories.toStringAsFixed(0)} kcal'),
-            Text('Target: ${targetCalories.toStringAsFixed(0)} kcal'),
-            Text('Steps: $steps'),
-            Text(
-              'Watch calories burned: ${activeCaloriesBurned.toStringAsFixed(0)} kcal',
-            ),
-          ],
-        ),
-      ),
-    );
+  IconData _mealIcon(String mealTitle) {
+    switch (mealTitle) {
+      case 'Breakfast':
+        return Icons.free_breakfast;
+      case 'Snack':
+        return Icons.cookie;
+      case 'Lunch':
+        return Icons.dinner_dining;
+      case 'Dinner':
+        return Icons.local_dining;
+      default:
+        return Icons.restaurant;
+    }
   }
 
   Widget _buildMealSection(
     BuildContext context,
     FoodDiaryDB foodDiaryDB,
-    String mealTitle,
+    String mealTitle, {
+    double minCollapsedHeight = 64,}
   ) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
@@ -107,87 +90,123 @@ class FoodDiaryPage extends StatelessWidget {
         .where((entry) => entry.mealType == mealTitle)
         .toList();
 
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-        side: BorderSide(color: colorScheme.outlineVariant),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: mealEntries.isEmpty
-            ? SizedBox(
-                height: 180,
-                child: Column(
-                  children: [
-                    _buildMealHeader(context, mealTitle),
-                    const Spacer(),
-                    Center(
-                      child: Text(
-                        'No food added',
-                        style: textTheme.titleMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                    const Spacer(),
-                  ],
-                ),
-              )
-            : Column(
-                children: [
-                  _buildMealHeader(context, mealTitle),
-                  const SizedBox(height: 16),
-                  Column(
-                    children: mealEntries.asMap().entries.map((entry) {
-                      final index = entry.key;
-                      final foodEntry = entry.value;
+    final mealKcal = mealEntries.fold<double>(0, (s, e) => s + e.calories);
 
-                      return Padding(
-                        padding: EdgeInsets.only(
-                          bottom: index == mealEntries.length - 1 ? 0 : 12,
+    return SizedBox(
+      width: double.infinity,
+      height: null,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: minCollapsedHeight),
+        child: Card(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+            side: BorderSide(color: colorScheme.outlineVariant),
+        ),
+      child: ExpansionTile(
+        tilePadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 24,
+            ),
+        visualDensity: VisualDensity(vertical: 2,),
+        title: Text(
+          mealTitle,
+          style: textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        subtitle: Text(
+          '${mealKcal.toStringAsFixed(0)} kcal',
+          style: textTheme.titleMedium?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+        leading: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Icon(
+            _mealIcon(mealTitle),
+            color: colorScheme.primary,
+            size: 28,
+          ),
+        ),
+        shape: const RoundedRectangleBorder(
+          side: BorderSide.none,),
+        collapsedShape: const RoundedRectangleBorder(
+          side: BorderSide.none,),
+        childrenPadding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+        children: [
+          const SizedBox(height: 0),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+            child: mealEntries.isEmpty
+                ? SizedBox(
+                    height: 180,
+                    child: Column(
+                      children: [
+                        _buildMealHeader(context, mealTitle),
+                        const Spacer(),
+                        Center(
+                          child: Text(
+                            'No food added',
+                            style: textTheme.titleMedium?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
                         ),
-                        child: _buildFoodEntryCard(
-                          context,
-                          foodDiaryDB,
-                          foodEntry,
-                        ),
-                      );
-                    }).toList(),
+                        const Spacer(),
+                      ],
+                    ),
+                  )
+                : Column(
+                    children: [
+                      _buildMealHeader(context, mealTitle),
+                      const SizedBox(height: 16),
+                      ...mealEntries.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final foodEntry = entry.value;
+
+                        return Padding(
+                          padding: EdgeInsets.only(
+                            bottom: index == mealEntries.length - 1 ? 0 : 12,
+                          ),
+                          child: _buildFoodEntryCard(
+                            context,
+                            foodDiaryDB,
+                            foodEntry,
+                          ),
+                        );
+                      }).toList(),
+                    ],
                   ),
-                ],
-              ),
-      ),
+                ),
+              ],
+            ),
+          ),
+        ),
     );
   }
 
   Widget _buildMealHeader(BuildContext context, String mealTitle) {
-    final textTheme = Theme.of(context).textTheme;
-
+  
     return Row(
-      children: [
-        Expanded(
-          child: Text(
-            mealTitle,
-            style: textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FilledButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => FoodSearchPage(
+                    mealType: mealTitle,
+                  ),
+                ),
+              );
+            },
+            icon: const Icon(Icons.add),
+            label: const Text('Add'),
           ),
-        ),
-        FilledButton.icon(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => FoodSearchPage(mealType: mealTitle),
-              ),
-            );
-          },
-          icon: const Icon(Icons.add),
-          label: const Text('Add'),
-        ),
-      ],
-    );
+        ],
+      );
   }
 
   Widget _buildFoodEntryCard(
@@ -267,7 +286,7 @@ class FoodDiaryPage extends StatelessWidget {
                 child: _buildNutritionBox(
                   context,
                   'Calories:',
-                  _formatNumber(foodEntry.calories),
+                  '${_formatNumber(foodEntry.calories)} kcal',
                   const Color(0xFFF4EBDD),
                 ),
               ),
@@ -276,7 +295,7 @@ class FoodDiaryPage extends StatelessWidget {
                 child: _buildNutritionBox(
                   context,
                   'Proteins:',
-                  '${_formatNumber(foodEntry.proteins)}g',
+                  '${_formatNumber(foodEntry.proteins)} g',
                   const Color(0xFFDDE6F2),
                 ),
               ),
@@ -289,7 +308,7 @@ class FoodDiaryPage extends StatelessWidget {
                 child: _buildNutritionBox(
                   context,
                   'Carbs:',
-                  '${_formatNumber(foodEntry.carbs)}g',
+                  '${_formatNumber(foodEntry.carbs)} g',
                   const Color(0xFFF2EFD9),
                 ),
               ),
@@ -298,7 +317,7 @@ class FoodDiaryPage extends StatelessWidget {
                 child: _buildNutritionBox(
                   context,
                   'Fats:',
-                  '${_formatNumber(foodEntry.fats)}g',
+                  '${_formatNumber(foodEntry.fats)} g',
                   const Color(0xFFF4E3E6),
                 ),
               ),
@@ -353,10 +372,6 @@ class FoodDiaryPage extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  double _totalCalories(List<FoodEntry> entries) {
-    return entries.fold(0, (total, entry) => total + entry.calories);
   }
 
   String _formatNumber(double value) {

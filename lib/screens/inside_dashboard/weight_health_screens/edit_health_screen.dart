@@ -156,7 +156,6 @@ class _EditHealthScreenState extends State<EditHealthScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // Card contenitore con lo stesso design di PersonalInfoScreen
                 Card(
                   elevation: 2,
                   shape: RoundedRectangleBorder(

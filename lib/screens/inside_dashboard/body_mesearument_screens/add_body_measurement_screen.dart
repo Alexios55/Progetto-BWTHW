@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bwthw_project/models.2/input_mesearument_models/body_measurement_entry.dart';
+import 'package:bwthw_project/widgets/date_input_field.dart';
 
 class AddBodyMeasurementScreen extends StatefulWidget {
   const AddBodyMeasurementScreen({super.key});
@@ -15,26 +16,19 @@ class _AddBodyMeasurementScreenState extends State<AddBodyMeasurementScreen> {
   final waistController = TextEditingController();
   final hipsController = TextEditingController();
   final thighController = TextEditingController();
+  late final TextEditingController _dateController;
 
   DateTime selectedDate = DateTime.now();
 
-  Future<void> _selectDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: selectedDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2100),
+  @override
+  void initState() {
+    super.initState();
+    _dateController = TextEditingController(
+      text:
+          '${selectedDate.day.toString().padLeft(2, '0')}/'
+          '${selectedDate.month.toString().padLeft(2, '0')}/'
+          '${selectedDate.year}',
     );
-
-    if (picked != null) {
-      setState(() {
-        selectedDate = picked;
-      });
-    }
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
   }
 
   double? _parseValue(String value) {
@@ -75,6 +69,18 @@ class _AddBodyMeasurementScreenState extends State<AddBodyMeasurementScreen> {
     Navigator.pop(context, entry);
   }
 
+  void _onDateParsed(DateTime? date) {
+    if (date == null) return;
+
+    setState(() {
+      selectedDate = date;
+      _dateController.text =
+          '${date.day.toString().padLeft(2, '0')}/'
+          '${date.month.toString().padLeft(2, '0')}/'
+          '${date.year}';
+    });
+  }
+
   Widget _field(
     BuildContext context,
     String label,
@@ -102,6 +108,7 @@ class _AddBodyMeasurementScreenState extends State<AddBodyMeasurementScreen> {
 
   @override
   void dispose() {
+    _dateController.dispose();
     chestController.dispose();
     armController.dispose();
     waistController.dispose();
@@ -112,7 +119,6 @@ class _AddBodyMeasurementScreenState extends State<AddBodyMeasurementScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -122,29 +128,12 @@ class _AddBodyMeasurementScreenState extends State<AddBodyMeasurementScreen> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            InkWell(
-              onTap: _selectDate,
-              borderRadius: BorderRadius.circular(14),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest.withOpacity(0.4),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.calendar_today_outlined),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Date: ${_formatDate(selectedDate)}',
-                      ),
-                    ),
-                    const Icon(Icons.edit_calendar_outlined),
-                  ],
-                ),
-              ),
+            DateInputField(
+              controller: _dateController,
+              label: 'Date',
+              firstDate: DateTime(2020),
+              lastDate: DateTime.now(),
+              onDateParsed: _onDateParsed,
             ),
             const SizedBox(height: 20),
             _field(context, 'Chest', chestController),

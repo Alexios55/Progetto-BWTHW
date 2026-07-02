@@ -173,79 +173,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               const SizedBox(height: 15),
 
-              /*Row(
-                children: [
-                  statBox(
-                    'Weight',
-                    '${patient.weightKg} kg',
-                    Icons.monitor_weight,
-                  ),
-                  const SizedBox(width: 5),
-                  statBox(
-                    'Height',
-                    '${patient.heightCm} cm',
-                    Icons.height,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 5),
-              Row(
-                children: [
-                statBox(
-                  'Goal',
-                  '${patient.targetWeightKg} kg',
-                  Icons.flag,
-                ),
-                const SizedBox(width: 5),
-                statBox(
-                  'Activity level',
-                  '${patient.activityLevel.label}',
-                  Icons.fitness_center,
-                ),
-              ],
-            ),*/
-
-              const SizedBox(height: 10),
-/*
-              Card(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  side: BorderSide(color: colorScheme.outlineVariant),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.insights_outlined,
-                            color: colorScheme.primary,
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            'BMI Overview',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: colorScheme.onSurface,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 18),
-                      BmiBar(
-                        bmi: bmi,
-                        statusColor: Colors.green,
-                      ),
-                    ],
-                  ),
-                ),
-              ),*/
-
-              const SizedBox(height: 8),
-
               Card(
                 elevation: 0,
                 shape: RoundedRectangleBorder(
@@ -287,6 +214,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 12),
                       infoRow('Gender', patient.gender.label),
                       const SizedBox(height: 12),
+                      infoRow('Email', patient.email),
+                      const SizedBox(height: 12),
+                      infoRow('Password', patient.password.replaceAll(RegExp(r'.'), '*')),
                     ],
                   ),
                 ),

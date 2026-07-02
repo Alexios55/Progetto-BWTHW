@@ -89,158 +89,156 @@ class _CaloriesBurnedScreenState extends State<CaloriesBurnedScreen> {
           style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         centerTitle: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.tune_outlined),
+                  ),
+        floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
             tooltip: 'Edit burn goal',
             onPressed: _isLoading ? null : _editGoal,
           ),
-        ],
-      ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Consumer2<PatientState, FoodDiaryDB>(
-              builder: (context, patientState, foodDiaryDB, _) {
-                final patient = patientState.patient;
-                final burned = patientState.burnedCalories;
-                final steps = patientState.steps;
-                final distanceKm = patientState.distanceKm; // add to PatientState
-                final consumedCalories = foodDiaryDB.entries
-                    .fold<double>(0, (s, e) => s + e.calories);
-                final baseGoal = patient != null
-                    ? calculateDailyCalorieGoal(patient)
-                    : 2000.0;
-                final surplus =
-                    (consumedCalories - baseGoal).clamp(0.0, double.infinity);
+    ? const Center(child: CircularProgressIndicator())
+    : Consumer2<PatientState, FoodDiaryDB>(
+        builder: (context, patientState, foodDiaryDB, _) {
+          final patient = patientState.patient;
+          final burned = patientState.burnedCalories;  
+          final steps = patientState.steps;
+          final distanceKm = patientState.distanceKm; // add to PatientState
+          final consumedCalories = foodDiaryDB.entries
+              .fold<double>(0, (s, e) => s + e.calories);
+          final baseGoal = patient != null
+              ? calculateDailyCalorieGoal(patient)
+              : 2000.0;
+          final surplus =
+              (consumedCalories - baseGoal).clamp(0.0, double.infinity);
 
-                return CustomScrollView(
-                  slivers: [
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // ── Three rings side by side ─────────
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _ActivityRing(
-                                  value: burned,
-                                  target: _burnedGoal,
-                                  unit: 'kcal',
-                                  label: 'Calories\nburned',
-                                  color: Colors.orange.shade500,
-                                  icon: Icons.local_fire_department_outlined,
-                                  caption:
-                                      'Goal: ${_burnedGoal.toStringAsFixed(0)} kcal/day',
-                                ),
-                                _ActivityRing(
-                                  value: steps.toDouble(),
-                                  target: 8000,
-                                  unit: 'steps',
-                                  label: 'Daily\nsteps',
-                                  color: Colors.green.shade500,
-                                  icon: Icons.directions_walk_outlined,
-                                  caption: 'Goal: 8,000 steps/day',
-                                  formatInteger: true,
-                                ),
-                                _ActivityRing(
-                                  value: distanceKm,
-                                  target: (steps * 0.00075)
-                                      .clamp(1.0, double.infinity),
-                                  unit: 'km',
-                                  label: 'Distance\ncovered',
-                                  color: Colors.blue.shade400,
-                                  icon: Icons.route_outlined,
-                                  caption:
-                                      '~${(steps * 0.00075).toStringAsFixed(1)} km from steps',
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            // ── Context blurb ────────────────────
-                            _ContextCard(
-                              burned: burned,
-                              steps: steps,
-                              distanceKm: distanceKm,
-                              surplus: surplus,
-                              colorScheme: colorScheme,
-                              textTheme: textTheme,
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            // ── Suggestions header ───────────────
-                            if (surplus > 0) ...[
-                              Text(
-                                'Burn off the surplus',
-                                style: textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                "You're ${surplus.toStringAsFixed(0)} kcal over your daily goal. "
-                                'Here are some ways to balance it out:',
-                                style: textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.onSurfaceVariant),
-                              ),
-                            ] else ...[
-                              Text(
-                                'Keep moving',
-                                style: textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                "You're within your calorie budget — great work! "
-                                'Some activity ideas for the rest of the day:',
-                                style: textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.onSurfaceVariant),
-                              ),
-                            ],
-
-                            const SizedBox(height: 12),
-                          ],
-                        ),
+          return CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // ── Three rings side by side ─────────
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _ActivityRing(
+                            value: burned,
+                            target: _burnedGoal,
+                            unit: 'kcal',
+                            label: 'Calories\nburned',
+                            color: Colors.orange.shade500,
+                            icon: Icons.local_fire_department_outlined,
+                            caption:
+                                'Goal: ${_burnedGoal.toStringAsFixed(0)} kcal/day',
+                          ),
+                          _ActivityRing(
+                            value: steps.toDouble(),
+                            target: 8000,
+                            unit: 'steps',
+                            label: 'Daily\nsteps',
+                            color: Colors.green.shade500,
+                            icon: Icons.directions_walk_outlined,
+                            caption: 'Goal: 8,000 steps/day',
+                            formatInteger: true,
+                          ),
+                          _ActivityRing(
+                            value: distanceKm,
+                            target: (steps * 0.00075)
+                                .clamp(1.0, double.infinity),
+                            unit: 'km',
+                            label: 'Distance\ncovered',
+                            color: Colors.blue.shade400,
+                            icon: Icons.route_outlined,
+                            caption:
+                                '~${(steps * 0.00075).toStringAsFixed(1)} km from steps',
+                          ),
+                        ],
                       ),
-                    ),
 
-                    // ── Activity suggestion cards ────────────────
-                    SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            final activities =
-                                _buildActivities(surplus, patient?.weightKg ?? 70);
-                            if (index >= activities.length) return null;
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: _ActivityCard(
-                                activity: activities[index],
-                                surplus: surplus,
-                                colorScheme: colorScheme,
-                                textTheme: textTheme,
-                              ),
-                            );
-                          },
-                          childCount:
-                              _buildActivities(surplus, patient?.weightKg ?? 70)
-                                  .length,
-                        ),
+                      const SizedBox(height: 24),
+
+                      // ── Context blurb ────────────────────
+                      _ContextCard(
+                        burned: burned,
+                        steps: steps,
+                        distanceKm: distanceKm,
+                        surplus: surplus,
+                        colorScheme: colorScheme,
+                        textTheme: textTheme,
                       ),
-                    ),
-                    const SliverToBoxAdapter(child: SizedBox(height: 24)),
-                  ],
-                );
-              },
-            ),
+
+                      const SizedBox(height: 24),
+
+                      // ── Suggestions header ───────────────
+                      if (surplus > 0) ...[
+                        Text(
+                          'Burn off the surplus',
+                          style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "You're ${surplus.toStringAsFixed(0)} kcal over your daily goal. "
+                          'Here are some ways to balance it out:',
+                          style: textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant),
+                        ),
+                      ] else ...[
+                        Text(
+                          'Keep moving',
+                          style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "You're within your calorie budget — great work! "
+                          'Some activity ideas for the rest of the day:',
+                          style: textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant),
+                        ),
+                      ],
+
+                      const SizedBox(height: 12),
+                    ],
+                  ),
+                ),
+              ),
+
+              // ── Activity suggestion cards ────────────────
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final activities =
+                          _buildActivities(surplus, patient?.weightKg ?? 70);
+                      if (index >= activities.length) return null;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: _ActivityCard(
+                          activity: activities[index],
+                          surplus: surplus,
+                          colorScheme: colorScheme,
+                          textTheme: textTheme,
+                        ),
+                      );
+                    },
+                    childCount:
+                        _buildActivities(surplus, patient?.weightKg ?? 70)
+                            .length,
+                  ),
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            ],
+          );
+        },
+      ),
     );
   }
 

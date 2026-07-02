@@ -13,13 +13,14 @@ import 'theme.dart';
 import 'package:bwthw_project/models.2/user_temp.dart';
 import 'package:bwthw_project/screens/profile/profile_screen.dart';
 import 'package:bwthw_project/screens/inside_dashboard/blood_test_screens/blood_test_screen.dart';
-import 'package:bwthw_project/screens/inside_dashboard/blood_test_screens/add_blood_test_screen.dart';  
+import 'package:bwthw_project/screens/inside_dashboard/blood_test_screens/add_blood_test_screen.dart';
 import 'package:bwthw_project/screens/splash_screen.dart';
 import 'package:bwthw_project/models.2/patient_state.dart';
 import 'package:bwthw_project/screens/inside_dashboard/body_mesearument_screens/body_measurements_screen.dart';
 import 'package:bwthw_project/screens/inside_dashboard/body_mesearument_screens/add_body_measurement_screen.dart';
 import 'package:bwthw_project/screens/inside_dashboard/suggested_food_screen.dart';
 import 'package:bwthw_project/screens/inside_dashboard/burned_calories_screen.dart';
+import 'package:bwthw_project/services/auth_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,39 +41,44 @@ class MyApp extends StatelessWidget {
     MaterialTheme theme = MaterialTheme(textTheme);
 
     return MultiProvider(
-    providers: [
-    ChangeNotifierProvider<FoodDiaryDB>(
-      create: (context) => FoodDiaryDB(),
-    ),
-    ChangeNotifierProvider<PatientState>(
-      create: (context) => PatientState(),
-    ),
-  ],
-    child: MaterialApp(
-    debugShowCheckedModeBanner: false,
-    title: 'smartDIET',
-    theme: theme.light(),
-    darkTheme: theme.dark(),
-    themeMode: ThemeMode.system,
-    home: SplashScreen(),
-    routes: {
-      '/start': (context) => const StartScreen(),
-      '/login': (context) => const LoginScreen(),
-      '/registration': (context) => const RegistrationScreen(),
-      '/welcome': (context) => const WelcomeScreen(),
-      '/personal-info': (context) {
-        final user = ModalRoute.of(context)!.settings.arguments as UserTemp;
-        return PersonalInfoScreen(user: user);
-      },
-      '/home': (context) => const HomeScreen(),
-      '/profile': (context) => const ProfileScreen(),
-      '/blood-tests': (context) => const BloodTestScreen(),
-      '/add-blood-test': (context) => const AddBloodTestScreen(),
-      '/body-measurements': (context) => const BodyMeasurementsScreen(),
-      '/add-body-measurement': (context) => const AddBodyMeasurementScreen(),
-      'food-suggestions': (context) => const SuggestedFoodsScreen(),
-      '/burned-calories': (context) => const CaloriesBurnedScreen(),
-      },
-    ),
-  );
-  }}
+      providers: [
+        ChangeNotifierProvider<FoodDiaryDB>(
+          create: (context) => FoodDiaryDB(),
+        ),
+        ChangeNotifierProvider<PatientState>(
+          create: (context) => PatientState(),
+        ),
+        ChangeNotifierProvider<AuthProvider>(
+          create: (context) => AuthProvider(),
+        ),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'smartDIET',
+        theme: theme.light(),
+        darkTheme: theme.dark(),
+        themeMode: ThemeMode.system,
+        home: SplashScreen(),
+        routes: {
+          '/start': (context) => const StartScreen(),
+          '/login': (context) => const LoginScreen(),
+          '/registration': (context) => const RegistrationScreen(),
+          '/welcome': (context) => const WelcomeScreen(),
+          '/personal-info': (context) {
+            final user = ModalRoute.of(context)!.settings.arguments as UserTemp;
+            return PersonalInfoScreen(user: user);
+          },
+          '/home': (context) => const HomeScreen(),
+          '/profile': (context) => const ProfileScreen(),
+          '/blood-tests': (context) => const BloodTestScreen(),
+          '/add-blood-test': (context) => const AddBloodTestScreen(),
+          '/body-measurements': (context) => const BodyMeasurementsScreen(),
+          '/add-body-measurement': (context) =>
+              const AddBodyMeasurementScreen(),
+          'food-suggestions': (context) => const SuggestedFoodsScreen(),
+          '/burned-calories': (context) => const CaloriesBurnedScreen(),
+        },
+      ),
+    );
+  }
+}

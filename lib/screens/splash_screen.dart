@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:bwthw_project/services/preference_service.dart';
 import 'package:provider/provider.dart';
 import 'package:bwthw_project/models.2/patient_state.dart';
+import 'package:bwthw_project/services/auth_provider.dart';
 import 'dart:async';
 
 class SplashScreen extends StatefulWidget {
@@ -16,31 +16,33 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_){
-    _checkLoginStatus();
-  });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkLoginStatus();
+    });
   }
 
   Future<void> _checkLoginStatus() async {
-    bool isLoggedIn = false;
-
+    final auth = context.read<AuthProvider>();
     try {
-      isLoggedIn = await PreferenceService.getLogin().timeout(const Duration(seconds: 3));
+      await auth.initialize().timeout(const Duration(seconds: 5));
     } catch (_) {
-      isLoggedIn = false;
+      await auth.logout();
     }
 
-    if (isLoggedIn) {
+    if (auth.isAuthenticated) {
       try {
-      await context.read<PatientState>().loadFromPreferences().timeout(const Duration(seconds: 3));
-    } catch (_) {}
-  }
+        await context
+            .read<PatientState>()
+            .loadFromPreferences()
+            .timeout(const Duration(seconds: 3));
+      } catch (_) {}
+    }
 
     await Future.delayed(const Duration(seconds: 2));
 
     if (!mounted) return;
 
-    if (isLoggedIn) {
+    if (auth.isAuthenticated) {
       Navigator.pushReplacementNamed(context, '/home');
     } else {
       Navigator.pushReplacementNamed(context, '/start');
@@ -60,12 +62,12 @@ class _SplashScreenState extends State<SplashScreen> {
               color: Theme.of(context).colorScheme.primary,
             ),
             const Text(
-                'smartDIET',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                ),
+              'smartDIET',
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
               ),
+            ),
             const SizedBox(height: 30),
             const CircularProgressIndicator(),
           ],

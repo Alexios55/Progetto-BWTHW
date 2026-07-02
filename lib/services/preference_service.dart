@@ -23,6 +23,9 @@ class PreferenceService {
   static const String _bodyMeasurementEntriesKey = 'body_measurement_entries';
   static const String _themeModeKey = 'theme_mode';
   static const String _languageKey = 'language';
+  static const String _accessTokenKey = 'access';
+  static const String _refreshTokenKey = 'refresh';
+  static const String _impactUsernameKey = 'impactUsername';
 
   // helper method to get shared preferences instance
   static Future<SharedPreferences> _prefs() => SharedPreferences.getInstance();
@@ -63,6 +66,33 @@ class PreferenceService {
     final prefs = await _prefs();
     await prefs.remove(_emailKey);
     await prefs.remove(_passwordKey);
+  }
+
+  static Future<void> saveImpactSession({
+    required String accessToken,
+    required String refreshToken,
+    required String username,
+  }) async {
+    final prefs = await _prefs();
+    await prefs.setString(_accessTokenKey, accessToken);
+    await prefs.setString(_refreshTokenKey, refreshToken);
+    await prefs.setString(_impactUsernameKey, username);
+  }
+
+  static Future<String?> getAccessToken() async =>
+      (await _prefs()).getString(_accessTokenKey);
+
+  static Future<String?> getRefreshToken() async =>
+      (await _prefs()).getString(_refreshTokenKey);
+
+  static Future<String?> getImpactUsername() async =>
+      (await _prefs()).getString(_impactUsernameKey);
+
+  static Future<void> clearImpactSession() async {
+    final prefs = await _prefs();
+    await prefs.remove(_accessTokenKey);
+    await prefs.remove(_refreshTokenKey);
+    await prefs.remove(_impactUsernameKey);
   }
 
   // Onboarding ------------------------------------------------------------------

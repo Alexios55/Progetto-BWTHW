@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:bwthw_project/services/preference_service.dart';
 import 'package:provider/provider.dart';
 import 'package:bwthw_project/models.2/patient_state.dart';
+import 'package:bwthw_project/services/auth_provider.dart';
 
 // This screen allows the user to log into the app by entering
 // an email and a password. If the fields are valid, the user
@@ -25,7 +25,6 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  bool canLogin = false;
   bool rememberMe = false;
 
   @override
@@ -36,30 +35,28 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> login() async {
-    String email = emailController.text.trim();
-    String password = passwordController.text.trim();
+    final username = emailController.text.trim();
+    final password = passwordController.text.trim();
 
-    // We have only one user with one credential
-    if (email == 'test@test.com' && password == '1234') {
-      setState(()
-      {
-        canLogin = true;
-      });
-    } else {
-      // Error message
+    if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Incorrect user or password'),
+          content: Text('Please enter your username and password.'),
         ),
       );
+      return;
     }
-    if (canLogin) {
-      // save the login with shared preferences
-      if (rememberMe) {
-        await PreferenceService.saveLogin(true);
-      } else {
-        await PreferenceService.saveLogin(false);
-      }
+
+    final auth = context.read<AuthProvider>();
+    final loggedIn = await auth.login(
+      username: username,
+      password: password,
+      rememberMe: rememberMe,
+    );
+
+    if (!mounted) return;
+
+    if (loggedIn) {
       await context.read<PatientState>().loadFromPreferences();
       if (!mounted) return;
       Navigator.pushNamedAndRemoveUntil(
@@ -67,6 +64,18 @@ class _LoginScreenState extends State<LoginScreen> {
         '/home',
         (route) => false,
       );
+    } else {
+      ScaffoldMessenger.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(8),
+            duration: const Duration(seconds: 3),
+            content: Text(auth.errorMessage ?? 'Login failed.'),
+          ),
+        );
     }
 
   }
@@ -139,6 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final isLoading = context.watch<AuthProvider>().isLoading;
 
     return Scaffold(
       appBar: AppBar(
@@ -288,16 +298,24 @@ class _LoginScreenState extends State<LoginScreen> {
                           width: double.infinity,
                           height: 55,
                           child: ElevatedButton(
-                            onPressed: login,
+                            onPressed: isLoading ? null : login,
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
                               ),
                             ),
-                            child: const Text(
-                              'Sign In',
-                              style: TextStyle(fontSize: 18),
-                            ),
+                            child: isLoading
+                                ? const SizedBox(
+                                    height: 22,
+                                    width: 22,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Text(
+                                    'Sign In',
+                                    style: TextStyle(fontSize: 18),
+                                  ),
                           ),
                         ),
                       ],

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:bwthw_project/services/preference_service.dart';
 import 'package:provider/provider.dart';
 import 'package:bwthw_project/models.2/patient_state.dart';
-import 'package:bwthw_project/services/auth_provider.dart';
 
 // This screen allows the user to log into the app by entering
 // an email and a password. If the fields are valid, the user
@@ -35,28 +35,16 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> login() async {
-    final username = emailController.text.trim();
-    final password = passwordController.text.trim();
+    String email = emailController.text.trim();
+    String password = passwordController.text.trim();
 
-    if (username.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter your username and password.'),
-        ),
-      );
-      return;
-    }
-
-    final auth = context.read<AuthProvider>();
-    final loggedIn = await auth.login(
-      username: username,
-      password: password,
-      rememberMe: rememberMe,
-    );
-
-    if (!mounted) return;
-
-    if (loggedIn) {
+    // App login: this is separate from the IMPACT wearable authorization.
+    if (email == 'test@test.com' && password == '1234') {
+      if (rememberMe) {
+        await PreferenceService.saveLogin(true);
+      } else {
+        await PreferenceService.saveLogin(false);
+      }
       await context.read<PatientState>().loadFromPreferences();
       if (!mounted) return;
       Navigator.pushNamedAndRemoveUntil(
@@ -65,19 +53,12 @@ class _LoginScreenState extends State<LoginScreen> {
         (route) => false,
       );
     } else {
-      ScaffoldMessenger.of(context)
-        ..removeCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(
-            backgroundColor: Theme.of(context).colorScheme.error,
-            behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.all(8),
-            duration: const Duration(seconds: 3),
-            content: Text(auth.errorMessage ?? 'Login failed.'),
-          ),
-        );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Incorrect user or password'),
+        ),
+      );
     }
-
   }
 
   /*@override
@@ -148,7 +129,6 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final isLoading = context.watch<AuthProvider>().isLoading;
 
     return Scaffold(
       appBar: AppBar(
@@ -298,24 +278,16 @@ class _LoginScreenState extends State<LoginScreen> {
                           width: double.infinity,
                           height: 55,
                           child: ElevatedButton(
-                            onPressed: isLoading ? null : login,
+                            onPressed: login,
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
                               ),
                             ),
-                            child: isLoading
-                                ? const SizedBox(
-                                    height: 22,
-                                    width: 22,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : const Text(
-                                    'Sign In',
-                                    style: TextStyle(fontSize: 18),
-                                  ),
+                            child: const Text(
+                              'Sign In',
+                              style: TextStyle(fontSize: 18),
+                            ),
                           ),
                         ),
                       ],

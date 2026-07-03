@@ -4,7 +4,6 @@ import 'package:bwthw_project/models.2/patient.dart';
 import 'package:bwthw_project/models.2/patient_state.dart';
 import 'package:bwthw_project/models.2/enums.dart';
 import 'package:bwthw_project/services/preference_service.dart';
-import 'package:bwthw_project/services/auth_provider.dart';
 import 'edit_profile_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -17,10 +16,9 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
 
   void _logout() async {
-    await context.read<AuthProvider>().logout();
     await PreferenceService.clearAll();
     if (!mounted) return;
-    Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
+    Navigator.pushReplacementNamed(context, '/login');
   }
 
   void _editProfile(Patient patient) async {

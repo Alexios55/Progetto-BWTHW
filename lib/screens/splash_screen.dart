@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:bwthw_project/services/preference_service.dart';
 import 'package:provider/provider.dart';
 import 'package:bwthw_project/models.2/patient_state.dart';
-import 'package:bwthw_project/services/auth_provider.dart';
 import 'dart:async';
 
 class SplashScreen extends StatefulWidget {
@@ -22,14 +22,16 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkLoginStatus() async {
-    final auth = context.read<AuthProvider>();
+    bool isLoggedIn = false;
+
     try {
-      await auth.initialize().timeout(const Duration(seconds: 5));
+      isLoggedIn =
+          await PreferenceService.getLogin().timeout(const Duration(seconds: 3));
     } catch (_) {
-      await auth.logout();
+      isLoggedIn = false;
     }
 
-    if (auth.isAuthenticated) {
+    if (isLoggedIn) {
       try {
         await context
             .read<PatientState>()
@@ -42,7 +44,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (!mounted) return;
 
-    if (auth.isAuthenticated) {
+    if (isLoggedIn) {
       Navigator.pushReplacementNamed(context, '/home');
     } else {
       Navigator.pushReplacementNamed(context, '/start');

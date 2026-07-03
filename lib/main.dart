@@ -20,7 +20,6 @@ import 'package:bwthw_project/screens/inside_dashboard/body_mesearument_screens/
 import 'package:bwthw_project/screens/inside_dashboard/body_mesearument_screens/add_body_measurement_screen.dart';
 import 'package:bwthw_project/screens/inside_dashboard/suggested_food_screen.dart';
 import 'package:bwthw_project/screens/inside_dashboard/burned_calories_screen.dart';
-import 'package:bwthw_project/services/auth_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,9 +46,6 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<PatientState>(
           create: (context) => PatientState(),
-        ),
-        ChangeNotifierProvider<AuthProvider>(
-          create: (context) => AuthProvider(),
         ),
       ],
       child: MaterialApp(

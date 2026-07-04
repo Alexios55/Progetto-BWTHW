@@ -17,8 +17,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _logout() async {
     await PreferenceService.clearAll();
-    Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
-    await PreferenceService.saveLogin(false);
+    if (!mounted) return;
+    Navigator.pushReplacementNamed(context, '/login');
   }
 
   void _editProfile(Patient patient) async {

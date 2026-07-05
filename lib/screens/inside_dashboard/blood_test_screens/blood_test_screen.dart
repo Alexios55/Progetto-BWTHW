@@ -1,7 +1,8 @@
+// blood_test_screen.dart
 import 'package:flutter/material.dart';
 import 'package:bwthw_project/models.2/input_mesearument_models/blood_test.dart';
 import 'package:bwthw_project/services/preference_service.dart';
-import 'package:bwthw_project/screens/inside_dashboard/blood_test_screens/blood_test_detail_screen.dart';
+import 'package:bwthw_project/screens/inside_dashboard/blood_test_screens/blood_test_detail_screen.dart'; // 🔥 QUESTO È L'IMPORT CHE MANCAVA
 
 class BloodTestScreen extends StatefulWidget {
   const BloodTestScreen({super.key});
@@ -23,8 +24,8 @@ class _BloodTestScreenState extends State<BloodTestScreen> {
     final loaded = await PreferenceService.getBloodTests() ?? [];
     final loadedTests = loaded.whereType<BloodTest>().toList();
     loadedTests.sort((a, b) {
-      final aDate = a.date ?? DateTime.fromMillisecondsSinceEpoch(0);
-      final bDate = b.date ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final aDate = a.date;
+      final bDate = b.date;
       return bDate.compareTo(aDate);
     });
 
@@ -36,11 +37,11 @@ class _BloodTestScreenState extends State<BloodTestScreen> {
   Future<void> _addBloodTest() async {
     final result = await Navigator.pushNamed(context, '/add-blood-test');
 
-    if (result != null) {
-      tests.add(result as BloodTest);
+    if (result != null && result is BloodTest) {
+      tests.add(result);
       tests.sort((a, b) {
-        final aDate = a.date ?? DateTime.fromMillisecondsSinceEpoch(0);
-        final bDate = b.date ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final aDate = a.date;
+        final bDate = b.date;
         return bDate.compareTo(aDate);
       });
 
@@ -85,10 +86,7 @@ class _BloodTestScreenState extends State<BloodTestScreen> {
     setState(() {});
   }
 
-  String _formatDate(DateTime? date) {
-    if (date == null) {
-      return 'Unknown';
-    }
+  String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }
 
@@ -101,6 +99,12 @@ class _BloodTestScreenState extends State<BloodTestScreen> {
       appBar: AppBar(
         title: const Text('Blood Tests'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: _addBloodTest,
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -152,11 +156,11 @@ class _BloodTestScreenState extends State<BloodTestScreen> {
                             color: colorScheme.onSurfaceVariant,
                           ),
                         ),
+                        const SizedBox(height: 16),
+                        _buildAddAnalysisButton(context),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  _buildAddAnalysisButton(context),
                 ],
               )
             : Column(
@@ -203,7 +207,7 @@ class _BloodTestScreenState extends State<BloodTestScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => BloodTestDetailScreen(test: test),
+            builder: (context) => BloodTestDetailScreen(test: test), // 🔥 ORA FUNZIONA PERCHÉ IMPORTATO
           ),
         );
       },

@@ -1,6 +1,6 @@
 import 'package:bwthw_project/screens/onboarding/bmi_status.dart';
 import 'package:bwthw_project/screens/home_screen.dart';
-import 'package:bwthw_project/screens/login_screen.dart';
+import 'package:bwthw_project/screens/login_screen_with_token.dart';
 import 'package:bwthw_project/screens/onboarding/personal_info_screen.dart';
 import 'package:bwthw_project/screens/onboarding/registration.dart';
 import 'package:bwthw_project/screens/start_screen.dart';

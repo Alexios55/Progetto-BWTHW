@@ -352,7 +352,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                       Patient patient = Patient(
                         id: 'patient_1',
                         name: 'Patient',
-                        email: '',
+                        user: '',
                         age: age,
                         weightKg: weight,
                         heightCm: height,

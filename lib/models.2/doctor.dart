@@ -11,7 +11,7 @@ class Doctor extends User {
     required super.id,
     required super.name,
     super.surname,
-    required super.email,
+    required super.user,
     super.password,
     required this.gender,
     required this.specialization,

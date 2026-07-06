@@ -53,7 +53,7 @@ class UserService extends ChangeNotifier {
       id: 'current_patient',
       name: '',
       surname: '',
-      email: '',
+      user: '',
       age: age,
       gender: gender,
       heightCm: height,

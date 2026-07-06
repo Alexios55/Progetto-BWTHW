@@ -3,7 +3,7 @@ class User {
   final String id;
   final String name;
   final String surname;
-  final String email;
+  final String user;
   final String password;
   final DateTime birthDate;
   final double weight;
@@ -14,7 +14,7 @@ class User {
     this.id = '',
     required this.name,
     this.surname = '',
-    this.email = '',
+    this.user = '',
     this.password = '',
     DateTime? birthDate,
     this.weight = 0,
@@ -41,7 +41,7 @@ class User {
       'id': id,
       'name': name,
       'surname': surname,
-      'email': email,
+      'user': user,
       'password': password,
       'birthDate': birthDate.toIso8601String(),
       'weight': weight,
@@ -55,7 +55,7 @@ class User {
       id: map['id'] ?? '',
       name: map['name'] ?? '',
       surname: map['surname'] ?? '',
-      email: map['email'] ?? '',
+      user: map['user'] ?? '',
       password: map['password'] ?? '',
       birthDate: DateTime.tryParse(map['birthDate'] ?? '') ?? DateTime(2000),
       weight: (map['weight'] ?? 0).toDouble(),

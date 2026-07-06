@@ -104,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 8),
 
                 Text(
-                  'Please enter your email and password to sign in',
+                  'Please enter your user and password to sign in',
                   style: TextStyle(
                     fontSize: 16,
                     color: colorScheme.onSurfaceVariant,
@@ -163,10 +163,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         TextField(
                           controller: usernameController,
-                          keyboardType: TextInputType.emailAddress,
+                          keyboardType: TextInputType.text,
                           decoration: InputDecoration(
-                            hintText: 'Email',
-                            prefixIcon: const Icon(Icons.email_outlined),
+                            hintText: 'User',
+                            prefixIcon: const Icon(Icons.person_outline),
                             filled: true,
                             fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
                             border: OutlineInputBorder(

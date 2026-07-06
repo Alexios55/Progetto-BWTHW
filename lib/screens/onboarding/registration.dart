@@ -14,29 +14,29 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
-  final TextEditingController emailController = TextEditingController();
+  final TextEditingController userController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
 
   @override
   void dispose() {
-    emailController.dispose();
+    userController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
     super.dispose();
   }
 
   void _createAccount() {
-    final String email = emailController.text.trim();
+    final String user = userController.text.trim();
     final String password = passwordController.text.trim();
     final String confirmPassword = confirmPasswordController.text.trim();
 
-    final RegExp emailRegExp = RegExp(
-      r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
-    );
+    //final RegExp emailRegExp = RegExp(
+    //  r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
+    //);
 
-    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+    if (user.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context)
         ..removeCurrentSnackBar()
         ..showSnackBar(
@@ -48,7 +48,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       return;
     }
 
-    if (!emailRegExp.hasMatch(email)) {
+    /*if (!emailRegExp.hasMatch(user)) {
       ScaffoldMessenger.of(context)
         ..removeCurrentSnackBar()
         ..showSnackBar(
@@ -58,7 +58,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           ),
         );
       return;
-    }
+    }*/
 
     if (password.length < 8) {
       ScaffoldMessenger.of(context)
@@ -168,11 +168,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         ),
                         const SizedBox(height: 28),
                         TextField(
-                          controller: emailController,
+                          controller: userController,
                           keyboardType: TextInputType.emailAddress,
                           decoration: InputDecoration(
-                            hintText: 'Email',
-                            prefixIcon: const Icon(Icons.email_outlined),
+                            hintText: 'Username',
+                            prefixIcon: const Icon(Icons.person_outline),
                             filled: true,
                             fillColor: colorScheme.surfaceContainerHighest
                                 .withValues(alpha: 0.4),

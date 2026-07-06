@@ -13,33 +13,33 @@ import 'package:bwthw_project/models.2/patient_state.dart';
 // This screen allows the user to log into the app by entering
 // an email and a password. The email must have a valid format
 // and the password must be at least 8 characters long.
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class LoginScreenTemp extends StatefulWidget {
+  const LoginScreenTemp({super.key});
 
   static const routeName = '/login';
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<LoginScreenTemp> createState() => _LoginScreenTempState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController emailController = TextEditingController();
+class _LoginScreenTempState extends State<LoginScreenTemp> {
+  final TextEditingController userController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool rememberMe = false;
 
   @override
   void dispose() {
-    emailController.dispose();
+    userController.dispose();
     passwordController.dispose();
     super.dispose();
   }
 
   Future<void> login() async {
-    String email = emailController.text.trim();
+    String user = userController.text.trim();
     String password = passwordController.text.trim();
 
     // App login: this is separate from the IMPACT wearable authorization.
-    if (email == 'test@test.com' && password == '1234') {
+    if (user == 'test' && password == '1234') {
       if (rememberMe) {
         await PreferenceService.saveLogin(true);
       } else {
@@ -219,11 +219,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 28),
 
                         TextField(
-                          controller: emailController,
-                          keyboardType: TextInputType.emailAddress,
+                          controller: userController,
+                          keyboardType: TextInputType.text,
                           decoration: InputDecoration(
-                            hintText: 'Email',
-                            prefixIcon: const Icon(Icons.email_outlined),
+                            hintText: 'User',
+                            prefixIcon: const Icon(Icons.person_outline),
                             filled: true,
                             fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
                             border: OutlineInputBorder(

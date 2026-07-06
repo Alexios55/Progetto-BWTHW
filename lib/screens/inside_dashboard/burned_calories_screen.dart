@@ -6,7 +6,7 @@ import 'package:bwthw_project/services/preference_service.dart';
 import 'package:bwthw_project/services/calorie_calculator.dart';
 import 'package:bwthw_project/services/impact.dart';
 import 'package:bwthw_project/models.2/werable_data_models/steps.dart';
-
+import 'package:bwthw_project/models.2/werable_data_models/distance.dart';
 class CaloriesBurnedScreen extends StatefulWidget {
   const CaloriesBurnedScreen({super.key});
 
@@ -28,6 +28,7 @@ class _CaloriesBurnedScreenState extends State<CaloriesBurnedScreen> {
   void initState() {
     super.initState();
     _loadGoal();
+    _loadWerableData();
   }
 
   Future<void> _loadGoal() async {
@@ -37,6 +38,11 @@ class _CaloriesBurnedScreenState extends State<CaloriesBurnedScreen> {
       _burnedGoal = prefs;
       _isLoading = false;
     });
+  }
+
+  Future<void> _loadWerableData() async {
+    final patientState = Provider.of<PatientState>(context, listen: false);
+    await patientState.loadDistance();
   }
 
   Future<void> _editGoal() async {
@@ -153,7 +159,7 @@ class _CaloriesBurnedScreenState extends State<CaloriesBurnedScreen> {
                             color: Colors.blue.shade400,
                             icon: Icons.route_outlined,
                             caption:
-                                '~${(steps * 0.00075).toStringAsFixed(1)} km from steps',
+                                '3 km/day',
                           ),
                         ],
                       ),

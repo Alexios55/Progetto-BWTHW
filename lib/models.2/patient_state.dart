@@ -76,12 +76,14 @@ class PatientState extends ChangeNotifier {
 
   Future<void> loadDistance() async {
     final data = await Impact().getDistanceData(DateTime.now());
+    print('Punti ricevuti: ${data.length}');
+    if (data.isNotEmpty) print('Primo timestamp: ${data.first.timestamp}');
     final grouped = distance_model.groupStepsByDay(data);
     final totalMeters = distance_model.totalDistanceUpToNow(grouped, DateTime.now());
-    distanceKm = totalMeters / 1000.0;
+    distanceKm = totalMeters / 100000.0;
     notifyListeners();
 
-    print(distanceKm);
+    print('distance km:$distanceKm');
   }
 
   Future<void> refreshWearableData() async {

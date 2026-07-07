@@ -1,6 +1,6 @@
 import 'package:bwthw_project/screens/onboarding/bmi_status.dart';
 import 'package:bwthw_project/screens/home_screen.dart';
-import 'package:bwthw_project/screens/login_screen.dart';
+import 'package:bwthw_project/screens/login_screen_with_token.dart';
 import 'package:bwthw_project/screens/onboarding/personal_info_screen.dart';
 import 'package:bwthw_project/screens/onboarding/registration.dart';
 import 'package:bwthw_project/screens/start_screen.dart';
@@ -20,6 +20,7 @@ import 'package:bwthw_project/screens/inside_dashboard/body_mesearument_screens/
 import 'package:bwthw_project/screens/inside_dashboard/body_mesearument_screens/add_body_measurement_screen.dart';
 import 'package:bwthw_project/screens/inside_dashboard/suggested_food_screen.dart';
 import 'package:bwthw_project/screens/inside_dashboard/burned_calories_screen.dart';
+import 'package:bwthw_project/screens/inside_dashboard/consumed_calories_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -73,6 +74,7 @@ class MyApp extends StatelessWidget {
               const AddBodyMeasurementScreen(),
           'food-suggestions': (context) => const SuggestedFoodsScreen(),
           '/burned-calories': (context) => const CaloriesBurnedScreen(),
+          '/consumed-calories': (context) => const ConsumedScreen()
         },
       ),
     );

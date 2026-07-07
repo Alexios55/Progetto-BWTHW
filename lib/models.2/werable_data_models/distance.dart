@@ -11,7 +11,7 @@ class Distance {
     : timestamp = DateFormat(
         'yyyy-MM-dd HH:mm:ss',
       ).parse('$date ${json["time"]}'),
-      value = json["value"];
+      value = int.parse(json["value"]);
 
   @override
   String toString() {

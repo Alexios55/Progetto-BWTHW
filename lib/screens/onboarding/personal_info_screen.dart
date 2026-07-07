@@ -132,7 +132,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       id: 'patient_1',
       name: widget.user.name ?? 'Patient',
       surname: widget.user.surname ?? '',
-      email: '',
+      user: '',
       age: age,
       weightKg: weightValue,
       heightCm: heightValue,

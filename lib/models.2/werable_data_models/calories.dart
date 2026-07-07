@@ -19,7 +19,7 @@ class Calories {
   }
 }
 
-Map<DateTime, List<Calories>> groupStepsByDay(List<Calories> allData) {
+Map<DateTime, List<Calories>> groupCaloriesByDay(List<Calories> allData) {
   final map = <DateTime, List<Calories>>{};
   for (final c in allData) {
     final day = DateTime(c.time.year, c.time.month, c.time.day);

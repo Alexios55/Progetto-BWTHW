@@ -10,7 +10,7 @@ class PreferenceService {
   // keys
   static const String _isLoggedInKey = 'isLoggedIn';
   static const String _onboardingDoneKey = 'onboardingDone';
-  static const String _emailKey = 'email';
+  static const String _userKey = 'user';
   static const String _passwordKey = 'password';
   static const String _nameKey = 'name';
   static const String _surnameKey = 'surname';
@@ -44,19 +44,19 @@ class PreferenceService {
     (await _prefs()).setBool(_isLoggedInKey, false);
 
   // This is the method to save user login
-  static Future<void> saveUserLogin(String email, String password) async {
+  static Future<void> saveUserLogin(String user, String password) async {
     final prefs = await _prefs();
-    await prefs.setString(_emailKey, email);
+    await prefs.setString(_userKey, user);
     await prefs.setString(_passwordKey, password);
   } 
 
   // This is the method to get user login
   static Future<Map<String, String>?> getUserLogin() async {
     final prefs = await _prefs();
-    String? email = prefs.getString(_emailKey);
+    String? user = prefs.getString(_userKey);
     String? password = prefs.getString(_passwordKey);
-    if (email != null && password != null) {
-      return {'email': email, 'password': password};
+    if (user != null && password != null) {
+      return {'user': user, 'password': password};
     }
     return null;
   }
@@ -64,7 +64,7 @@ class PreferenceService {
   // This is the method to clear user login
   static Future<void> clearUserLogin() async {
     final prefs = await _prefs();
-    await prefs.remove(_emailKey);
+    await prefs.remove(_userKey);
     await prefs.remove(_passwordKey);
   }
 

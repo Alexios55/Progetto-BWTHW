@@ -22,7 +22,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late Gender selectedGender;
   late TextEditingController birthDateController;
   late DateTime birthDate;
-  late TextEditingController mail;
+  late TextEditingController usernameController;
   late TextEditingController password;
   late TextEditingController new_password;
   late TextEditingController confirm_password;
@@ -38,7 +38,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     birthDateController = TextEditingController(
       text: widget.patient.birthDate.toIso8601String().split('T').first,
     );
-    mail = TextEditingController(text: widget.patient.email);
+    usernameController = TextEditingController(text: widget.patient.user);
     password = TextEditingController();
     new_password = TextEditingController();
     confirm_password = TextEditingController();
@@ -73,7 +73,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       surname: surnameController.text.trim(),
       gender: selectedGender,
       birthDate: birthDate,
-      email: mail.text.trim(),
+      user: usernameController.text.trim(),
       password: new_password.text.isNotEmpty ? new_password.text : widget.patient.password,
     );
 
@@ -82,7 +82,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       name: updatedPatient.name,
       surname: updatedPatient.surname,
       birthDate: updatedPatient.birthDate,
-      email: updatedPatient.email,  
+      user: updatedPatient.user,
       password: updatedPatient.password,
     ));
 
@@ -117,7 +117,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       const SizedBox(height: 8),
                       TextField(controller: surnameController, decoration: const InputDecoration(labelText: 'Surname')),
                       const SizedBox(height: 8),
-                      TextField(controller: mail, decoration: const InputDecoration(labelText: 'Email')),
+                      TextField(controller: usernameController, decoration: const InputDecoration(labelText: 'Username')),
                       const SizedBox(height: 8),
                       TextField(controller: password, decoration: const InputDecoration(labelText: 'Current password')),
                       const SizedBox(height: 8),

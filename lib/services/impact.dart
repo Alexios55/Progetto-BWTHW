@@ -40,7 +40,7 @@ class Impact {
     final refresh = await PreferenceService.getRefreshToken();
     final username = await PreferenceService.getImpactUsername();
 
-    if (refresh == null) {
+    if (refresh == null || username == null) {
       return 401;
     }
 
@@ -54,7 +54,7 @@ class Impact {
         await PreferenceService.saveImpactSession(
           accessToken: decodedResponse['access'],
           refreshToken: decodedResponse['refresh'],
-          username: username ?? _fallbackImpactUsername,
+          username: username,
         );
       }
 
@@ -124,6 +124,7 @@ class Impact {
 
   Future<String?> _authorizedAccessToken() async {
     var access = await PreferenceService.getAccessToken();
+    print('Access token presente: ${access != null}');
     if (access == null) {
       return null;
     }
@@ -147,10 +148,11 @@ class Impact {
     return access;
   }
 
-  Future<String> _patientUsername() async {
-    return await PreferenceService.getImpactUsername() ??
-        _fallbackImpactUsername;
-  }
+Future<String> _patientUsername() async {
+  final saved = await PreferenceService.getImpactUsername();
+  print('Username salvato in prefs: $saved');
+  return saved ?? _fallbackImpactUsername;
+}
 
   Future<http.Response?> _getAuthorized(Uri uri) async {
     final access = await _authorizedAccessToken();
@@ -227,11 +229,19 @@ class Impact {
 
     String formattedDate = DateFormat('yyyy-MM-dd').format(date);
     final username = await _patientUsername();
+    print('Username usato: $username');
     final url =
         '${Impact.baseUrl}data/v1/distance/patients/$username/day/$formattedDate/';
+    print('URL chiamata: $url');
 
     final response = await _getAuthorized(Uri.parse(url));
-    if (response == null) return result;
+    if (response == null) {
+      print('Response NULL: getAuthorized ha fallito (token mancante o errore di rete)');      
+      return result;
+    }
+
+    print('Status code: ${response.statusCode}');
+    print('Body: ${response.body}');
 
     if (response.statusCode == 200) {
       final decodedResponse = jsonDecode(response.body);

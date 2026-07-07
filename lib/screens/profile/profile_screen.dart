@@ -214,7 +214,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 12),
                       infoRow('Gender', patient.gender.label),
                       const SizedBox(height: 12),
-                      infoRow('Email', patient.email),
+                      infoRow('Email', patient.user),
                       const SizedBox(height: 12),
                       infoRow('Password', patient.password.replaceAll(RegExp(r'.'), '*')),
                     ],

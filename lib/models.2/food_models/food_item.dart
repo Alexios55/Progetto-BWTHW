@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 class FoodItem {
   final String name;
 
-  // ── Macronutrients (per 100 g) ──────────────────────────────
+  // ── Macronutrients (per 100 g) 
   final double calories;   // kcal
   final double proteins;   // g
   final double carbs;      // g
@@ -23,7 +23,7 @@ class FoodItem {
   final double omega3;      // mg -> LDL-cholesterol modulator
   final double fiber;       // g  -> glucose modulator
 
-  // ── Absorption modulators ───────────────────────────────────
+  // ── Absorption modulators
   final double phytates; // Phytates reduce absorption of Fe, Zn, Ca (mg/100g).
   final double oxalates; // Oxalates reduce absorption of Ca and Fe (mg/100g).
 

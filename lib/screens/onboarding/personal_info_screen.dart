@@ -1,6 +1,9 @@
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:bwthw_project/models.2/enums.dart';
 import 'package:bwthw_project/models.2/patient.dart';
 import 'package:bwthw_project/models.2/patient_state.dart';
@@ -8,6 +11,7 @@ import 'package:bwthw_project/models.2/user_temp.dart';
 import 'package:bwthw_project/screens/onboarding/bmi_status.dart';
 import 'package:bwthw_project/services/user_service.dart';
 import 'package:bwthw_project/utils/calculate_age.dart';
+import 'package:bwthw_project/utils/impact.dart';
 import 'package:bwthw_project/widgets/date_input_field.dart';
 
 class PersonalInfoScreen extends StatefulWidget {
@@ -26,26 +30,35 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   final TextEditingController weightController = TextEditingController();
   final TextEditingController heightController = TextEditingController();
   final TextEditingController ageController = TextEditingController();
-  late int age;
-  late DateTime birthDate;
+
+  int? age;
+  DateTime? birthDate;
 
   String? selectedSex;
   String? activityLevel;
 
   void _onDateParsed(DateTime? date) {
     if (date == null) {
-      setState(() => ageController.clear());
+      setState(() {
+        age = null;
+        birthDate = null;
+        ageController.clear();
+      });
       return;
     }
+
     if (date.isAfter(DateTime.now())) {
       ScaffoldMessenger.of(context)
         ..removeCurrentSnackBar()
-        ..showSnackBar(const SnackBar(
-          content: Text('Please enter a date of birth that is not in the future'),
-          duration: Duration(seconds: 2),
-        ));
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Please enter a date of birth that is not in the future'),
+            duration: Duration(seconds: 2),
+          ),
+        );
       return;
     }
+
     setState(() {
       age = AgeCalculator.calculateAge(date);
       birthDate = date;
@@ -53,10 +66,10 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     });
   }
 
-  void _goToNextStep() {
+  Future<void> _goToNextStep() async {
     if (selectedSex == null ||
-        dateOfBirthController.text.isEmpty ||
-        ageController.text.isEmpty ||
+        birthDate == null ||
+        age == null ||
         weightController.text.isEmpty ||
         heightController.text.isEmpty ||
         activityLevel == null) {
@@ -71,7 +84,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       return;
     }
 
-    if (age < 16) {
+    if (age! < 16) {
       ScaffoldMessenger.of(context)
         ..removeCurrentSnackBar()
         ..showSnackBar(
@@ -81,12 +94,11 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
           ),
         );
       return;
-    } else {
-      ageController.text = age.toString();
     }
 
     final double? weightValue =
         double.tryParse(weightController.text.replaceAll(',', '.'));
+
     if (weightValue == null) {
       ScaffoldMessenger.of(context)
         ..removeCurrentSnackBar()
@@ -101,6 +113,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
 
     final double? heightValue =
         double.tryParse(heightController.text.replaceAll(',', '.'));
+
     if (heightValue == null) {
       ScaffoldMessenger.of(context)
         ..removeCurrentSnackBar()
@@ -118,31 +131,45 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
 
     widget.user.weight = weightValue;
     widget.user.height = heightValue;
-    widget.user.dateOfBirth = birthDate;
+    widget.user.dateOfBirth = birthDate!;
 
     UserService().setUserData(
       weight: weightValue,
       height: heightValue,
-      age: age,
+      age: age!,
       gender: gender,
       activityLevel: parsedActivityLevel,
     );
+
+    final prefs = await SharedPreferences.getInstance();
+
+    final savedUser = prefs.getString('user') ?? ImpactConfig.username;
+    final savedPassword = prefs.getString('password') ?? ImpactConfig.password;
 
     final patient = Patient(
       id: 'patient_1',
       name: widget.user.name ?? 'Patient',
       surname: widget.user.surname ?? '',
-      user: '5UJpUCxIUn',
-      password: '12345678!',
-      age: age,
+      user: savedUser,
+      password: savedPassword,
+      age: age!,
       weightKg: weightValue,
       heightCm: heightValue,
       gender: gender,
       activityLevel: parsedActivityLevel,
-      birthDate: birthDate,
+      birthDate: birthDate!,
     );
 
-    Provider.of<PatientState>(context, listen: false).setPatient(patient);
+    await prefs.setString('patient', jsonEncode(patient.toMap()));
+    await prefs.setBool('onboardingDone', true);
+
+    if (!mounted) return;
+
+    context.read<PatientState>().setPatient(patient);
+
+    print('PATIENT salvato nelle SharedPreferences');
+    print('Patient user: $savedUser');
+    print('Patient name: ${patient.name}');
 
     Navigator.push(
       context,
@@ -397,7 +424,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                         ),
                         const SizedBox(height: 24),
                         DropdownButtonFormField<String>(
-                          initialValue: null,
+                          initialValue: activityLevel,
                           decoration: InputDecoration(
                             hintText: 'Activity Level',
                             prefixIcon: const Icon(Icons.fitness_center),
@@ -466,4 +493,3 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     );
   }
 }
-

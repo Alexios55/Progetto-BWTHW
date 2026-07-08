@@ -4,8 +4,7 @@ import 'package:bwthw_project/models.2/patient_state.dart';
 import 'package:bwthw_project/models.2/food_models/food_diary_db.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bwthw_project/services/calorie_calculator.dart';
-import 'package:bwthw_project/services/impact2.dart';
-import 'package:bwthw_project/models.2/werable_data_models/steps.dart';
+
 class CaloriesBurnedScreen extends StatefulWidget {
   const CaloriesBurnedScreen({super.key});
 
@@ -14,40 +13,57 @@ class CaloriesBurnedScreen extends StatefulWidget {
 }
 
 class _CaloriesBurnedScreenState extends State<CaloriesBurnedScreen> {
-  final Impact _impact = Impact();
-
   double _burnedGoal = 500;
   bool _isLoading = true;
-
-  int _stepToday = 0;
-  int caloriesBurned = 0;
-  int distance = 0;
 
   @override
   void initState() {
     super.initState();
-    _loadGoal();
-    _loadWerableData();
-  }
 
-  Future<void> _loadGoal() async {
-    final prefs = await SharedPreferences.getInstance();
-    final burnedGoal = prefs.getDouble('burnedCaloriesGoal');
-    if (!mounted) {await totalStepsUpToNow;};
-    setState(() {
-      _burnedGoal = burnedGoal ?? 500;
-      _isLoading = false;
+    Future.microtask(() {
+      _loadScreenData();
     });
   }
 
-  Future<void> _loadWerableData() async {
-    final patientState = Provider.of<PatientState>(context, listen: false);
-    await patientState.loadDistance();
+  Future<void> _loadScreenData() async {
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final burnedGoal = prefs.getDouble('burnedCaloriesGoal');
+
+      final patientState = context.read<PatientState>();
+
+      await patientState.loadFromPreferences();
+
+      // Prende calories, steps e distance da inizio giornata fino all'ora attuale.
+      await patientState.refreshWearableData();
+
+      if (!mounted) return;
+
+      setState(() {
+        _burnedGoal = burnedGoal ?? 500;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Errore caricamento Activity & Burn: $e');
+
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _editGoal() async {
     final controller =
         TextEditingController(text: _burnedGoal.toStringAsFixed(0));
+
     final result = await showDialog<double>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -62,22 +78,31 @@ class _CaloriesBurnedScreenState extends State<CaloriesBurnedScreen> {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
             onPressed: () {
-              final v = double.tryParse(controller.text);
-              if (v != null && v > 0) Navigator.pop(ctx, v);
+              final value = double.tryParse(controller.text);
+              if (value != null && value > 0) {
+                Navigator.pop(ctx, value);
+              }
             },
             child: const Text('Save'),
           ),
         ],
       ),
     );
+
     if (result != null) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setDouble('burnedCaloriesGoal', result);
-      setState(() => _burnedGoal = result);
+
+      if (!mounted) return;
+
+      setState(() {
+        _burnedGoal = result;
+      });
     }
   }
 
@@ -96,162 +121,175 @@ class _CaloriesBurnedScreenState extends State<CaloriesBurnedScreen> {
           style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         centerTitle: false,
-                  ),
-        floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-            tooltip: 'Edit burn goal',
-            onPressed: _isLoading ? null : _editGoal,
-          ),
-      body: _isLoading
-    ? const Center(child: CircularProgressIndicator())
-    : Consumer2<PatientState, FoodDiaryDB>(
-        builder: (context, patientState, foodDiaryDB, _) {
-          final patient = patientState.patient;
-          final burned = patientState.burnedCalories;  
-          final steps = patientState.steps;
-          final distanceKm = patientState.distanceKm; // add to PatientState
-          final consumedCalories = foodDiaryDB.entries
-              .fold<double>(0, (s, e) => s + e.calories);
-          final baseGoal = patient != null
-              ? calculateDailyCalorieGoal(patient)
-              : 2000.0;
-          final surplus =
-              (consumedCalories - baseGoal).clamp(0.0, double.infinity);
-
-          return CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // ── Three rings side by side ─────────
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _ActivityRing(
-                            value: burned,
-                            target: _burnedGoal,
-                            unit: 'kcal',
-                            label: 'Calories\nburned',
-                            color: Colors.orange.shade500,
-                            icon: Icons.local_fire_department_outlined,
-                            caption:
-                                'Goal: ${_burnedGoal.toStringAsFixed(0)} kcal/day',
-                          ),
-                          _ActivityRing(
-                            value: steps.toDouble(),
-                            target: 8000,
-                            unit: 'steps',
-                            label: 'Daily\nsteps',
-                            color: Colors.green.shade500,
-                            icon: Icons.directions_walk_outlined,
-                            caption: 'Goal: 8,000 steps/day',
-                            formatInteger: true,
-                          ),
-                          _ActivityRing(
-                            value: distanceKm,
-                            target: (steps * 0.00075)
-                                .clamp(1.0, double.infinity),
-                            unit: 'km',
-                            label: 'Distance\ncovered',
-                            color: Colors.blue.shade400,
-                            icon: Icons.route_outlined,
-                            caption:
-                                '3 km/day',
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // ── Context blurb ────────────────────
-                      _ContextCard(
-                        burned: burned,
-                        steps: steps,
-                        distanceKm: distanceKm,
-                        surplus: surplus,
-                        colorScheme: colorScheme,
-                        textTheme: textTheme,
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // ── Suggestions header ───────────────
-                      if (surplus > 0) ...[
-                        Text(
-                          'Burn off the surplus',
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "You're ${surplus.toStringAsFixed(0)} kcal over your daily goal. "
-                          'Here are some ways to balance it out:',
-                          style: textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant),
-                        ),
-                      ] else ...[
-                        Text(
-                          'Keep moving',
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "You're within your calorie budget — great work! "
-                          'Some activity ideas for the rest of the day:',
-                          style: textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant),
-                        ),
-                      ],
-
-                      const SizedBox(height: 12),
-                    ],
-                  ),
-                ),
-              ),
-
-              // ── Activity suggestion cards ────────────────
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final activities =
-                          _buildActivities(surplus, patient?.weightKg ?? 70);
-                      if (index >= activities.length) return null;
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: _ActivityCard(
-                          activity: activities[index],
-                          surplus: surplus,
-                          colorScheme: colorScheme,
-                          textTheme: textTheme,
-                        ),
-                      );
-                    },
-                    childCount:
-                        _buildActivities(surplus, patient?.weightKg ?? 70)
-                            .length,
-                  ),
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 24)),
-            ],
-          );
-        },
       ),
+      floatingActionButton: FloatingActionButton(
+        tooltip: 'Edit burn goal',
+        onPressed: _isLoading ? null : _editGoal,
+        child: const Icon(Icons.add),
+      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: _loadScreenData,
+              child: Consumer2<PatientState, FoodDiaryDB>(
+                builder: (context, patientState, foodDiaryDB, _) {
+                  final patient = patientState.patient;
+
+                  final burned = patientState.burnedCalories;
+                  final steps = patientState.steps;
+                  final distanceKm = patientState.distanceKm;
+
+                  final consumedCalories = foodDiaryDB.entries.fold<double>(
+                    0,
+                    (sum, entry) => sum + entry.calories,
+                  );
+
+                  final baseGoal = patient != null
+                      ? calculateDailyCalorieGoal(patient)
+                      : 2000.0;
+
+                  final surplus =
+                      (consumedCalories - baseGoal).clamp(0.0, double.infinity);
+
+                  return CustomScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _ActivityRing(
+                                    value: burned,
+                                    target: _burnedGoal,
+                                    unit: 'kcal',
+                                    label: 'Calories\nburned',
+                                    color: Colors.orange.shade500,
+                                    icon: Icons.local_fire_department_outlined,
+                                    caption:
+                                        'Goal: ${_burnedGoal.toStringAsFixed(0)} kcal/day',
+                                  ),
+                                  _ActivityRing(
+                                    value: steps.toDouble(),
+                                    target: 8000,
+                                    unit: 'steps',
+                                    label: 'Daily\nsteps',
+                                    color: Colors.green.shade500,
+                                    icon: Icons.directions_walk_outlined,
+                                    caption: 'Goal: 8,000 steps/day',
+                                    formatInteger: true,
+                                  ),
+                                  _ActivityRing(
+                                    value: distanceKm,
+                                    target: 3,
+                                    unit: 'km',
+                                    label: 'Distance\ncovered',
+                                    color: Colors.blue.shade400,
+                                    icon: Icons.route_outlined,
+                                    caption: 'Goal: 3 km/day',
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 24),
+
+                              _ContextCard(
+                                burned: burned,
+                                steps: steps,
+                                distanceKm: distanceKm,
+                                surplus: surplus,
+                                colorScheme: colorScheme,
+                                textTheme: textTheme,
+                              ),
+
+                              const SizedBox(height: 24),
+
+                              if (surplus > 0) ...[
+                                Text(
+                                  'Burn off the surplus',
+                                  style: textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  "You're ${surplus.toStringAsFixed(0)} kcal over your daily goal. "
+                                  'Here are some ways to balance it out:',
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ] else ...[
+                                Text(
+                                  'Keep moving',
+                                  style: textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  "You're within your calorie budget — great work! "
+                                  'Some activity ideas for the rest of the day:',
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+
+                              const SizedBox(height: 12),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      SliverPadding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        sliver: SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              final activities = _buildActivities(
+                                surplus,
+                                patient?.weightKg ?? 70,
+                              );
+
+                              if (index >= activities.length) return null;
+
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
+                                child: _ActivityCard(
+                                  activity: activities[index],
+                                  surplus: surplus,
+                                  colorScheme: colorScheme,
+                                  textTheme: textTheme,
+                                ),
+                              );
+                            },
+                            childCount: _buildActivities(
+                              surplus,
+                              patient?.weightKg ?? 70,
+                            ).length,
+                          ),
+                        ),
+                      ),
+
+                      const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                    ],
+                  );
+                },
+              ),
+            ),
     );
   }
 
   List<_Activity> _buildActivities(double surplus, double weightKg) {
-    // MET-based kcal/min estimates for a ~70kg person, scaled by weight
     final scale = weightKg / 70;
+
     return [
       _Activity(
         icon: Icons.directions_walk_outlined,
@@ -305,13 +343,11 @@ class _CaloriesBurnedScreenState extends State<CaloriesBurnedScreen> {
         kcalPerMin: 3.5 * scale,
         description:
             'A lighter option when your body needs rest. Improves flexibility, '
-            'reduces cortisol (which helps with fat storage), and promotes recovery.',
+            'reduces cortisol and promotes recovery.',
       ),
     ];
   }
 }
-
-// ── ACTIVITY RING ────────────────────────────────────────────────
 
 class _ActivityRing extends StatelessWidget {
   final double value;
@@ -338,7 +374,8 @@ class _ActivityRing extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
-    final progress = (value / target).clamp(0.0, 1.0);
+
+    final progress = target <= 0 ? 0.0 : (value / target).clamp(0.0, 1.0);
     final isComplete = value >= target;
 
     return Column(
@@ -352,7 +389,8 @@ class _ActivityRing extends StatelessWidget {
               child: CircularProgressIndicator(
                 value: progress,
                 strokeWidth: 8,
-                backgroundColor: colorScheme.outlineVariant.withOpacity(0.2),
+                backgroundColor:
+                    colorScheme.outlineVariant.withOpacity(0.2),
                 valueColor: AlwaysStoppedAnimation<Color>(
                   isComplete ? Colors.green.shade500 : color,
                 ),
@@ -362,14 +400,14 @@ class _ActivityRing extends StatelessWidget {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(icon,
-                    size: 18,
-                    color: isComplete ? Colors.green.shade500 : color),
+                Icon(
+                  icon,
+                  size: 18,
+                  color: isComplete ? Colors.green.shade500 : color,
+                ),
                 const SizedBox(height: 2),
                 Text(
-                  formatInteger
-                      ? _formatInt(value)
-                      : _formatVal(value),
+                  formatInteger ? _formatInt(value) : _formatVal(value),
                   style: textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
@@ -395,10 +433,15 @@ class _ActivityRing extends StatelessWidget {
                     color: Colors.green.shade500,
                     shape: BoxShape.circle,
                     border: Border.all(
-                        color: colorScheme.surface, width: 2),
+                      color: colorScheme.surface,
+                      width: 2,
+                    ),
                   ),
-                  child: const Icon(Icons.check,
-                      size: 10, color: Colors.white),
+                  child: const Icon(
+                    Icons.check,
+                    size: 10,
+                    color: Colors.white,
+                  ),
                 ),
               ),
           ],
@@ -417,7 +460,7 @@ class _ActivityRing extends StatelessWidget {
           caption,
           style: textTheme.labelSmall?.copyWith(
             fontSize: 9.5,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            color: colorScheme.onSurfaceVariant,
           ),
           textAlign: TextAlign.center,
         ),
@@ -425,19 +468,17 @@ class _ActivityRing extends StatelessWidget {
     );
   }
 
-  String _formatVal(double v) {
-    if (v >= 1000) return '${(v / 1000).toStringAsFixed(1)}k';
-    if (v >= 10) return v.toStringAsFixed(0);
-    return v.toStringAsFixed(1);
+  String _formatVal(double value) {
+    if (value >= 1000) return '${(value / 1000).toStringAsFixed(1)}k';
+    if (value >= 10) return value.toStringAsFixed(0);
+    return value.toStringAsFixed(1);
   }
 
-  String _formatInt(double v) {
-    if (v >= 1000) return '${(v / 1000).toStringAsFixed(1)}k';
-    return v.toStringAsFixed(0);
+  String _formatInt(double value) {
+    if (value >= 1000) return '${(value / 1000).toStringAsFixed(1)}k';
+    return value.toStringAsFixed(0);
   }
 }
-
-// ── CONTEXT CARD ─────────────────────────────────────────────────
 
 class _ContextCard extends StatelessWidget {
   final double burned;
@@ -486,10 +527,9 @@ class _ContextCard extends StatelessWidget {
       icon = Icons.directions_walk_outlined;
       color = colorScheme.primary;
       message =
-          'You\'ve walked ${steps.toString()} steps today — '
-          '${steps >= 8000 ? 'above' : 'below'} the recommended 8,000. '
-          'Studies show that consistent daily movement, even light walking, '
-          'has significant long-term cardiovascular benefits.';
+          'You\'ve walked $steps steps today and covered ${distanceKm.toStringAsFixed(1)} km — '
+          '${steps >= 8000 ? 'above' : 'below'} the recommended 8,000 steps. '
+          'Consistent daily movement is important for long-term health.';
     }
 
     return Container(
@@ -520,8 +560,6 @@ class _ContextCard extends StatelessWidget {
   }
 }
 
-// ── ACTIVITY MODEL ───────────────────────────────────────────────
-
 class _Activity {
   final IconData icon;
   final String name;
@@ -538,8 +576,6 @@ class _Activity {
   });
 }
 
-// ── ACTIVITY CARD ─────────────────────────────────────────────────
-
 class _ActivityCard extends StatelessWidget {
   final _Activity activity;
   final double surplus;
@@ -555,9 +591,8 @@ class _ActivityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final minutesNeeded = surplus > 0
-        ? (surplus / activity.kcalPerMin).ceil()
-        : null;
+    final minutesNeeded =
+        surplus > 0 ? (surplus / activity.kcalPerMin).ceil() : null;
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -577,7 +612,11 @@ class _ActivityCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: activity.color.withOpacity(0.3)),
             ),
-            child: Icon(activity.icon, size: 20, color: activity.color),
+            child: Icon(
+              activity.icon,
+              size: 20,
+              color: activity.color,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -596,12 +635,15 @@ class _ActivityCard extends StatelessWidget {
                     if (minutesNeeded != null)
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: activity.color.withOpacity(0.10),
                           borderRadius: BorderRadius.circular(7),
                           border: Border.all(
-                              color: activity.color.withOpacity(0.3)),
+                            color: activity.color.withOpacity(0.3),
+                          ),
                         ),
                         child: Text(
                           '~$minutesNeeded min',

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:provider/provider.dart';
 import 'package:bwthw_project/models.2/enums.dart';
 import 'package:bwthw_project/models.2/patient.dart';
@@ -6,9 +8,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bwthw_project/utils/input_validators.dart';
 import 'package:flutter/material.dart';
 
-// This screen collects the user's personal information,
-// such as sex, date of birth, age, weight, and height,
-// before moving to the next onboarding step.
 class PersonalInfoScreen extends StatefulWidget {
   const PersonalInfoScreen({super.key});
 
@@ -21,24 +20,19 @@ class PersonalInfoScreen extends StatefulWidget {
 class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  // Controllers used to manage the text shown inside the fields.
   final TextEditingController dateOfBirthController = TextEditingController();
   final TextEditingController ageController = TextEditingController();
   final TextEditingController weightController = TextEditingController();
   final TextEditingController heightController = TextEditingController();
 
-  // Variable used to store the selected sex.
   Gender? selectedSex;
   ActivityLevel selectedActivityLevel = ActivityLevel.moderatelyActive;
   Goal selectedGoal = Goal.loseWeight;
 
-  // Opens the date picker and writes the selected date into the text field.
   Future<void> _selectDate(BuildContext context) async {
-    DateTime initialDate = DateTime(2000);
-
     final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: initialDate,
+      initialDate: DateTime(2000),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
     );
@@ -53,9 +47,78 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     }
   }
 
+  DateTime _parseDateOfBirth(String value) {
+    final parts = value.split('/');
+
+    final day = int.parse(parts[0]);
+    final month = int.parse(parts[1]);
+    final year = int.parse(parts[2]);
+
+    return DateTime(year, month, day);
+  }
+
+  double _calculateIdealWeight(double heightCm) {
+    final heightM = heightCm / 100.0;
+    return 22 * heightM * heightM;
+  }
+
+  Future<void> _savePersonalInfoAndContinue() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    final double weight =
+        double.parse(weightController.text.replaceAll(',', '.'));
+    final double height =
+        double.parse(heightController.text.replaceAll(',', '.'));
+    final int age = int.parse(ageController.text);
+    final DateTime birthDate = _parseDateOfBirth(dateOfBirthController.text);
+    final double idealWeight = _calculateIdealWeight(height);
+
+    final prefs = await SharedPreferences.getInstance();
+
+    final savedUser = prefs.getString('user') ?? '';
+    final savedPassword = prefs.getString('password') ?? '';
+
+    final patient = Patient(
+      id: 'patient_1',
+      name: 'Patient',
+      user: savedUser,
+      password: savedPassword,
+      age: age,
+      weightKg: weight,
+      heightCm: height,
+      gender: selectedSex ?? Gender.male,
+      goal: selectedGoal,
+      activityLevel: selectedActivityLevel,
+    );
+
+    await prefs.setString('patient', jsonEncode(patient.toMap()));
+
+    await prefs.setString('name', patient.name);
+    await prefs.setString('surname', '');
+    await prefs.setString('birthDate', birthDate.toIso8601String());
+    await prefs.setDouble('weight', weight);
+    await prefs.setDouble('height', height);
+    await prefs.setDouble('idealWeight', idealWeight);
+    await prefs.setBool('onboardingDone', true);
+
+    if (!mounted) return;
+
+    context.read<PatientState>().setPatient(patient);
+
+    print('PATIENT salvato nelle SharedPreferences');
+    print('User: $savedUser');
+    print('Weight: $weight');
+    print('Height: $height');
+    print('Birth date: $birthDate');
+    print('Ideal weight: $idealWeight');
+
+    Navigator.pushNamed(context, '/bmi-status');
+  }
+
   @override
   void dispose() {
-    // Dispose controllers to free memory when the screen is removed.
     dateOfBirthController.dispose();
     ageController.dispose();
     weightController.dispose();
@@ -77,9 +140,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
               children: [
                 const SizedBox(height: 20),
 
-                // Main title of the screen.
                 const Text(
-                  'Personal Informaition',
+                  'Personal Information',
                   style: TextStyle(
                     fontSize: 34,
                     fontWeight: FontWeight.bold,
@@ -88,7 +150,6 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
 
                 const SizedBox(height: 8),
 
-                // Subtitle that explains what the user has to do.
                 Text(
                   'Please, enter your personal information to continue',
                   style: TextStyle(
@@ -99,7 +160,6 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
 
                 const SizedBox(height: 12),
 
-                // Small helper text to make the screen feel more personalized.
                 Text(
                   'Your information helps us personalize your journey.',
                   style: TextStyle(
@@ -110,7 +170,6 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
 
                 const SizedBox(height: 32),
 
-                // Main card that contains all personal information fields.
                 Form(
                   key: _formKey,
                   child: Card(
@@ -122,7 +181,6 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                       padding: const EdgeInsets.all(20),
                       child: Column(
                         children: [
-                          // Dropdown field for sex selection.
                           DropdownButtonFormField<Gender>(
                             initialValue: selectedSex,
                             decoration: InputDecoration(
@@ -155,15 +213,14 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
 
                           const SizedBox(height: 20),
 
-                          // Read-only field for date of birth.
-                          // When tapped, it opens the calendar picker.
                           TextFormField(
                             controller: dateOfBirthController,
                             readOnly: true,
                             onTap: () => _selectDate(context),
                             decoration: InputDecoration(
                               hintText: 'Date of birth',
-                              prefixIcon: const Icon(Icons.calendar_today_outlined),
+                              prefixIcon:
+                                  const Icon(Icons.calendar_today_outlined),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -172,16 +229,15 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                 vertical: 18,
                               ),
                             ),
-                            validator:
-                                (value) => InputValidators.validateRequired(
-                                  value,
-                                  fieldName: 'Date of birth',
-                                ),
+                            validator: (value) =>
+                                InputValidators.validateRequired(
+                              value,
+                              fieldName: 'Date of birth',
+                            ),
                           ),
 
                           const SizedBox(height: 20),
 
-                          // Age field.
                           TextFormField(
                             controller: ageController,
                             keyboardType: TextInputType.number,
@@ -225,9 +281,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                 )
                                 .toList(),
                             onChanged: (value) {
-                              if (value == null) {
-                                return;
-                              }
+                              if (value == null) return;
+
                               setState(() {
                                 selectedActivityLevel = value;
                               });
@@ -258,9 +313,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                 )
                                 .toList(),
                             onChanged: (value) {
-                              if (value == null) {
-                                return;
-                              }
+                              if (value == null) return;
+
                               setState(() {
                                 selectedGoal = value;
                               });
@@ -269,14 +323,15 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
 
                           const SizedBox(height: 20),
 
-                          // Weight and height are displayed side by side
-                          // to make the layout more compact and modern.
                           Row(
                             children: [
                               Expanded(
                                 child: TextFormField(
                                   controller: weightController,
-                                  keyboardType: TextInputType.number,
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
                                   decoration: InputDecoration(
                                     hintText: 'Weight',
                                     prefixIcon: const Icon(
@@ -294,11 +349,16 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                   validator: InputValidators.validateWeight,
                                 ),
                               ),
+
                               const SizedBox(width: 16),
+
                               Expanded(
                                 child: TextFormField(
                                   controller: heightController,
-                                  keyboardType: TextInputType.number,
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
                                   decoration: InputDecoration(
                                     hintText: 'Height',
                                     prefixIcon: const Icon(Icons.height),
@@ -324,47 +384,11 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
 
                 const SizedBox(height: 28),
 
-                // Main button used to continue to the next step.
                 SizedBox(
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
-                    onPressed: () async {
-                      if (!_formKey.currentState!.validate()) {
-                        return;
-                      }
-
-                      final double weight =
-                          double.parse(weightController.text.replaceAll(',', '.'));
-                      final double height =
-                          double.parse(heightController.text.replaceAll(',', '.'));
-                      final int age = int.parse(ageController.text);
-
-                      // Persisting user data is handled by PatientState below.
-                      // Removed usage of undefined `UserService`.
-
-                      final prefs = await SharedPreferences.getInstance();
-                      final savedUser = prefs.getString('user') ?? '';
-                      final savedPassword = prefs.getString('password') ?? '';
-
-                      Patient patient = Patient(
-                        id: 'patient_1',
-                        name: 'Patient',
-                        user: savedUser,
-                        password: savedPassword,
-                        age: age,
-                        weightKg: weight,
-                        heightCm: height,
-                        gender: selectedSex ?? Gender.male,
-                        goal: selectedGoal,
-                        activityLevel: selectedActivityLevel,
-                      );
-
-                      Provider.of<PatientState>(context, listen: false).setPatient(patient);
-
-
-                      Navigator.pushNamed(context, '/bmi-status');
-                    },
+                    onPressed: _savePersonalInfoAndContinue,
                     child: const Text(
                       'Next',
                       style: TextStyle(fontSize: 18),
@@ -379,5 +403,3 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     );
   }
 }
-
-

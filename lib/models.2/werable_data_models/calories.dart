@@ -1,37 +1,77 @@
 import 'package:intl/intl.dart';
 
 class Calories {
-  // this class models the single calories data point
-  final DateTime time;
-  final int value;
+  final DateTime timestamp;
+  final double value;
 
-  Calories({required this.time, required this.value});
+  Calories({
+    required this.timestamp,
+    required this.value,
+  });
 
-  Calories.fromJson(String date, Map<String, dynamic> json)
-    : time = DateFormat(
-        'yyyy-MM-dd HH:mm:ss',
-      ).parse('$date ${json["time"]}'),
-      value = json["value"];
+  factory Calories.fromJson(String date, Map<String, dynamic> json) {
+    final String rawTime = json['time']?.toString() ?? '00:00:00';
+
+    final DateTime parsedTimestamp =
+        DateFormat('yyyy-MM-dd HH:mm:ss').parse('$date $rawTime');
+
+    final dynamic rawValue = json['value'];
+
+    double parsedValue = 0.0;
+
+    if (rawValue is num) {
+      parsedValue = rawValue.toDouble();
+    } else if (rawValue is String) {
+      parsedValue = double.tryParse(rawValue) ?? 0.0;
+    }
+
+    return Calories(
+      timestamp: parsedTimestamp,
+      value: parsedValue,
+    );
+  }
+
+  DateTime get time => timestamp;
 
   @override
   String toString() {
-    return 'Calories {timestamp: $time, value: $value}';
+    return 'Calories(timestamp: $timestamp, value: $value)';
   }
 }
 
-Map<DateTime, List<Calories>> groupCaloriesByDay(List<Calories> allData) {
-  final map = <DateTime, List<Calories>>{};
-  for (final c in allData) {
-    final day = DateTime(c.time.year, c.time.month, c.time.day);
-    map.putIfAbsent(day, () => []).add(c);
+Map<DateTime, List<Calories>> groupCaloriesByDay(List<Calories> data) {
+  final Map<DateTime, List<Calories>> grouped = {};
+
+  for (final entry in data) {
+    final day = DateTime(
+      entry.timestamp.year,
+      entry.timestamp.month,
+      entry.timestamp.day,
+    );
+
+    grouped.putIfAbsent(day, () => []);
+    grouped[day]!.add(entry);
   }
-  return map;
+
+  return grouped;
 }
 
-int totalCaloriesUpToNow(Map<DateTime, List<Calories>> grouped, DateTime now) {
+double totalCaloriesUpToNow(
+  Map<DateTime, List<Calories>> grouped,
+  DateTime now,
+) {
   final today = DateTime(now.year, now.month, now.day);
-  final list = grouped[today] ?? [];
-  return list
-      .where((c) => !c.time.isAfter(now))
-      .fold<int>(0, (sum, c) => sum + c.value);
+
+  final todayData = grouped[today] ?? [];
+
+  double total = 0.0;
+
+  for (final entry in todayData) {
+    if (entry.timestamp.isBefore(now) ||
+        entry.timestamp.isAtSameMomentAs(now)) {
+      total += entry.value;
+    }
+  }
+
+  return total;
 }

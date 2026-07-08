@@ -1,13 +1,9 @@
-
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:bwthw_project/services/impact.dart';
-import 'package:bwthw_project/models.2/patient_state.dart';
 
-// This screen allows the user to create a new account by entering
-// a valid email, a password of at least 8 characters, and a matching
-// confirmation password before continuing to the next step.
+import 'package:bwthw_project/services/impact.dart';
+import 'package:bwthw_project/utils/impact.dart';
+
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
 
@@ -22,12 +18,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
-  final Impact impactService = Impact();
-  bool isLoading = false;
 
-  // Having only one user, i use the seme hardcoded credential for the testing purpose. In a real app, you would have a proper registration flow with a backend service.
-  static const String _validUsername = '5UJpUCxIUn';
-  static const String _validPassword = '12345678!';
+  final Impact impactService = Impact();
+
+  bool isLoading = false;
 
   @override
   void dispose() {
@@ -41,10 +35,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     final String user = userController.text.trim();
     final String password = passwordController.text.trim();
     final String confirmPassword = confirmPasswordController.text.trim();
-
-    //final RegExp emailRegExp = RegExp(
-    //  r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
-    //);
 
     if (user.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context)
@@ -82,53 +72,45 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       return;
     }
 
-    // Local check on the only account avaible to check in the testing phase that we have the right credential for impact service
-    if (user != _validUsername || password != _validPassword) {
-      ScaffoldMessenger.of(context)
-        ..removeCurrentSnackBar()
-        ..showSnackBar(
-          const SnackBar(
-            content: Text('Invalid username or password'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      return;
-    }
-
     setState(() => isLoading = true);
 
-    // save credentials for future use for impact service
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('user', user);
-    await prefs.setString('password', password);
+    print('REGISTRATION username inserito: $user');
+    print('USERNAME IMPACT atteso: ${ImpactConfig.username}');
+    print('PATIENT USERNAME per dati: ${ImpactConfig.patientUsername}');
 
-    // Authentication in impact with the credentials
     final result = await impactService.getAndStoreTokens(user, password);
 
     if (!mounted) return;
+
     setState(() => isLoading = false);
 
-        if (result == 200) {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setBool('isLoggedIn', true);
-          await context.read<PatientState>().loadFromPreferences();
-          if (!mounted) return;
-          Navigator.pushNamed(context, '/welcome');
-        } else {
-          ScaffoldMessenger.of(context)
-            ..removeCurrentSnackBar()
-            ..showSnackBar(SnackBar(
-              backgroundColor: Theme.of(context).colorScheme.error,
-              behavior: SnackBarBehavior.floating,
-              margin: const EdgeInsets.all(8),
-              duration: const Duration(seconds: 3),
-              content: Text(result == 401
-                  ? 'Impact connection failed: incorrect credentials'
-                  : 'Connection error (code $result). Please try again.'),
-            ));
-    }
+    if (result == 200) {
+      final prefs = await SharedPreferences.getInstance();
 
-    Navigator.pushNamed(context, '/welcome');
+      await prefs.setString('user', user);
+      await prefs.setString('password', password);
+      await prefs.setBool('isLoggedIn', true);
+
+      if (!mounted) return;
+
+      Navigator.pushNamed(context, '/welcome');
+    } else {
+      ScaffoldMessenger.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(8),
+            duration: const Duration(seconds: 3),
+            content: Text(
+              result == 401
+                  ? 'Impact connection failed: incorrect credentials'
+                  : 'Connection error (code $result). Please try again.',
+            ),
+          ),
+        );
+    }
   }
 
   @override
@@ -154,6 +136,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 10),
+
                 const Text(
                   'Sign Up',
                   style: TextStyle(
@@ -161,7 +144,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+
                 const SizedBox(height: 32),
+
                 Container(
                   decoration: BoxDecoration(
                     color: colorScheme.surface,
@@ -192,7 +177,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             color: colorScheme.primary,
                           ),
                         ),
+
                         const SizedBox(height: 20),
+
                         Text(
                           'Create account',
                           style: TextStyle(
@@ -201,7 +188,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             color: colorScheme.onSurface,
                           ),
                         ),
+
                         const SizedBox(height: 8),
+
                         Text(
                           'Sign up to start your journey with smartDIET',
                           textAlign: TextAlign.center,
@@ -210,10 +199,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             color: colorScheme.onSurfaceVariant,
                           ),
                         ),
+
                         const SizedBox(height: 28),
+
                         TextField(
                           controller: userController,
-                          keyboardType: TextInputType.emailAddress,
+                          keyboardType: TextInputType.text,
                           decoration: InputDecoration(
                             hintText: 'Username',
                             prefixIcon: const Icon(Icons.person_outline),
@@ -230,7 +221,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             ),
                           ),
                         ),
+
                         const SizedBox(height: 18),
+
                         TextField(
                           controller: passwordController,
                           obscureText: true,
@@ -250,13 +243,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             ),
                           ),
                         ),
+
                         const SizedBox(height: 18),
+
                         TextField(
                           controller: confirmPasswordController,
                           obscureText: true,
                           decoration: InputDecoration(
                             hintText: 'Confirm Password',
-                            prefixIcon: const Icon(Icons.lock_reset_outlined),
+                            prefixIcon:
+                                const Icon(Icons.lock_reset_outlined),
                             filled: true,
                             fillColor: colorScheme.surfaceContainerHighest
                                 .withValues(alpha: 0.4),
@@ -270,28 +266,40 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             ),
                           ),
                         ),
+
                         const SizedBox(height: 24),
+
                         SizedBox(
                           width: double.infinity,
                           height: 55,
                           child: ElevatedButton(
-                            onPressed: _createAccount,
+                            onPressed: isLoading ? null : _createAccount,
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
                               ),
                             ),
-                            child: const Text(
-                              'Create Account',
-                              style: TextStyle(fontSize: 18),
-                            ),
+                            child: isLoading
+                                ? const SizedBox(
+                                    width: 22,
+                                    height: 22,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Text(
+                                    'Create Account',
+                                    style: TextStyle(fontSize: 18),
+                                  ),
                           ),
                         ),
                       ],
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 24),
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -318,4 +326,3 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     );
   }
 }
-

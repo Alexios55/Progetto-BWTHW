@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:bwthw_project/services/preference_service.dart';
 import 'package:bwthw_project/models.2/werable_data_models/distance.dart';
 import 'package:bwthw_project/utils/impact.dart';
@@ -17,7 +18,6 @@ class Impact {
   static String refreshEndpoint = ImpactConfig.refreshEndpoint;
 
   static const Duration _timeout = Duration(seconds: 10);
-  static const String _fallbackImpactUsername = '5UJpUCxIUn';
 
   Future<bool> isImpactUp() async {
     final url = Impact.baseUrl + Impact.pingEndpoint;
@@ -34,13 +34,11 @@ class Impact {
     }
   }
 
-  //This method allows to refresh the stored JWT in SharedPreferences
   Future<int> refreshTokens() async {
     final url = Impact.baseUrl + Impact.refreshEndpoint;
     final refresh = await PreferenceService.getRefreshToken();
-    final username = await PreferenceService.getImpactUsername();
 
-    if (refresh == null || username == null) {
+    if (refresh == null) {
       return 401;
     }
 
@@ -51,10 +49,11 @@ class Impact {
 
       if (response.statusCode == 200) {
         final decodedResponse = jsonDecode(response.body);
+
         await PreferenceService.saveImpactSession(
           accessToken: decodedResponse['access'],
           refreshToken: decodedResponse['refresh'],
-          username: username,
+          username: ImpactConfig.username,
         );
       }
 
@@ -68,18 +67,29 @@ class Impact {
     } on FormatException {
       return 500;
     }
-  } //_refreshTokens
+  }
 
   Future<int> getAndStoreTokens(String username, String password) async {
     final url = Impact.baseUrl + Impact.tokenEndpoint;
-    final body = {'username': username, 'password': password};
+
+    final body = {
+      'username': username,
+      'password': password,
+    };
 
     try {
+      print('Calling TOKEN endpoint: $url');
+      print('Username login usato: $username');
+
       final response =
           await http.post(Uri.parse(url), body: body).timeout(_timeout);
 
+      print('Token status code: ${response.statusCode}');
+      print('Token body: ${response.body}');
+
       if (response.statusCode == 200) {
         final decodedResponse = jsonDecode(response.body);
+
         await PreferenceService.saveImpactSession(
           accessToken: decodedResponse['access'],
           refreshToken: decodedResponse['refresh'],
@@ -97,10 +107,11 @@ class Impact {
     } on FormatException {
       return 500;
     }
-  } //_getAndStoreTokens
+  }
 
   Future<bool> hasValidSession() async {
     final access = await PreferenceService.getAccessToken();
+
     if (access == null) {
       return false;
     }
@@ -124,12 +135,15 @@ class Impact {
 
   Future<String?> _authorizedAccessToken() async {
     var access = await PreferenceService.getAccessToken();
+
     print('Access token presente: ${access != null}');
+
     if (access == null) {
       return null;
     }
 
     bool isExpired = true;
+
     try {
       isExpired = JwtDecoder.isExpired(access);
     } on FormatException {
@@ -139,28 +153,35 @@ class Impact {
 
     if (isExpired) {
       final statusCode = await refreshTokens();
+
       if (statusCode != 200) {
+        print('Refresh token fallito. Status code: $statusCode');
         return null;
       }
+
       access = await PreferenceService.getAccessToken();
     }
 
     return access;
   }
 
-Future<String> _patientUsername() async {
-  final saved = await PreferenceService.getImpactUsername();
-  print('Username salvato in prefs: $saved');
-  return saved ?? _fallbackImpactUsername;
-}
+  Future<String> _patientUsername() async {
+    print('Username paziente usato: ${ImpactConfig.patientUsername}');
+    return ImpactConfig.patientUsername;
+  }
 
   Future<http.Response?> _getAuthorized(Uri uri) async {
     final access = await _authorizedAccessToken();
+
     if (access == null) {
+      print('Access token nullo: impossibile fare la chiamata');
       return null;
     }
 
-    final headers = {HttpHeaders.authorizationHeader: 'Bearer $access'};
+    final headers = {
+      HttpHeaders.authorizationHeader: 'Bearer $access',
+    };
+
     try {
       return await http.get(uri, headers: headers).timeout(_timeout);
     } on SocketException {
@@ -175,90 +196,183 @@ Future<String> _patientUsername() async {
   Future<List<Calories>> getCaloriesData(DateTime date) async {
     List<Calories> result = [];
 
-    final oneYearAgo = DateTime(date.year - 1, date.month, date.day -1);
+    final oneYearAgo = DateTime(date.year - 1, date.month, date.day - 1);
     String formattedDate = DateFormat('yyyy-MM-dd').format(oneYearAgo);
+
     final username = await _patientUsername();
+
     final url =
-        '${Impact.baseUrl}data/v1/calories/patients/$username/day/$formattedDate/';
+        '${Impact.baseUrl}${ImpactConfig.caloriesEndpoint}$username/day/$formattedDate/';
+
+    print('Calling CALORIES endpoint: $url');
 
     final response = await _getAuthorized(Uri.parse(url));
-    if (response == null) return result;
 
-    if (response.statusCode == 200) {
-      final decodedResponse = jsonDecode(response.body);
-      for (var i = 0; i < decodedResponse['data']['data'].length; i++) {
-        result.add(
-          Calories.fromJson(
-            decodedResponse['data']['date'],
-            decodedResponse['data']['data'][i],
-          ),
-        );
-      } //for
-    }
-    return result;
-  } //get calories
-
-  // Getting steps data
-  Future<List<Steps>> getStepsData(DateTime date) async {
-    List<Steps> result = [];
-
-    final oneYearAgo = DateTime(date.year - 1, date.month, date.day -1);
-    String formattedDate = DateFormat('yyyy-MM-dd').format(oneYearAgo);
-    final username = await _patientUsername();
-    print('Username usato nel token: $username');
-    final url =
-        '${Impact.baseUrl}data/v1/steps/patients/$username/day/$formattedDate/';
-
-    final response = await _getAuthorized(Uri.parse(url));
-    if (response == null) return result;
-
-    if (response.statusCode == 200) {
-      final decodedResponse = jsonDecode(response.body);
-      for (var i = 0; i < decodedResponse['data']['data'].length; i++) {
-        result.add(
-          Steps.fromJson(
-            decodedResponse['data']['date'],
-            decodedResponse['data']['data'][i],
-          ),
-        );
-      } //for
-    }
-    return result;
-  }
-
-  // Getting distance data
-  Future<List<Distance>> getDistanceData(DateTime date) async {
-    List<Distance> result = [];
-
-    final oneYearAgo = DateTime(date.year - 1, date.month, date.day -1 );
-    String formattedDate = DateFormat('yyyy-MM-dd').format(oneYearAgo);
-    final username = await _patientUsername();
-    print('Username usato: $username');
-    final url =
-        '${Impact.baseUrl}data/v1/distance/patients/$username/day/$formattedDate/';
-    print('URL chiamata: $url');
-
-    final response = await _getAuthorized(Uri.parse(url));
     if (response == null) {
-      print('Response NULL: getAuthorized ha fallito (token mancante o errore di rete)');      
+      print('Response NULL calories');
       return result;
     }
 
-    print('Status code: ${response.statusCode}');
-    print('Body: ${response.body}');
+    print('Calories status code: ${response.statusCode}');
+    print('Calories body: ${response.body}');
 
     if (response.statusCode == 200) {
       final decodedResponse = jsonDecode(response.body);
-      for (var i = 0; i < decodedResponse['data']['data'].length; i++) {
-        result.add(
-          Distance.fromJson(
-            decodedResponse['data']['date'],
-            decodedResponse['data']['data'][i],
-          ),
-        );
-      } //for
+
+      final dataContainer = decodedResponse['data'];
+
+      if (dataContainer == null) return result;
+      if (dataContainer is List && dataContainer.isEmpty) return result;
+      if (dataContainer is! Map) return result;
+
+      final caloriesField = dataContainer['data'];
+
+      if (caloriesField == null || caloriesField is String) return result;
+
+      final String dataDate = dataContainer['date'].toString();
+
+      List<dynamic> rawCaloriesList = [];
+
+      if (caloriesField is List) {
+        rawCaloriesList = caloriesField;
+      } else if (caloriesField is Map) {
+        rawCaloriesList = [caloriesField];
+      }
+
+      for (final caloriesJson in rawCaloriesList) {
+        if (caloriesJson is Map<String, dynamic>) {
+          result.add(
+            Calories.fromJson(
+              dataDate,
+              caloriesJson,
+            ),
+          );
+        }
+      }
     }
+
     return result;
   }
 
-} //Impact
+  Future<List<Steps>> getStepsData(DateTime date) async {
+    List<Steps> result = [];
+
+    final oneYearAgo = DateTime(date.year - 1, date.month, date.day - 1);
+    String formattedDate = DateFormat('yyyy-MM-dd').format(oneYearAgo);
+
+    final username = await _patientUsername();
+
+    final url =
+        '${Impact.baseUrl}${ImpactConfig.stepsEndpoint}$username/day/$formattedDate/';
+
+    print('Calling STEPS endpoint: $url');
+
+    final response = await _getAuthorized(Uri.parse(url));
+
+    if (response == null) {
+      print('Response NULL steps');
+      return result;
+    }
+
+    print('Steps status code: ${response.statusCode}');
+    print('Steps body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final decodedResponse = jsonDecode(response.body);
+
+      final dataContainer = decodedResponse['data'];
+
+      if (dataContainer == null) return result;
+      if (dataContainer is List && dataContainer.isEmpty) return result;
+      if (dataContainer is! Map) return result;
+
+      final stepsField = dataContainer['data'];
+
+      if (stepsField == null || stepsField is String) return result;
+
+      final String dataDate = dataContainer['date'].toString();
+
+      List<dynamic> rawStepsList = [];
+
+      if (stepsField is List) {
+        rawStepsList = stepsField;
+      } else if (stepsField is Map) {
+        rawStepsList = [stepsField];
+      }
+
+      for (final stepJson in rawStepsList) {
+        if (stepJson is Map<String, dynamic>) {
+          result.add(
+            Steps.fromJson(
+              dataDate,
+              stepJson,
+            ),
+          );
+        }
+      }
+    }
+
+    return result;
+  }
+
+  Future<List<Distance>> getDistanceData(DateTime date) async {
+    List<Distance> result = [];
+
+    final oneYearAgo = DateTime(date.year - 1, date.month, date.day - 1);
+    String formattedDate = DateFormat('yyyy-MM-dd').format(oneYearAgo);
+
+    final username = await _patientUsername();
+
+    final url =
+        '${Impact.baseUrl}${ImpactConfig.distanceEndpoint}$username/day/$formattedDate/';
+
+    print('Calling DISTANCE endpoint: $url');
+
+    final response = await _getAuthorized(Uri.parse(url));
+
+    if (response == null) {
+      print('Response NULL distance');
+      return result;
+    }
+
+    print('Distance status code: ${response.statusCode}');
+    print('Distance body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final decodedResponse = jsonDecode(response.body);
+
+      final dataContainer = decodedResponse['data'];
+
+      if (dataContainer == null) return result;
+      if (dataContainer is List && dataContainer.isEmpty) return result;
+      if (dataContainer is! Map) return result;
+
+      final distanceField = dataContainer['data'];
+
+      if (distanceField == null || distanceField is String) return result;
+
+      final String dataDate = dataContainer['date'].toString();
+
+      List<dynamic> rawDistanceList = [];
+
+      if (distanceField is List) {
+        rawDistanceList = distanceField;
+      } else if (distanceField is Map) {
+        rawDistanceList = [distanceField];
+      }
+
+      for (final distanceJson in rawDistanceList) {
+        if (distanceJson is Map<String, dynamic>) {
+          result.add(
+            Distance.fromJson(
+              dataDate,
+              distanceJson,
+            ),
+          );
+        }
+      }
+    }
+
+    return result;
+  }
+}

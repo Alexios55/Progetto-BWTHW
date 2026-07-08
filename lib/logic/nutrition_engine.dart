@@ -33,6 +33,9 @@ import 'package:bwthw_project/logic/nutrient_interaction_graph.dart';
 //
 //  where α + β + γ = 1 and δ, ε are fixed penalty/bonus weights.
 
+// In this algortihm ε is not used. It is anyway displayed to show a possible future application where the user can select
+// some favorite or prefered food and the algorithm can prefer these food while calculating the nutritional score
+
 // Scored result for a single food item.
 class FoodScore {
   final FoodItem food;
@@ -208,7 +211,7 @@ class NutritionEngine {
     // γ: activity factor — 10k steps or 500 kcal burned → γ = 0.20
     final activityFactor =
         min(1.0, (stepsToday / 10000 + caloriesBurned / 500) / 2);
-    final gamma = (activityFactor * 0.20).clamp(0.0, 0.25);
+    final gamma = (activityFactor * 0.20).clamp(0.0, 0.20);
 
     // α: remainder
     final alpha = (1.0 - beta - gamma).clamp(0.0, 1.0);

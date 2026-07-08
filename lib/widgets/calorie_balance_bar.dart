@@ -148,6 +148,7 @@ class CalorieBalanceBar extends StatelessWidget {
           ),
         ),
 
+
         const SizedBox(height: 5),
 
         // Animated indicator 

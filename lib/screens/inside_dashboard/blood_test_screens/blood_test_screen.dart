@@ -23,12 +23,8 @@ class _BloodTestScreenState extends State<BloodTestScreen> {
     final prefs = await SharedPreferences.getInstance();
     final loaded = prefs.getStringList('bloodTests') ?? [];
 
-    final loadedTests = loaded.whereType<BloodTest>().toList();
-    loadedTests.sort((a, b) {
-      final aDate = a.date;
-      final bDate = b.date;
-      return bDate.compareTo(aDate);
-    });
+    final loadedTests = loaded.map((e) => BloodTest.fromMap(jsonDecode(e))).toList();
+    loadedTests.sort((a, b) => b.date.compareTo(a.date));
 
     setState(() {
       tests = loadedTests;

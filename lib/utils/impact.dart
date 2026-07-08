@@ -8,7 +8,6 @@ class ImpactConfig {
   static const String refreshEndpoint = 'gate/v1/refresh/';
 
   // Username e password per ottenere il token
-  // Qui devi mettere lo username dell'Excel, NON quello del paziente
   static String username = '5UJpUCxIUn';
   static String password = '12345678!';
 
@@ -16,7 +15,6 @@ class ImpactConfig {
   static String patientUsername = 'Jpefaq6m58';
 
   static String distanceEndpoint = 'data/v1/distance/patients/';
-  static String sleepEndpoint = 'data/v1/sleep/patients/';
   static String stepsEndpoint = 'data/v1/steps/patients/';
   static String caloriesEndpoint = 'data/v1/calories/patients/';
 }

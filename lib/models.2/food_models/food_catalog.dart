@@ -1,19 +1,10 @@
 import 'package:bwthw_project/models.2/enums.dart';
 import 'food_item.dart';
 
-// Food catalog with all micronutrient data.
-//
-// Micronutrient values (iron, calcium, vitaminC, vitaminD, omega3, fiber, phytates, oxalates) are per 100g and sourced from:
-//   - USDA FoodData Central
-//   - CREA (Italian food composition tables)
-//   - BDA Food Composition Database (UK)
-//
-// suitableMeals: which MealType(s) this food is typically consumed in.
-// Foods without reliable micronutrient data retain default 0 values.
 class FoodCatalog {
   static const List<FoodItem> foods = [
 
-    // ── DAIRY ──────────────────────────────────────────────────
+    //  DAIRY 
     FoodItem(
       name: 'Whole Milk', calories: 64, proteins: 3.3, carbs: 4.9, fats: 3.6,
       calcium: 120, vitaminD: 0.1, iron: 0.0,
@@ -51,7 +42,7 @@ class FoodCatalog {
       suitableMeals: [MealType.breakfast, MealType.morningSnack],
     ),
 
-    // ── JUICES & SWEETENERS ─────────────────────────────────────
+    
     FoodItem(
       name: 'Fruit Juice', calories: 56, proteins: 0.3, carbs: 14.5, fats: 0.1,
       vitaminC: 30,
@@ -154,7 +145,7 @@ class FoodCatalog {
       suitableMeals: [MealType.breakfast],
     ),
 
-    // ── MEAT ───────────────────────────────────────────────────
+   
     FoodItem(
       name: 'Chicken Breast', calories: 165, proteins: 31.0, carbs: 0, fats: 3.6,
       iron: 0.9,
@@ -180,7 +171,7 @@ class FoodCatalog {
       suitableMeals: [MealType.lunch, MealType.dinner],
     ),
 
-    // ── FISH ───────────────────────────────────────────────────
+   
     FoodItem(
       name: 'Fish (Average Values)', calories: 97.1, proteins: 16.67, carbs: 1.17, fats: 2.89,
       iron: 0.9, omega3: 400, vitaminD: 5.0,
@@ -200,7 +191,7 @@ class FoodCatalog {
       suitableMeals: [MealType.lunch, MealType.dinner],
     ),
 
-    // ── EGGS ───────────────────────────────────────────────────
+    
     FoodItem(
       name: 'Whole Egg', calories: 128, proteins: 12.4, carbs: 0, fats: 8.7,
       iron: 1.8, vitaminD: 2.0, calcium: 50,
@@ -214,7 +205,7 @@ class FoodCatalog {
       suitableMeals: [MealType.breakfast, MealType.lunch, MealType.dinner],
     ),
 
-    // ── CURED MEATS ────────────────────────────────────────────
+   
     FoodItem(
       name: 'Cured Meats (Average Values)', calories: 144.6, proteins: 27.56, carbs: 0.2, fats: 3.74,
       iron: 1.2,
@@ -234,7 +225,7 @@ class FoodCatalog {
       suitableMeals: [MealType.lunch, MealType.dinner],
     ),
 
-    // ── CHEESE ─────────────────────────────────────────────────
+    
     FoodItem(
       name: 'Fresh Cheese (Average Values)', calories: 271.33, proteins: 18.78, carbs: 1.05, fats: 21.35,
       calcium: 250,
@@ -272,7 +263,7 @@ class FoodCatalog {
       suitableMeals: [MealType.lunch, MealType.dinner, MealType.morningSnack],
     ),
 
-    // ── FRUIT ──────────────────────────────────────────────────
+    
     FoodItem(
       name: 'Fruit (Average Values)', calories: 35.39, proteins: 0.68, carbs: 8.28, fats: 0.18,
       vitaminC: 15, fiber: 2.0,
@@ -304,7 +295,6 @@ class FoodCatalog {
       suitableMeals: [MealType.breakfast, MealType.morningSnack, MealType.afternoonSnack],
     ),
 
-    // ── VEGETABLES ─────────────────────────────────────────────
     FoodItem(
       name: 'Vegetables (Average Values)', calories: 20.13, proteins: 1.74, carbs: 3.01, fats: 0.2,
       vitaminC: 20, iron: 1.0, calcium: 40, fiber: 2.5,
@@ -343,7 +333,7 @@ class FoodCatalog {
       suitableMeals: [MealType.lunch, MealType.dinner],
     ),
 
-    // ── LEGUMES ────────────────────────────────────────────────
+   
     FoodItem(
       name: 'Dry Legumes (Average Values)', calories: 295.7, proteins: 22.09, carbs: 49.39, fats: 2.0,
       iron: 5.0, calcium: 80, fiber: 12.0, phytates: 400,
@@ -375,7 +365,7 @@ class FoodCatalog {
       suitableMeals: [MealType.lunch, MealType.dinner],
     ),
 
-    // ── FATS & SPREADS ─────────────────────────────────────────
+   
     FoodItem(
       name: 'Extra Virgin Olive Oil', calories: 899, proteins: 0, carbs: 0, fats: 99.9,
       omega3: 760,
@@ -394,7 +384,7 @@ class FoodCatalog {
       suitableMeals: [MealType.breakfast, MealType.morningSnack, MealType.afternoonSnack],
     ),
 
-    // ── NUTS ───────────────────────────────────────────────────
+    
     FoodItem(
       name: 'Almonds', calories: 579, proteins: 21.0, carbs: 22.0, fats: 50.0,
       calcium: 264, iron: 3.7, fiber: 12.5,
@@ -409,7 +399,7 @@ class FoodCatalog {
       suitableMeals: [MealType.morningSnack, MealType.afternoonSnack],
     ),
 
-    // ── PREPARED FOODS ──────────────────────────────────────────
+  
     FoodItem(
       name: 'Pizza Margherita', calories: 270, proteins: 11.0, carbs: 33.0, fats: 10.0,
       calcium: 200, iron: 1.5,

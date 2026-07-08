@@ -15,7 +15,6 @@ class BloodTestDetailScreen extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    // Prepara i dati per il grafico
     final dataPoints = _getDataPoints(test);
 
     return Scaffold(
@@ -23,23 +22,22 @@ class BloodTestDetailScreen extends StatelessWidget {
         title: const Text('Blood Test Details'),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Card con data
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(18),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: colorScheme.surface,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(18),
                 border: Border.all(color: colorScheme.outlineVariant),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.calendar_today_outlined),
-                  const SizedBox(width: 10),
+                  const Icon(Icons.calendar_today_outlined, size: 20),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Date: ${_formatDate(test.date)}',
@@ -51,21 +49,21 @@ class BloodTestDetailScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 20),
 
-            
-            const SizedBox(height: 20),
+            const SizedBox(height: 18),
 
-            // Tabella riassuntiva con tutti i valori
             Text(
               'All Values Summary',
               style: textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 12),
+
+            const SizedBox(height: 10),
+
             Container(
-              padding: const EdgeInsets.all(16),
+              width: double.infinity,
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
@@ -73,109 +71,137 @@ class BloodTestDetailScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  // Header
-                  Row(
+                  const Row(
                     children: [
-                      const Expanded(
-                        flex: 2,
+                      Expanded(
+                        flex: 3,
                         child: Text(
                           'Parameter',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                          ),
                         ),
                       ),
-                      const Expanded(
-                        flex: 2,
+                      Expanded(
+                        flex: 3,
                         child: Text(
                           'Value',
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                          ),
                         ),
                       ),
-                      const Expanded(
-                        flex: 1,
+                      Expanded(
+                        flex: 2,
                         child: Text(
                           'Range',
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                          ),
                         ),
                       ),
-                      const Expanded(
-                        flex: 1,
+                      Expanded(
+                        flex: 2,
                         child: Text(
                           'Status',
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                          ),
                         ),
                       ),
                     ],
                   ),
+
                   const Divider(),
+
                   ...dataPoints.map((point) {
-                    final status = _getStatus(point.normalizedValue);
+                    final status = _getStatus(point);
+
                     return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      padding: const EdgeInsets.symmetric(vertical: 5),
                       child: Row(
                         children: [
                           Expanded(
-                            flex: 2,
+                            flex: 3,
                             child: Row(
                               children: [
                                 Container(
-                                  width: 10,
-                                  height: 10,
+                                  width: 8,
+                                  height: 8,
                                   decoration: BoxDecoration(
                                     color: point.color,
                                     shape: BoxShape.circle,
                                   ),
                                 ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  point.label,
-                                  style: const TextStyle(fontWeight: FontWeight.w500),
+                                const SizedBox(width: 5),
+                                Expanded(
+                                  child: Text(
+                                    point.label,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 11,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
                           ),
+
                           Expanded(
-                            flex: 2,
+                            flex: 3,
                             child: Text(
                               '${point.rawValue.toStringAsFixed(1)} ${point.unit}',
                               textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
+                                fontSize: 11,
                                 color: point.color,
                               ),
                             ),
                           ),
+
                           Expanded(
-                            flex: 1,
+                            flex: 2,
                             child: Text(
-                              '${point.minValue} - ${point.maxValue}',
+                              '${_formatRangeValue(point.minValue)}-${_formatRangeValue(point.maxValue)}',
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 10,
                                 color: colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ),
+
                           Expanded(
-                            flex: 1,
+                            flex: 2,
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
+                                horizontal: 4,
+                                vertical: 3,
                               ),
                               decoration: BoxDecoration(
                                 color: status.color.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(10),
                               ),
-                              child: Text(
-                                status.label,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: status.color,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 11,
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  status.label,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: status.color,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 10,
+                                  ),
                                 ),
                               ),
                             ),
@@ -248,18 +274,54 @@ class BloodTestDetailScreen extends StatelessWidget {
     ];
   }
 
-  ({String label, Color color}) _getStatus(double normalizedValue) {
-    if (normalizedValue >= 0.3 && normalizedValue <= 0.7) {
-      return (label: '✅ Good', color: Colors.green);
-    } else if (normalizedValue >= 0.2 && normalizedValue <= 0.8) {
-      return (label: '⚠️ Borderline', color: Colors.orange);
-    } else {
-      return (label: '❌ Alert', color: Colors.red);
+  ({String label, Color color}) _getStatus(ChartDataPoint point) {
+    final value = point.rawValue;
+
+    if (point.label == 'Calcium') {
+      if (value >= 9 && value <= 10) {
+        return (label: 'Good', color: Colors.green);
+      }
+
+      if ((value >= 8 && value < 9) || (value > 10 && value <= 11)) {
+        return (label: 'Border', color: Colors.orange);
+      }
+
+      return (label: 'Alert', color: Colors.red);
     }
+
+    final min = point.minValue;
+    final max = point.maxValue;
+
+    const double borderlineMargin = 5.0;
+
+    final lowerAlertLimit = min - borderlineMargin;
+    final lowerBorderlineLimit = min + borderlineMargin;
+
+    final upperBorderlineLimit = max - borderlineMargin;
+    final upperAlertLimit = max + borderlineMargin;
+
+    if (value < lowerAlertLimit || value > upperAlertLimit) {
+      return (label: 'Alert', color: Colors.red);
+    }
+
+    if ((value >= lowerAlertLimit && value <= lowerBorderlineLimit) ||
+        (value >= upperBorderlineLimit && value <= upperAlertLimit)) {
+      return (label: 'Border', color: Colors.orange);
+    }
+
+    return (label: 'Good', color: Colors.green);
   }
 
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
+  }
+
+  String _formatRangeValue(double value) {
+    if (value == value.roundToDouble()) {
+      return value.toStringAsFixed(0);
+    }
+
+    return value.toStringAsFixed(1);
   }
 }
 
@@ -292,7 +354,8 @@ class ChartDataPoint {
     } else if (rawValue <= optimalValue) {
       return ((rawValue - minValue) / (optimalValue - minValue)) * 0.5;
     } else {
-      return 0.5 + ((rawValue - optimalValue) / (maxValue - optimalValue)) * 0.5;
+      return 0.5 +
+          ((rawValue - optimalValue) / (maxValue - optimalValue)) * 0.5;
     }
   }
 }

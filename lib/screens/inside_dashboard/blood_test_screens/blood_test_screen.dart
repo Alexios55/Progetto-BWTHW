@@ -1,9 +1,8 @@
 // blood_test_screen.dart
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:bwthw_project/models.2/input_mesearument_models/blood_test.dart';
-import 'package:bwthw_project/services/preference_service.dart';
-import 'package:bwthw_project/screens/inside_dashboard/blood_test_screens/blood_test_detail_screen.dart'; // 🔥 QUESTO È L'IMPORT CHE MANCAVA
-
+import 'package:shared_preferences/shared_preferences.dart';import 'package:bwthw_project/screens/inside_dashboard/blood_test_screens/blood_test_detail_screen.dart'; // 🔥 QUESTO È L'IMPORT CHE MANCAVA
 class BloodTestScreen extends StatefulWidget {
   const BloodTestScreen({super.key});
 
@@ -21,7 +20,9 @@ class _BloodTestScreenState extends State<BloodTestScreen> {
   }
 
   Future<void> loadTests() async {
-    final loaded = await PreferenceService.getBloodTests() ?? [];
+    final prefs = await SharedPreferences.getInstance();
+    final loaded = prefs.getStringList('bloodTests') ?? [];
+
     final loadedTests = loaded.whereType<BloodTest>().toList();
     loadedTests.sort((a, b) {
       final aDate = a.date;
@@ -36,6 +37,7 @@ class _BloodTestScreenState extends State<BloodTestScreen> {
 
   Future<void> _addBloodTest() async {
     final result = await Navigator.pushNamed(context, '/add-blood-test');
+    final prefs = await SharedPreferences.getInstance();
 
     if (result != null && result is BloodTest) {
       tests.add(result);
@@ -45,7 +47,7 @@ class _BloodTestScreenState extends State<BloodTestScreen> {
         return bDate.compareTo(aDate);
       });
 
-      await PreferenceService.saveBloodTests(tests);
+      await prefs.setStringList('bloodTests', tests.map((t) => jsonEncode(t.toMap())).toList());
 
       setState(() {});
     }
@@ -81,7 +83,8 @@ class _BloodTestScreenState extends State<BloodTestScreen> {
     if (confirm != true) return;
 
     tests.remove(test);
-    await PreferenceService.saveBloodTests(tests);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('bloodTests', tests.map((t) => jsonEncode(t.toMap())).toList());
 
     setState(() {});
   }

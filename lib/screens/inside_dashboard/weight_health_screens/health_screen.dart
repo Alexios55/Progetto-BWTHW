@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:bwthw_project/models.2/input_mesearument_models/weight_entry.dart';
-import 'package:bwthw_project/services/preference_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bwthw_project/widgets/stat_box.dart';
 import 'package:bwthw_project/widgets/bmi_bar.dart';
 import 'package:bwthw_project/screens/inside_dashboard/weight_health_screens/edit_health_screen.dart';
@@ -11,7 +11,50 @@ import 'package:bwthw_project/widgets/date_input_field.dart';
 import 'package:bwthw_project/models.2/enums.dart';
 import 'dart:math' as math;
 import 'package:fl_chart/fl_chart.dart';
-import 'package:bwthw_project/widgets/bmi_bar.dart';
+import 'dart:convert';
+
+// Minimal PreferenceService implementation used by this screen.
+class PreferenceService {
+  static Future<User?> getUserData() async {
+    final sp = await SharedPreferences.getInstance();
+    final s = sp.getString('user');
+    if (s == null) return null;
+    try {
+      return User.fromMap(jsonDecode(s));
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<void> addWeightEntry(WeightEntry entry) async {
+    final sp = await SharedPreferences.getInstance();
+    final list = sp.getStringList('weightHistory') ?? [];
+    list.add(jsonEncode(entry.toMap()));
+    await sp.setStringList('weightHistory', list);
+  }
+
+  static Future<List<WeightEntry>> getWeightEntries() async {
+    final sp = await SharedPreferences.getInstance();
+    final entries = sp.getStringList('weightHistory') ?? [];
+    return entries.map((e) => WeightEntry.fromMap(jsonDecode(e))).toList();
+  }
+
+  static Future<void> saveWeightEntries(List<WeightEntry> entries) async {
+    final sp = await SharedPreferences.getInstance();
+    final list = entries.map((e) => jsonEncode(e.toMap())).toList();
+    await sp.setStringList('weightHistory', list);
+  }
+
+  static Future<void> saveUser(User user) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setString('user', jsonEncode(user.toMap()));
+  }
+
+  // Placeholder: persist patient if needed by app. No-op to avoid dependency.
+  static Future<void> savePatient(dynamic patient) async {
+    return;
+  }
+}
 
 class HealthScreen extends StatefulWidget {
   const HealthScreen({super.key});
@@ -32,12 +75,15 @@ class _HealthScreenState extends State<HealthScreen> {
   }
 
   Future<void> _loadData() async {
-    final entries = await PreferenceService.getWeightEntries();
-    entries.sort((a, b) => a.date.compareTo(b.date));
+    final sp = await SharedPreferences.getInstance();
+    final entries = sp.getStringList('weightHistory') ?? [];
+
+    final loadedWeightEntries = entries.map((e) => WeightEntry.fromMap(jsonDecode(e))).toList();
+    loadedWeightEntries.sort((a, b) => a.date.compareTo(b.date));
     final loadedUser = await PreferenceService.getUserData();
     if (!mounted) return;
     setState(() {
-      weightEntries = entries;
+      weightEntries = loadedWeightEntries;
       user = loadedUser;
       isLoading = false;
     });

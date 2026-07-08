@@ -3,9 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:bwthw_project/models.2/patient.dart';
 import 'package:bwthw_project/models.2/patient_state.dart';
 import 'package:bwthw_project/models.2/enums.dart';
-import 'package:bwthw_project/services/preference_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bwthw_project/models.2/input_mesearument_models/weight_entry.dart';
 import 'package:bwthw_project/models.2/user.dart';
+import 'dart:convert';
 
 class EditHealthScreen extends StatefulWidget {
   final Patient patient;
@@ -84,24 +85,24 @@ class _EditHealthScreenState extends State<EditHealthScreen> {
     );
 
     // Salvataggio persistente locale
-    await PreferenceService.savePatient(updatedPatient);
-    await PreferenceService.saveUser(User(
-      name: updatedPatient.name,
-      surname: updatedPatient.surname,
-      birthDate: updatedPatient.birthDate,
-      weight: updatedPatient.weightKg,
-      height: updatedPatient.heightCm,
-      idealWeight: updatedPatient.targetWeightKg ?? 0,
-    ));
+    final sp= await SharedPreferences.getInstance();
+    await sp.setString('name', updatedPatient.name);
+    await sp.setString('surname', updatedPatient.surname);
+    await sp.setDouble('weight', updatedPatient.weightKg);
+    await sp.setDouble('height', updatedPatient.heightCm);
+    await sp.setDouble('idealWeight', updatedPatient.targetWeightKg ?? 0);
+
 
     // Se il peso corrente è cambiato, aggiungi un'entry nello storico dei pesi
     if (newWeight != widget.patient.weightKg) {
-      await PreferenceService.addWeightEntry(
-        WeightEntry(
-          date: DateTime.now(),
-          weight: newWeight,
-        ),
-      );
+      final prefs = await SharedPreferences.getInstance();
+      final history = prefs.getStringList('weightHistory') ?? [];
+
+      final entries = history.map((e) => WeightEntry.fromMap(jsonDecode(e))).toList();
+
+      entries.add(WeightEntry(date: DateTime.now(), weight: newWeight));
+
+      await prefs.setStringList('weightHistory', entries.map((e) => jsonEncode(e.toMap())).toList());
     }
 
     if (mounted) {

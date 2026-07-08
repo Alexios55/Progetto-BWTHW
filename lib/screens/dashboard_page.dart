@@ -1,13 +1,15 @@
 
 import 'package:bwthw_project/screens/inside_dashboard/suggested_food_screen.dart';
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:bwthw_project/models.2/food_models/food_diary_db.dart';
-import 'package:bwthw_project/services/preference_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bwthw_project/services/calorie_calculator.dart';
 import 'package:bwthw_project/models.2/patient_state.dart';
+import 'package:bwthw_project/models.2/user.dart';
 import 'package:bwthw_project/widgets/navigation_card.dart';
-import 'package:bwthw_project/screens/inside_dashboard/weight_health_screens/health_screen.dart';
+import 'package:bwthw_project/screens/inside_dashboard/weight_health_screens/health_screen.dart' hide PreferenceService;
 import 'package:bwthw_project/widgets/calorie_balance_bar.dart';
 import 'package:bwthw_project/models.2/enums.dart';
 import 'package:bwthw_project/models.2/food_models/food_item.dart';
@@ -31,19 +33,52 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Future<void> _loadDashboardData() async {
     // final loadedEntries = await PreferenceService.getWeightEntries();
-    final loadedUser = await PreferenceService.getUserData();
+    final prefs = await SharedPreferences.getInstance();
 
-    if (!mounted) return;
+    try{
+      final user = prefs.getString('user');
+
+      if (user==null){return;}
+
+      final name = prefs.getString('name');
+      final surname = prefs.getString('surname');
+      final birthDate = DateTime.tryParse(prefs.getString('birthDate') ?? '');
+      final weight = prefs.getDouble('weight');
+      final height = prefs.getDouble('height');
+      final idealWeight = prefs.getDouble('idealWeight');
+
+      if (name == null ||
+          surname == null ||
+          birthDate == null ||
+          weight == null ||
+          height == null ||
+          idealWeight == null) {
+        return;
+      }
+
+      final loadedUser = User(
+        name: name,
+        surname: surname,
+        birthDate: birthDate,
+        weight: weight,
+        height: height,
+        idealWeight: idealWeight,
+      );
+
+      if (!mounted) return;
+      context.read<PatientState>().updateWeight(loadedUser.weight);
+    } finally {
+      if (mounted){
+        setState((){
+          isLoading = false;
+        });
+      }
+    }
 
     setState(() {
       isLoading = false;
     });
 
-    // update the weigth in patient for the calculation of calories
-    context.read<PatientState>().updateWeight(loadedUser!.weight);
-    await PreferenceService.savePatient(
-      context.read<PatientState>().patient!,
-    );
   }
 
   @override

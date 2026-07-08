@@ -1,11 +1,10 @@
-import 'package:bwthw_project/screens/dashboard_page.dart';
-import 'package:bwthw_project/screens/onboarding/registration.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:bwthw_project/services/preference_service.dart';
 import 'package:bwthw_project/services/impact.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bwthw_project/models.2/patient_state.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import 'package:bwthw_project/models.2/patient.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,6 +21,10 @@ class _LoginScreenState extends State<LoginScreen> {
   final Impact impact = Impact();
   bool _isLoading = false;
   bool rememberMe = false;
+
+  // Credential hardcore for only one user
+  static const String _validUsername = '5UJpUCxIUn';
+  static const String _validPassword = '12345678!';
 
   @override
   void dispose() {
@@ -42,7 +45,27 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
     }
 
+    // Local control for the only user
+    if (username != _validUsername || password != _validPassword) {
+      ScaffoldMessenger.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(SnackBar(
+          backgroundColor: Theme.of(context).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(8),
+          duration: const Duration(seconds: 3),
+          content: const Text('Incorrect username or password'),
+        ));
+      return;
+    }
+
     setState(() => _isLoading = true);
+
+    // save credential in shared preferences for future use for impact service
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString('user', username);
+    await prefs.setString('password', password);
 
     final result = await impact.getAndStoreTokens(username, password);
 
@@ -50,8 +73,16 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = false);
 
    if (result == 200) {
-      await PreferenceService.saveLogin(rememberMe);
-      await context.read<PatientState>().loadFromPreferences();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', rememberMe);
+
+    final patientJson = prefs.getString('patient');
+    if (patientJson != null){
+      try{
+        final patient = Patient.fromMap(jsonDecode(patientJson));
+        context.read<PatientState>().setPatient(patient);
+      } catch(_){}
+    }
       if (!mounted) return;
       Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
     } else {

@@ -2,7 +2,7 @@ import 'package:provider/provider.dart';
 import 'package:bwthw_project/models.2/enums.dart';
 import 'package:bwthw_project/models.2/patient.dart';
 import 'package:bwthw_project/models.2/patient_state.dart';
-import 'package:bwthw_project/services/user_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bwthw_project/utils/input_validators.dart';
 import 'package:flutter/material.dart';
 
@@ -329,7 +329,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       if (!_formKey.currentState!.validate()) {
                         return;
                       }
@@ -340,19 +340,18 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                           double.parse(heightController.text.replaceAll(',', '.'));
                       final int age = int.parse(ageController.text);
 
-                      UserService().setUserData(
-                        weight: weight,
-                        height: height,
-                        age: age,
-                        gender: selectedSex ?? Gender.male,
-                        activityLevel: selectedActivityLevel,
-                        goal: selectedGoal,
-                      );
+                      // Persisting user data is handled by PatientState below.
+                      // Removed usage of undefined `UserService`.
+
+                      final prefs = await SharedPreferences.getInstance();
+                      final savedUser = prefs.getString('user') ?? '';
+                      final savedPassword = prefs.getString('password') ?? '';
 
                       Patient patient = Patient(
                         id: 'patient_1',
                         name: 'Patient',
-                        user: '',
+                        user: savedUser,
+                        password: savedPassword,
                         age: age,
                         weightKg: weight,
                         heightCm: height,

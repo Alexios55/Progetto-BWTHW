@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:bwthw_project/models.2/patient_state.dart';
 import 'package:bwthw_project/models.2/food_models/food_diary_db.dart';
 import 'package:bwthw_project/models.2/input_mesearument_models/blood_test.dart';
 import 'package:bwthw_project/logic/nutrition_engine.dart';
-import 'package:bwthw_project/services/preference_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bwthw_project/models.2/food_models/food_catalog.dart';
 import 'package:bwthw_project/widgets/activity_ring.dart';
 
@@ -18,7 +19,8 @@ class ConsumedScreen extends StatefulWidget {
 }
 
 class _ConsumedScreenState extends State<ConsumedScreen> {
-  BloodTest? _latestBloodTest;
+  // store raw decoded blood test; avoid calling BloodTest.fromJson which may not exist
+  Map<String, dynamic>? _latestBloodTest;
 
   @override
   void initState() {
@@ -27,10 +29,11 @@ class _ConsumedScreenState extends State<ConsumedScreen> {
   }
 
   Future<void> _loadBloodTest() async {
-    final tests = await PreferenceService.getBloodTests();
+    final sp = await SharedPreferences.getInstance();
+    final tests = sp.getStringList('bloodTests') ?? [];
     if (!mounted) return;
     setState(() {
-      _latestBloodTest = tests.isNotEmpty ? tests.last : null;
+      _latestBloodTest = tests.isNotEmpty ? (jsonDecode(tests.last) as Map<String, dynamic>) : null;
     });
   }
 

@@ -8,8 +8,8 @@ class ImpactConfig {
 
   static String username = '5UJpUCxIUn';
   static String password = '12345678!';
-  static String patientUsername = 'IL_PAZIENTE_ASSOCIATO';
+  static String patientUsername = '5UJpUCxIUn';
 
-  static String heartrateEndpoint = 'data/v1/heartrate/patients/';
+  static String distanceEndpoint = 'data/v1/distance/patients/';
   static String sleepEndpoint = 'data/v1/sleep/patients/';
 }

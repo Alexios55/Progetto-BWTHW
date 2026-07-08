@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:bwthw_project/models.2/patient.dart';
 import 'package:bwthw_project/models.2/patient_state.dart';
 import 'package:bwthw_project/models.2/enums.dart';
-import 'package:bwthw_project/services/preference_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'edit_profile_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -16,7 +16,8 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
 
   void _logout() async {
-    await PreferenceService.clearAll();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
     if (!mounted) return;
     Navigator.pushReplacementNamed(context, '/login');
   }
@@ -214,7 +215,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 12),
                       infoRow('Gender', patient.gender.label),
                       const SizedBox(height: 12),
-                      infoRow('Email', patient.user),
+                      infoRow('User', patient.user),
                       const SizedBox(height: 12),
                       infoRow('Password', patient.password.replaceAll(RegExp(r'.'), '*')),
                     ],

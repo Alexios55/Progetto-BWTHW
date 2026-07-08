@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:bwthw_project/models.2/patient_state.dart';
 import 'package:bwthw_project/models.2/food_models/food_diary_db.dart';
-import 'package:bwthw_project/services/preference_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bwthw_project/services/calorie_calculator.dart';
-import 'package:bwthw_project/services/impact.dart';
+import 'package:bwthw_project/services/impact2.dart';
 import 'package:bwthw_project/models.2/werable_data_models/steps.dart';
-import 'package:bwthw_project/models.2/werable_data_models/distance.dart';
 class CaloriesBurnedScreen extends StatefulWidget {
   const CaloriesBurnedScreen({super.key});
 
@@ -32,10 +31,11 @@ class _CaloriesBurnedScreenState extends State<CaloriesBurnedScreen> {
   }
 
   Future<void> _loadGoal() async {
-    final prefs = await PreferenceService.getBurnedCaloriesGoal();
+    final prefs = await SharedPreferences.getInstance();
+    final burnedGoal = prefs.getDouble('burnedCaloriesGoal');
     if (!mounted) {await totalStepsUpToNow;};
     setState(() {
-      _burnedGoal = prefs;
+      _burnedGoal = burnedGoal ?? 500;
       _isLoading = false;
     });
   }
@@ -75,7 +75,8 @@ class _CaloriesBurnedScreenState extends State<CaloriesBurnedScreen> {
       ),
     );
     if (result != null) {
-      await PreferenceService.saveBurnedCaloriesGoal(result);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setDouble('burnedCaloriesGoal', result);
       setState(() => _burnedGoal = result);
     }
   }

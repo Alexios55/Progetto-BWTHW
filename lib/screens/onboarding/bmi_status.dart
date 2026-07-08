@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:bwthw_project/models.2/user_temp.dart';
 import 'package:bwthw_project/widgets/bmi_bar.dart';
-import 'package:bwthw_project/services/preference_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bwthw_project/models.2/user.dart';
 import 'package:bwthw_project/models.2/input_mesearument_models/weight_entry.dart';
 import 'package:provider/provider.dart';
 import 'package:bwthw_project/models.2/patient.dart';
 import 'package:bwthw_project/models.2/patient_state.dart';
 import 'package:bwthw_project/models.2/enums.dart';
+import 'dart:convert';
 
 /// This screen shows the user's BMI result, the current physical status,
 /// a short explanation, and a field where the user can enter an ideal weight.
@@ -131,45 +132,20 @@ class _BmiStatusScreenState extends State<BmiStatusScreen> {
 
     widget.user.idealWeight = idealWeightValue;
 
-    await finishOnboarding();
-  }
+    final sp = await SharedPreferences.getInstance();
+    await sp.setDouble('idealWeight', idealWeightValue);
+    await sp.setBool('onboardingDone', true);
 
-  Future<void> finishOnboarding() async {
-    User user = User(
-      name: widget.user.name!,
-      surname: widget.user.surname!,
-      birthDate: widget.user.dateOfBirth!,
-      weight: widget.user.weight!,
-      height: widget.user.height!,
-      idealWeight: widget.user.idealWeight ?? 0,
-    );
-
-    await PreferenceService.saveUser(user);
-    final completePatient = widget.patient.copyWith(
-      targetWeightKg: widget.user.idealWeight,
-      goal: _deriveGoal(widget.user.weight!, widget.user.idealWeight!),
-    );
-    await PreferenceService.savePatient(completePatient);
-
-    // Update the PatientState
-    if (mounted) {
-      context.read<PatientState>().setPatient(completePatient);
+    final patientState = context.read<PatientState>();
+    final patient = patientState.patient;
+    if (patient != null) {
+      final updated = patient.copyWith(targetWeightKg: idealWeightValue);
+      patientState.setPatient(updated);
+      await sp.setString('patient', jsonEncode(updated.toMap()));
     }
 
-    await PreferenceService.addWeightEntry(
-      WeightEntry(
-        date: DateTime.now(),
-        weight: user.weight,
-      ),
-    );
-    await PreferenceService.saveOnboardingCompleted(true);
-
-    Navigator.pushNamedAndRemoveUntil(
-      context,
-      '/home',
-      (route) => false,
-      arguments: user,
-    );
+    if (!mounted) return;
+    Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
   }
 
   Goal _deriveGoal(double currentWeight, double targetWeight) {

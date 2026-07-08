@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:bwthw_project/services/preference_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:bwthw_project/models.2/patient_state.dart';
 import 'dart:async';
@@ -25,8 +25,8 @@ class _SplashScreenState extends State<SplashScreen> {
     bool isLoggedIn = false;
 
     try {
-      isLoggedIn =
-          await PreferenceService.getLogin().timeout(const Duration(seconds: 3));
+      final prefs = await SharedPreferences.getInstance().timeout(const Duration(seconds: 3));
+      isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
     } catch (_) {
       isLoggedIn = false;
     }

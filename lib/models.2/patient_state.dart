@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'patient.dart';
-import 'package:bwthw_project/services/preference_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bwthw_project/models.2/enums.dart';
 import 'package:bwthw_project/models.2/werable_data_models/distance.dart' as distance_model;
 import 'package:bwthw_project/models.2/werable_data_models/steps.dart' as steps_model;
 import 'package:bwthw_project/models.2/werable_data_models/calories.dart' as calories_model;
 import 'package:bwthw_project/services/impact.dart';
+import 'dart:convert';
 
 class PatientState extends ChangeNotifier {
   Patient? patient;
@@ -23,13 +24,20 @@ class PatientState extends ChangeNotifier {
     patient = newPatient;
     notifyListeners();
   }
-
   Future<void> loadFromPreferences() async {
-    final loaded = await PreferenceService.getPatient();
-    if (loaded != null) {
-      patient = loaded;
+    final prefs = await SharedPreferences.getInstance();
+    final patientJson = prefs.getString('patient');
+    if (patientJson == null) return;
+
+    try {
+      final loaded = Patient.fromMap(jsonDecode(patientJson));
+      final user = prefs.getString('user');
+      final password = prefs.getString('password');
+      patient = (user != null && password != null)
+          ? loaded.copyWith(user: user, password: password)
+          : loaded;
       notifyListeners();
-    }
+    } catch (_) {}
   }
 
   void updateWeight(double newWeight) {

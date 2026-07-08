@@ -3,8 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:bwthw_project/models.2/patient.dart';
 import 'package:bwthw_project/models.2/patient_state.dart';
 import 'package:bwthw_project/models.2/enums.dart';
-import 'package:bwthw_project/services/preference_service.dart';
-import 'package:bwthw_project/models.2/user.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bwthw_project/widgets/date_input_field.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -77,14 +76,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       password: new_password.text.isNotEmpty ? new_password.text : widget.patient.password,
     );
 
-    await PreferenceService.savePatient(updatedPatient);
-    await PreferenceService.saveUser(User(
-      name: updatedPatient.name,
-      surname: updatedPatient.surname,
-      birthDate: updatedPatient.birthDate,
-      user: updatedPatient.user,
-      password: updatedPatient.password,
-    ));
+
+    final prefs = SharedPreferences.getInstance();
+    await prefs.then((prefs) {
+      prefs.setString('name', updatedPatient.name);
+      prefs.setString('surname', updatedPatient.surname);
+      prefs.setString('user', updatedPatient.user);
+      prefs.setString('password', updatedPatient.password);
+      prefs.setString('birthDate', updatedPatient.birthDate.toIso8601String());
+    });
 
     if (mounted) {
       context.read<PatientState>().setPatient(updatedPatient);

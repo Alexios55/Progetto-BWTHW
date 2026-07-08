@@ -1,5 +1,9 @@
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:bwthw_project/services/impact.dart';
+import 'package:bwthw_project/models.2/patient_state.dart';
 
 // This screen allows the user to create a new account by entering
 // a valid email, a password of at least 8 characters, and a matching
@@ -18,6 +22,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
+  final Impact impactService = Impact();
+  bool isLoading = false;
+
+  // Having only one user, i use the seme hardcoded credential for the testing purpose. In a real app, you would have a proper registration flow with a backend service.
+  static const String _validUsername = '5UJpUCxIUn';
+  static const String _validPassword = '12345678!';
 
   @override
   void dispose() {
@@ -27,7 +37,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     super.dispose();
   }
 
-  void _createAccount() {
+  Future<void> _createAccount() async {
     final String user = userController.text.trim();
     final String password = passwordController.text.trim();
     final String confirmPassword = confirmPasswordController.text.trim();
@@ -47,18 +57,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         );
       return;
     }
-
-    /*if (!emailRegExp.hasMatch(user)) {
-      ScaffoldMessenger.of(context)
-        ..removeCurrentSnackBar()
-        ..showSnackBar(
-          const SnackBar(
-            content: Text('Please enter a valid email address'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      return;
-    }*/
 
     if (password.length < 8) {
       ScaffoldMessenger.of(context)
@@ -82,6 +80,52 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           ),
         );
       return;
+    }
+
+    // Local check on the only account avaible to check in the testing phase that we have the right credential for impact service
+    if (user != _validUsername || password != _validPassword) {
+      ScaffoldMessenger.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Invalid username or password'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    // save credentials for future use for impact service
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user', user);
+    await prefs.setString('password', password);
+
+    // Authentication in impact with the credentials
+    final result = await impactService.getAndStoreTokens(user, password);
+
+    if (!mounted) return;
+    setState(() => isLoading = false);
+
+        if (result == 200) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('isLoggedIn', true);
+          await context.read<PatientState>().loadFromPreferences();
+          if (!mounted) return;
+          Navigator.pushNamed(context, '/welcome');
+        } else {
+          ScaffoldMessenger.of(context)
+            ..removeCurrentSnackBar()
+            ..showSnackBar(SnackBar(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              behavior: SnackBarBehavior.floating,
+              margin: const EdgeInsets.all(8),
+              duration: const Duration(seconds: 3),
+              content: Text(result == 401
+                  ? 'Impact connection failed: incorrect credentials'
+                  : 'Connection error (code $result). Please try again.'),
+            ));
     }
 
     Navigator.pushNamed(context, '/welcome');

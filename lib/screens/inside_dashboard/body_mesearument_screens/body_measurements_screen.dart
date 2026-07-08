@@ -1,8 +1,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:bwthw_project/models.2/input_mesearument_models/body_measurement_entry.dart';
-import 'package:bwthw_project/services/preference_service.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 class BodyMeasurementsScreen extends StatefulWidget {
   const BodyMeasurementsScreen({super.key});
 
@@ -20,11 +20,13 @@ class _BodyMeasurementsScreenState extends State<BodyMeasurementsScreen> {
   }
 
   Future<void> _loadEntries() async {
-    final loaded = await PreferenceService.getBodyMeasurementEntries();
-    loaded.sort((a, b) => b.date.compareTo(a.date));
+    final loaded = await SharedPreferences.getInstance();
+    final loadedEntries = loaded.getStringList('bodyMeasurementEntries') ?? [];
+    final parsedEntries = loadedEntries.map((e) => BodyMeasurementEntry.fromMap(jsonDecode(e))).toList();
+    parsedEntries.sort((a, b) => b.date.compareTo(a.date));
 
     setState(() {
-      entries = loaded;
+      entries = parsedEntries;
     });
   }
 
@@ -35,7 +37,8 @@ class _BodyMeasurementsScreenState extends State<BodyMeasurementsScreen> {
       entries.add(result as BodyMeasurementEntry);
       entries.sort((a, b) => b.date.compareTo(a.date));
 
-      await PreferenceService.saveBodyMeasurementEntries(entries);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('bodyMeasurementEntries', entries.map((e) => jsonEncode(e.toMap())).toList());
 
       setState(() {});
     }
@@ -67,7 +70,8 @@ class _BodyMeasurementsScreenState extends State<BodyMeasurementsScreen> {
     if (confirm != true) return;
 
     entries.removeAt(index);
-    await PreferenceService.saveBodyMeasurementEntries(entries);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('bodyMeasurementEntries', entries.map((e) => jsonEncode(e.toMap())).toList());
 
     setState(() {});
   }

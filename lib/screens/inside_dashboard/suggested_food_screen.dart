@@ -6,8 +6,9 @@ import 'package:bwthw_project/models.2/food_models/food_item.dart';
 import 'package:bwthw_project/models.2/enums.dart';
 import 'package:bwthw_project/logic/nutrition_engine.dart';
 import 'package:bwthw_project/models.2/input_mesearument_models/blood_test.dart';
-import 'package:bwthw_project/services/preference_service.dart';
 import 'package:bwthw_project/models.2/food_models/food_catalog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class SuggestedFoodsScreen extends StatefulWidget {
   const SuggestedFoodsScreen({super.key});
@@ -27,7 +28,10 @@ class _SuggestedFoodsScreenState extends State<SuggestedFoodsScreen> {
   }
 
   Future<void> _loadBloodTest() async {
-    final tests = await PreferenceService.getBloodTests();
+    final sp = await SharedPreferences.getInstance();
+    final tests = sp.getStringList('blood_tests')
+            ?.map((s) => BloodTest.fromMap(jsonDecode(s) as Map<String, dynamic>))
+            .toList() ?? [];
     if (!mounted) return;
     setState(() {
       _latestBloodTest = tests.isNotEmpty ? tests.last : null;

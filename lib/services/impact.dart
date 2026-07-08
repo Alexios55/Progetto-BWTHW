@@ -175,7 +175,8 @@ Future<String> _patientUsername() async {
   Future<List<Calories>> getCaloriesData(DateTime date) async {
     List<Calories> result = [];
 
-    String formattedDate = DateFormat('yyyy-MM-dd').format(date);
+    final oneYearAgo = DateTime(date.year - 1, date.month, date.day -1);
+    String formattedDate = DateFormat('yyyy-MM-dd').format(oneYearAgo);
     final username = await _patientUsername();
     final url =
         '${Impact.baseUrl}data/v1/calories/patients/$username/day/$formattedDate/';
@@ -201,8 +202,10 @@ Future<String> _patientUsername() async {
   Future<List<Steps>> getStepsData(DateTime date) async {
     List<Steps> result = [];
 
-    String formattedDate = DateFormat('yyyy-MM-dd').format(date);
+    final oneYearAgo = DateTime(date.year - 1, date.month, date.day -1);
+    String formattedDate = DateFormat('yyyy-MM-dd').format(oneYearAgo);
     final username = await _patientUsername();
+    print('Username usato nel token: $username');
     final url =
         '${Impact.baseUrl}data/v1/steps/patients/$username/day/$formattedDate/';
 
@@ -227,7 +230,8 @@ Future<String> _patientUsername() async {
   Future<List<Distance>> getDistanceData(DateTime date) async {
     List<Distance> result = [];
 
-    String formattedDate = DateFormat('yyyy-MM-dd').format(date);
+    final oneYearAgo = DateTime(date.year - 1, date.month, date.day -1 );
+    String formattedDate = DateFormat('yyyy-MM-dd').format(oneYearAgo);
     final username = await _patientUsername();
     print('Username usato: $username');
     final url =

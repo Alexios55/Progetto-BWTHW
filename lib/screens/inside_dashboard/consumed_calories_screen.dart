@@ -194,6 +194,7 @@ class _ConsumedScreenState extends State<ConsumedScreen> {
                                         color: colorScheme.onSurfaceVariant,
                                         fontWeight: FontWeight.w600,
                                         letterSpacing: 0.3,
+                                        fontSize: 18,
                                       ),
                                     ),
                                     const SizedBox(height: 12),
@@ -206,6 +207,7 @@ class _ConsumedScreenState extends State<ConsumedScreen> {
                                           target: targets.calories,
                                           unit: 'kcal',
                                           color: colorScheme.primary,
+                                          sublabel: '~ ${targets.calories.toInt()} kcal'
                                         ),
                                         ActivityRing(
                                           label: 'Proteins',
@@ -213,6 +215,7 @@ class _ConsumedScreenState extends State<ConsumedScreen> {
                                           target: targets.proteins,
                                           unit: 'g',
                                           color: Colors.blue.shade500,
+                                          sublabel: '~ ${targets.proteins.toInt()} g',
                                         ),
                                         ActivityRing(
                                           label: 'Carbohydrates',
@@ -220,6 +223,7 @@ class _ConsumedScreenState extends State<ConsumedScreen> {
                                           target: targets.carbs,
                                           unit: 'g',
                                           color: Colors.amber.shade600,
+                                          sublabel: '~ ${targets.carbs.toInt()} g',
                                         ),
                                         ActivityRing(
                                           label: 'Fats',
@@ -227,6 +231,7 @@ class _ConsumedScreenState extends State<ConsumedScreen> {
                                           target: targets.fats,
                                           unit: 'g',
                                           color: Colors.orange.shade500,
+                                          sublabel: '~ ${targets.fats.toInt()} g',
                                         ),
                                       ],
                                     ),
@@ -258,6 +263,7 @@ class _ConsumedScreenState extends State<ConsumedScreen> {
                                             color: colorScheme.onSurfaceVariant,
                                             fontWeight: FontWeight.w600,
                                             letterSpacing: 0.3,
+                                            fontSize: 18,
                                           ),
                                         ),
                                         const SizedBox(width: 6),
@@ -280,6 +286,7 @@ class _ConsumedScreenState extends State<ConsumedScreen> {
                                           target: ironTarget,
                                           unit: 'mg',
                                           color: Colors.red.shade400,
+                                          sublabel: '~ ${ironTarget.toInt()} mg',
                                         ),
                                         ActivityRing(
                                           label: 'Calcium',
@@ -287,6 +294,7 @@ class _ConsumedScreenState extends State<ConsumedScreen> {
                                           target: calciumTarget,
                                           unit: 'mg',
                                           color: Colors.indigo.shade400,
+                                          sublabel: '~ ${calciumTarget.toInt()} mg'
                                         ),
                                         ActivityRing(
                                           label: 'Vit. D',
@@ -294,6 +302,7 @@ class _ConsumedScreenState extends State<ConsumedScreen> {
                                           target: vitaminDTarget,
                                           unit: 'µg',
                                           color: Colors.orange.shade400,
+                                          sublabel: '~ ${vitaminDTarget.toInt()} µg'
                                         ),
                                       ],
                                     ),
@@ -307,6 +316,7 @@ class _ConsumedScreenState extends State<ConsumedScreen> {
                                           target: omega3Target,
                                           unit: 'mg',
                                           color: Colors.cyan.shade500,
+                                          sublabel: '~ ${omega3Target.toInt()} mg',
                                         ),
                                         ActivityRing(
                                           label: 'Fibers',
@@ -314,6 +324,7 @@ class _ConsumedScreenState extends State<ConsumedScreen> {
                                           target: fiberTarget,
                                           unit: 'g',
                                           color: Colors.green.shade500,
+                                          sublabel: '~ ${fiberTarget.toInt()} g',
                                         ),
                                       ],
                                     ),

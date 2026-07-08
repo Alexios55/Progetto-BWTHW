@@ -162,7 +162,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     foodCalories,
                     exerciseCalories,
                   ),
-
+                  
                   if (topSuggestions.isNotEmpty) ...[
                     const SizedBox(height: 20),
                     _buildSuggestedFoodCard(
@@ -480,7 +480,7 @@ class _DashboardPageState extends State<DashboardPage> {
     if (score.activityScore > 0.4) {
       labels.add(
         _ReasonLabel(
-          'Post-allenamento',
+          'Post-training',
           Icons.directions_run,
           Colors.deepOrange,
         ),
@@ -572,7 +572,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       ),
                       const SizedBox(height: 15),
                       CalorieBalanceBar(
-                        consumed: foodCalories - exerciseCalories,
+                        consumed: foodCalories,
                         goal: baseGoal.toDouble(),
                         maxRange: 1000,
                       ),

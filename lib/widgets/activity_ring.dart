@@ -9,6 +9,7 @@ class ActivityRing extends StatelessWidget {
   final String label;
   final Color color;
   final bool formatInteger;
+  final String sublabel;
 
   const ActivityRing({
     super.key,
@@ -18,6 +19,7 @@ class ActivityRing extends StatelessWidget {
     required this.label,
     required this.color,
     this.formatInteger = false,
+    required this.sublabel
   });
 
   @override
@@ -84,13 +86,21 @@ class ActivityRing extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           label,
-          style: textTheme.labelSmall?.copyWith(
+          style: textTheme.labelMedium?.copyWith(
             fontWeight: FontWeight.w600,
-            fontSize: 11,
+            fontSize: 12,
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: 3),
+        Text(
+          sublabel,
+          style: textTheme.labelSmall?.copyWith(
+            fontWeight: FontWeight.w400,
+            fontSize: 9,
+          )
+          )
+
       ],
     );
   }

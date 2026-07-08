@@ -57,7 +57,7 @@ class CalorieBalanceBar extends StatelessWidget {
   static double _expectedFraction(DateTime now) {
     final nowMinutes = now.hour * 60 + now.minute;
 
-    for (int i = 1; i < _checkPoints.length -1; i++) {
+    for (int i = 0; i < _checkPoints.length -1; i++) {
       final a = _checkPoints[i];
       final b = _checkPoints[i+1];
       final aMin = a.hour * 60 + a.minute;
@@ -87,6 +87,7 @@ class CalorieBalanceBar extends StatelessWidget {
   }
 
   double get _balance => consumed - _expectedNow;
+  
 
   Color get _indicatorColor {
     final norm = (_balance / maxRange).clamp(-1.0, 1.0);
@@ -105,6 +106,7 @@ class CalorieBalanceBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     final colorScheme = Theme.of(context).colorScheme;
     final balance = _balance;
 
